@@ -1,6 +1,12 @@
-.vscode/
-bin/
-pkg/
+/build/
+/todo.md
+
+/ignore/
+*.ignore.*
+*.ignore
+
+/.vscode/
+
 
 # Prerequisites
 *.d
@@ -34,20 +40,3 @@ pkg/
 *.exe
 *.out
 *.app
-
-
-build/
-package/
-
-todo.md
-
-
-# Folder that contains contents of a test game
-Game/
-logs/
-*.log
-*.res.hpp
-docs
-*.ignore.*
-*.ignore
-*.res.h
