@@ -29,6 +29,8 @@ void Window::Create(int width, int height, const char *title) {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		throw std::runtime_error("Failed to load glad");
 	}
+
+	glfwSetKeyCallback(_window, Input::Callback::Key);
 }
 
 bool Window::ShouldClose() {
@@ -41,6 +43,10 @@ void Window::SwapBuffers() {
 
 void Window::PollEvents() {
 	glfwPollEvents();
+}
+
+void Window::SetShouldClose(bool close /*= true*/) {
+	glfwSetWindowShouldClose(_window, close ? 1 : 0);
 }
 
 void ErrorCallback(int error, const char *description) {

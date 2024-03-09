@@ -5,6 +5,8 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
+#include "core/input.hpp"
+
 class Window {
   public:
 	Window();
@@ -16,7 +18,10 @@ class Window {
 	void SwapBuffers();
 	void PollEvents();
 
+	void SetShouldClose(bool close = true);
+
   private:
+	friend class InputState;
 	GLFWwindow *_window;
 };
 
