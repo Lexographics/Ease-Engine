@@ -138,6 +138,18 @@ enum class Key {
 	RightAlt = 346,
 	RightSuper = 347,
 	Menu = 348,
+
+	Mouse1 = 10001,
+	Mouse2 = 10002,
+	Mouse3 = 10003,
+	Mouse4 = 10004,
+	Mouse5 = 10005,
+	Mouse6 = 10006,
+	Mouse7 = 10007,
+	Mouse8 = 10008,
+	MouseLeft = Mouse1,
+	MouseRight = Mouse2,
+	MouseMiddle = Mouse3,
 };
 
 void InitState(Window *window);
@@ -154,6 +166,7 @@ bool IsActionJustReleased(const char *actionName);
 
 namespace Callback {
 void Key(GLFWwindow *window, int key, int scancode, int action, int mods);
+void MouseButton(GLFWwindow *window, int button, int action, int mods);
 } // namespace Callback
 }; // namespace Input
 

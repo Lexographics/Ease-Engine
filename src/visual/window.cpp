@@ -31,6 +31,7 @@ void Window::Create(int width, int height, const char *title) {
 	}
 
 	glfwSetKeyCallback(_window, Input::Callback::Key);
+	glfwSetMouseButtonCallback(_window, Input::Callback::MouseButton);
 }
 
 bool Window::ShouldClose() {

@@ -91,3 +91,14 @@ void Input::Callback::Key(GLFWwindow *window, int key, int scancode, int action,
 		state.keyStates[key] = InputActionState::JustReleased;
 	}
 }
+
+void Input::Callback::MouseButton(GLFWwindow *window, int button, int action, int mods) {
+	int key = ((int)Input::Key::Mouse1) + button;
+	if (action == GLFW_PRESS) {
+		state.keyStates[key] = InputActionState::JustPressed;
+	}
+
+	if (action == GLFW_RELEASE) {
+		state.keyStates[key] = InputActionState::JustReleased;
+	}
+}
