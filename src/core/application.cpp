@@ -1,6 +1,7 @@
 #include "application.hpp"
 
 #include "input.hpp"
+#include <iostream>
 
 Application::Application(int argc, char const *argv[]) {
 }
@@ -13,11 +14,14 @@ void Application::Start() {
 
 	_window.Create(1280, 720, "Sowa Engine");
 
+	Input::SetActionKeys("ui_accept", {Key::Enter});
+	Input::SetActionKeys("ui_exit", {Key::Escape});
+
 	while (!_window.ShouldClose()) {
 		_window.SwapBuffers();
 
-		_window.PollEvents();
-		if (Input::IsKeyDown(Key::Escape)) {
+		Input::Poll();
+		if (Input::IsActionJustPressed("ui_exit")) {
 			_window.SetShouldClose();
 		}
 	}

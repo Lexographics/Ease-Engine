@@ -5,6 +5,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 class Window;
 
 namespace Input {
@@ -140,7 +142,15 @@ enum class Key {
 
 void InitState(Window *window);
 
+void Poll();
 bool IsKeyDown(Key key);
+bool IsKeyJustPressed(Key key);
+bool IsKeyJustReleased(Key key);
+void SetActionKeys(const char *actionName, const std::vector<Key> &keys);
+const std::vector<Key> &GetActionKeys(const char *actionName);
+bool IsActionPressed(const char *actionName);
+bool IsActionJustPressed(const char *actionName);
+bool IsActionJustReleased(const char *actionName);
 
 namespace Callback {
 void Key(GLFWwindow *window, int key, int scancode, int action, int mods);
