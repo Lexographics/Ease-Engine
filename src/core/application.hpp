@@ -2,6 +2,7 @@
 #define APPLICATION_HPP
 #pragma once
 
+#include "visual/viewport.hpp"
 #include "visual/window.hpp"
 
 class Application {
@@ -13,6 +14,8 @@ class Application {
 
   private:
 	Window _window;
+
+	Viewport _mainViewport;
 };
 
 #endif // APPLICATION_HPP
