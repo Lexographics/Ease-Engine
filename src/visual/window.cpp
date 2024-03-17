@@ -3,13 +3,23 @@
 #include <stdexcept>
 
 static void ErrorCallback(int error, const char *description);
+static void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
+
+static Window *s_window;
+
+struct WindowAccessor {
+	static void SetSize(int width, int height) {
+		s_window->_width = width;
+		s_window->_height = height;
+	}
+};
 
 Window::Window() {
+	s_window = this;
 }
 
 Window::~Window() {
 	glfwDestroyWindow(_window);
-	glfwTerminate();
 }
 
 void Window::Create(int width, int height, const char *title) {
@@ -32,6 +42,11 @@ void Window::Create(int width, int height, const char *title) {
 
 	glfwSetKeyCallback(_window, Input::Callback::Key);
 	glfwSetMouseButtonCallback(_window, Input::Callback::MouseButton);
+
+	glfwSetFramebufferSizeCallback(_window, FramebufferSizeCallback);
+
+	_width = width;
+	_height = height;
 }
 
 bool Window::ShouldClose() {
@@ -48,6 +63,15 @@ void Window::PollEvents() {
 
 void Window::SetShouldClose(bool close /*= true*/) {
 	glfwSetWindowShouldClose(_window, close ? 1 : 0);
+}
+
+glm::vec2 Window::GetWindowSize() {
+	return glm::vec2(_width, _height);
+}
+
+void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+	glViewport(0, 0, width, height);
+	WindowAccessor::SetSize(width, height);
 }
 
 void ErrorCallback(int error, const char *description) {
