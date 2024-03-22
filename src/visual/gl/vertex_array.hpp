@@ -56,8 +56,8 @@ class VertexArray {
 	void New();
 	void Delete();
 
-	void Bind();
-	void Unbind();
+	void Bind() const;
+	void Unbind() const;
 
 	void ResetAttributes();
 	void SetAttribute(uint32_t slot, AttributeType type);

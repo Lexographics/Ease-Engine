@@ -22,11 +22,11 @@ void Buffer::Delete() {
 	}
 }
 
-void Buffer::Bind() {
+void Buffer::Bind() const {
 	glBindBuffer((GLenum)_bufferType, _id);
 }
 
-void Buffer::Unbind() {
+void Buffer::Unbind() const {
 	glBindBuffer((GLenum)_bufferType, 0);
 }
 

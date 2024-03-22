@@ -55,6 +55,8 @@ struct RendererState {
 
 	Model fullscreenModel;
 	Shader fullscreenShader;
+
+	Shader shader3d;
 };
 static RendererState state;
 
@@ -76,6 +78,8 @@ void Visual::Renderer::InitState() {
 	state.vao.UploadAttributes();
 
 	state.vao.Unbind();
+
+	state.shader3d.Load("res/default3d");
 
 	state.shader.Load("res/sprite2d");
 	state.shader.Bind();
@@ -224,4 +228,15 @@ void Visual::Renderer::DrawFullscreen(uint32_t textureID) {
 	state.fullscreenShader.Bind();
 	state.fullscreenShader.UniformTexture("uTexture", textureID, 0);
 	state.fullscreenModel.Draw();
+}
+
+void Visual::Renderer::DrawMesh(const Mesh &mesh, const glm::mat4 &transform) {
+	state.shader3d.Bind();
+
+	state.shader3d.UniformMat4("uView", glm::mat4(1.f));
+	state.shader3d.UniformMat4("uProj", glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 100.f));
+	state.shader3d.UniformMat4("uModel", transform);
+	state.shader3d.UniformTexture("uMat_AlbedoTex", 2);
+
+	mesh.Draw();
 }

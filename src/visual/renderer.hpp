@@ -4,6 +4,9 @@
 
 #include <glm/glm.hpp>
 
+#include "model.hpp"
+#include "resource/mesh.hpp"
+
 namespace Visual::Renderer {
 
 void InitState();
@@ -14,6 +17,8 @@ void PushQuad(glm::mat4 transform, float textureID, float r = 1.f, float g = 1.f
 void End();
 
 void DrawFullscreen(uint32_t textureID);
+
+void DrawMesh(const Mesh &mesh, const glm::mat4 &transform);
 
 } // namespace Visual::Renderer
 

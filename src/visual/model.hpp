@@ -23,7 +23,7 @@ class Model {
 	void New();
 	void Delete();
 
-	void Draw();
+	void Draw() const;
 
   private:
 	VertexArray _vao;

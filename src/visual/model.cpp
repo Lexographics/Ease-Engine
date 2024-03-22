@@ -55,7 +55,7 @@ void Model::Delete() {
 	_ebo.Delete();
 }
 
-void Model::Draw() {
+void Model::Draw() const {
 	_vao.Bind();
 	if (_indexCount > 0)
 		glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_INT, nullptr);
