@@ -236,7 +236,7 @@ void Visual::Renderer::DrawMesh(const Mesh &mesh, const glm::mat4 &transform) {
 	state.shader3d.UniformMat4("uView", glm::mat4(1.f));
 	state.shader3d.UniformMat4("uProj", glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 100.f));
 	state.shader3d.UniformMat4("uModel", transform);
-	state.shader3d.UniformTexture("uMat_AlbedoTex", 2);
+	state.shader3d.UniformTexture("uMat_AlbedoTex", 17);
 
 	mesh.Draw();
 }

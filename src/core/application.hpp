@@ -10,7 +10,8 @@ class Application {
 	Application(int argc, char const *argv[]);
 	~Application();
 
-	void Start();
+	void Init();
+	void Update();
 
   private:
 	Window _window;

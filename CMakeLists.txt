@@ -9,6 +9,17 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message("Building in ${CMAKE_BUILD_TYPE}")
+message("Platform: ${CMAKE_SYSTEM_NAME}")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(TARGET_PLATFORM "Linux")
+  add_definitions(-DSW_LINUX)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  set(TARGET_PLATFORM "Web")
+  add_definitions(-DSW_WEB)
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-O1 -g")
@@ -25,8 +36,8 @@ set(SOWA_THIRDPARTY_SOURCES "")
 set(SOWA_THIRDPARTY_INCLUDES "")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 
-add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
-target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
+# add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
+# target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 add_executable(sowa ${SOWA_SOURCES})
 target_include_directories(
@@ -35,9 +46,21 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries(
-  sowa
-  PRIVATE
-    thirdparty
-    glfw
-)
+# target_link_libraries(
+  # sowa
+  # PUBLIC
+    # thirdparty
+  # PRIVATE
+    # glfw
+# )
+
+if(${TARGET_PLATFORM} STREQUAL "Web")
+  set_target_properties(sowa
+    PROPERTIES
+      OUTPUT_NAME "index"
+      SUFFIX ".html"
+      LINK_FLAGS
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
+      # "-sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
+      )
+endif()

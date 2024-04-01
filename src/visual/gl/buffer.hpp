@@ -2,7 +2,7 @@
 #define BUFFER_HPP
 #pragma once
 
-#include <glad/glad.h>
+#include "visual/gl.hpp"
 
 enum class BufferType {
 	None = GL_NONE,

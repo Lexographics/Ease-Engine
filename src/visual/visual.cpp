@@ -1,8 +1,6 @@
 #include "visual.hpp"
 
-#include <glad/glad.h>
-
-#include <GLFW/glfw3.h>
+#include "visual/gl.hpp"
 
 #include "shader.hpp"
 #include "viewport.hpp"

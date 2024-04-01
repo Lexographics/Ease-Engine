@@ -2,8 +2,7 @@
 #define WINDOW_HPP
 #pragma once
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
+#include "visual/gl.hpp"
 
 #include <glm/glm.hpp>
 
@@ -25,8 +24,8 @@ class Window {
 	glm::vec2 GetWindowSize();
 
   private:
-	friend class InputState;
-	friend class WindowAccessor;
+	friend struct InputState;
+	friend struct WindowAccessor;
 	GLFWwindow *_window;
 
 	int _width = 0;

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sowa Engine</title>
+</head>
+
+<body>
+  <!-- <div id="main"> -->
+  <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+  <!-- </div> -->
+
+  <script type="text/javascript">
+
+    const canvas = document.getElementById("canvas");
+    var Module = {
+      canvas: (function () { return canvas; })()
+    }
+
+  </script>
+
+
+  {{{ SCRIPT }}}
+</body>
+
+</html>

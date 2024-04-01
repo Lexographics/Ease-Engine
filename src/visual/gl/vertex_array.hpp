@@ -2,8 +2,8 @@
 #define VERTEX_ARRAY_HPP
 #pragma once
 
+#include "visual/gl.hpp"
 #include <cstdint>
-#include <glad/glad.h>
 #include <vector>
 
 enum class AttributeType {

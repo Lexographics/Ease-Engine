@@ -1,12 +1,12 @@
 #include "viewport.hpp"
 
+#include "visual/gl.hpp"
 #include <cstddef>
-#include <glad/glad.h>
 #include <vector>
 
 Viewport::Viewport() {
 	SetTarget(0, ViewportTargetType::Vec4);
-	SetTarget(1, ViewportTargetType::Int);
+	// SetTarget(1, ViewportTargetType::Int);
 }
 
 Viewport::~Viewport() {

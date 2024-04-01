@@ -36,9 +36,11 @@ void Window::Create(int width, int height, const char *title) {
 	}
 
 	glfwMakeContextCurrent(_window);
+#ifndef SW_WEB
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		throw std::runtime_error("Failed to load glad");
 	}
+#endif
 
 	glfwSetKeyCallback(_window, Input::Callback::Key);
 	glfwSetMouseButtonCallback(_window, Input::Callback::MouseButton);
