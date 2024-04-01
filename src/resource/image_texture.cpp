@@ -2,10 +2,12 @@
 
 #include <iostream>
 
-#include <glad/glad.h>
+#include "visual/gl.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include "core/file.hpp"
 
 ImageTexture::~ImageTexture() {
 	Delete();
@@ -21,8 +23,10 @@ void ImageTexture::Unbind() {
 }
 
 void ImageTexture::Load(const char *path) {
+	auto file = File::Load(path);
+
 	stbi_set_flip_vertically_on_load(true);
-	auto pixels = stbi_load(path, &_width, &_height, &_channels, 4);
+	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->buffer.data()), file->buffer.size(), &_width, &_height, &_channels, 4);
 	if (!pixels) {
 		Delete();
 		std::cout << "Failed to load texture path:" << path << std::endl;

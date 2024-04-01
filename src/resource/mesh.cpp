@@ -3,10 +3,12 @@
 #include <iostream>
 #include <vector>
 
-#include <glad/glad.h>
+#include "visual/gl.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+
+#include "core/file.hpp"
 
 Mesh::~Mesh() {
 }
@@ -21,7 +23,11 @@ void Mesh::Load(const char *path) {
 	std::string err;
 	std::string warn;
 
-	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path, nullptr);
+	auto file = File::Load(path);
+	std::string data{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
+	std::istringstream ss(data);
+
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &ss);
 
 	if (!err.empty()) {
 		std::cout << "Failed to load object file " << path << std::endl;
