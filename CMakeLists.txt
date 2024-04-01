@@ -36,8 +36,8 @@ set(SOWA_THIRDPARTY_SOURCES "")
 set(SOWA_THIRDPARTY_INCLUDES "")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 
-# add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
-# target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
+add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
+target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 add_executable(sowa ${SOWA_SOURCES})
 target_include_directories(
@@ -50,9 +50,13 @@ target_compile_options(sowa PRIVATE "-Werror")
   # sowa
   # PUBLIC
     # thirdparty
-  # PRIVATE
+# PRIVATE
     # glfw
 # )
+if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
+  target_link_libraries( sowa PUBLIC thirdparty PRIVATE glfw freetype )
+endif()
+
 
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(sowa
