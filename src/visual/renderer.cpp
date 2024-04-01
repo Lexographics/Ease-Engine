@@ -224,6 +224,58 @@ void Visual::Renderer::End() {
 	Reset();
 }
 
+void Visual::Renderer::DrawText(const std::string &text, Font &font, const glm::mat4 &transform) {
+	float x = 0;
+	float y = 0;
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++) {
+		const Font::Character &ch = font.GetCharacter((int)*c);
+		if (ch.textureID == 0) {
+			std::cout << "Texture id for character " << *c << " not found" << std::endl;
+			font.LoadCharacter((int)*c);
+			continue;
+		}
+
+		float xPos = x + ch.bearing.x;
+		float yPos = y - (ch.size.y - ch.bearing.y);
+
+		float w = ch.size.x;
+		float h = ch.size.y;
+
+		glm::vec4 points[4] = {
+			{xPos, yPos + h, 0.f, 1.f},
+			{xPos, yPos, 0.f, 1.f},
+			{xPos + w, yPos, 0.f, 1.f},
+			{xPos + w, yPos + h, 0.f, 1.f}};
+
+		glm::vec2 uvs[4] = {
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+			{1.f, 0.f}};
+
+		BatchVertex vertices[4];
+		for (int i = 0; i < 4; i++) {
+			points[i] = transform * points[i];
+
+			vertices[i].x = points[i].x;
+			vertices[i].y = points[i].y;
+			vertices[i].z = 1.f;
+			vertices[i].r = 1.f;
+			vertices[i].g = 1.f;
+			vertices[i].b = 1.f;
+			vertices[i].a = 1.f;
+			vertices[i].t_id = ch.textureID;
+			vertices[i].d_id = 1.f;
+			vertices[i].u = uvs[i].x;
+			vertices[i].v = uvs[i].y;
+		}
+
+		PushQuad(vertices);
+		x += (ch.advance >> 6);
+	}
+}
+
 void Visual::Renderer::DrawFullscreen(uint32_t textureID) {
 	state.fullscreenShader.Bind();
 	state.fullscreenShader.UniformTexture("uTexture", textureID, 0);
