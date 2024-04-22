@@ -16,6 +16,8 @@
 
 #include "resource/image_texture.hpp"
 
+#include "utf8.h"
+
 #ifndef PI
 #define PI (3.14159265358979323846)
 #endif
@@ -227,12 +229,17 @@ void Visual::Renderer::End() {
 void Visual::Renderer::DrawText(const std::string &text, Font &font, const glm::mat4 &transform) {
 	float x = 0;
 	float y = 0;
-	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++) {
-		const Font::Character &ch = font.GetCharacter((int)*c);
+
+	auto it = text.begin();
+	auto end = text.end();
+
+	while (it != end) {
+		utf8::utfchar32_t charcode = utf8::next(it, end);
+
+		const Font::Character &ch = font.GetCharacter(charcode);
 		if (ch.textureID == 0) {
-			std::cout << "Texture id for character " << *c << " not found" << std::endl;
-			font.LoadCharacter((int)*c);
+			std::cout << "Texture id for character " << charcode << " not found" << std::endl;
+			font.LoadCharacter(charcode);
 			continue;
 		}
 
