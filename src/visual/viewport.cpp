@@ -6,7 +6,7 @@
 
 Viewport::Viewport() {
 	SetTarget(0, ViewportTargetType::Vec4);
-	// SetTarget(1, ViewportTargetType::Int);
+	SetTarget(1, ViewportTargetType::Int);
 }
 
 Viewport::~Viewport() {
@@ -30,7 +30,7 @@ void Viewport::Create(int width, int height) {
 		if (target.type == ViewportTargetType::Vec4) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _width, _height, 0, GL_RGBA, GL_FLOAT, NULL);
 		} else if (target.type == ViewportTargetType::Int) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, _width, _height, 0, GL_RED_INTEGER, GL_INT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		}
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -83,12 +83,21 @@ void Viewport::Unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Viewport::Clear(float r, float g, float b, float a /*= 1.0*/, float depth /*= false*/) {
+void Viewport::Clear(float r, float g, float b, float a /*= 1.0*/, bool depth /*= false*/) {
+	// TODO: Designed as if all viewports have (1: RGBA, 2: uint) attachments. Needs update after change
 	glClearColor(r, g, b, a);
-	glClear(GL_COLOR_BUFFER_BIT);
 
-	if (depth)
-		glClear(GL_DEPTH_BUFFER_BIT);
+	GLenum attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+	glDrawBuffers(1, attachments);
+
+	glClear(
+		depth ? GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+			  : GL_COLOR_BUFFER_BIT);
+
+	glBindTexture(GL_TEXTURE_2D, _targets[1].textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+
+	glDrawBuffers(2, attachments);
 }
 
 int Viewport::GetTargetTextureID(int slot) {
