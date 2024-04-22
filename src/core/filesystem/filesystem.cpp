@@ -1,19 +1,16 @@
-#include "file.hpp"
+#include "filesystem.hpp"
 
 #include <filesystem>
 #include <fstream>
 
-struct FileState {
-};
-static FileState state;
-
-void File::InitState() {
+FolderFileSystem::FolderFileSystem(const std::filesystem::path &path) {
+	_basePath = path;
 }
 
-FileData File::Load(const char *path) {
+FileData FolderFileSystem::Load(const char *path) {
 	FileData data = std::make_shared<FileDataInternal>();
 
-	std::ifstream file{path, std::ios::binary};
+	std::ifstream file{_basePath / std::filesystem::path(path), std::ios::binary};
 	if (!file.good())
 		return nullptr;
 

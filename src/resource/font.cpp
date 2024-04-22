@@ -5,6 +5,8 @@
 
 #include "visual/gl.hpp"
 
+#include "core/application.hpp"
+
 static FT_Library GetFreeType() {
 	static FT_Library lib = nullptr;
 	if (!lib)
@@ -17,7 +19,7 @@ Font::~Font() {
 }
 
 void Font::LoadTTF(const char *path) {
-	_buffer = File::Load(path);
+	_buffer = App().FS()->Load(path);
 	if (!_buffer) {
 		return;
 	}

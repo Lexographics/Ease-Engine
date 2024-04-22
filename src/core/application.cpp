@@ -1,8 +1,8 @@
 #include "application.hpp"
 
-#include "file.hpp"
 #include "input.hpp"
 
+#include "resource/font.hpp"
 #include "resource/image_texture.hpp"
 #include "resource/mesh.hpp"
 
@@ -15,7 +15,14 @@
 
 #include <iostream>
 
+static Application *s_app = nullptr;
+
+Application &App() {
+	return *s_app;
+}
+
 Application::Application(int argc, char const *argv[]) {
+	s_app = this;
 }
 
 Application::~Application() {
@@ -23,23 +30,27 @@ Application::~Application() {
 
 static ImageTexture texture;
 static Mesh mesh;
+static Font font;
 
 void Application::Init() {
+	_fs = new FolderFileSystem("res");
 
 	_window.Create(1280, 720, "Sowa Engine");
 
 	Input::InitState(&_window);
 	Visual::InitState(&_window);
 	Visual::Renderer::InitState();
-	File::InitState();
 
 	Input::SetActionKeys("ui_accept", {Key::Enter});
 	Input::SetActionKeys("ui_exit", {Key::Escape});
 
-	texture.Load("res/image.png");
+	texture.Load("tile.png");
+	std::cout << texture.ID() << std::endl;
 	texture.Bind(0);
 
-	mesh.Load("res/teapot.obj");
+	mesh.Load("teapot.obj");
+
+	font.LoadTTF("font.ttf");
 
 	_mainViewport.Create(1280, 720);
 
@@ -64,8 +75,7 @@ void Application::Update() {
 
 	Visual::UseViewport(&_mainViewport);
 
-	glClearColor(0.2f, 0.2f, 0.2f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	_mainViewport.Clear(0.2f, 0.2f, 0.2f, 1.f, true);
 
 	Visual::Renderer::Reset();
 
@@ -73,7 +83,9 @@ void Application::Update() {
 	Visual::Renderer::PushQuad(120, 10, 100, 100, 1, 0, 1, 1, 1, 0);
 	Visual::Renderer::PushQuad(230, 10, 100, 100, 0, 1, 1, 1, 1, texture.ID());
 
-	Visual::Renderer::PushQuad(Matrix::CalculateTransform({200.f, 200.f}, 45.f, {200.f, 200.f}), texture.ID());
+	Visual::Renderer::PushQuad(Matrix::CalculateTransform({200.f, 200.f}, 25.f, {200.f, 200.f}), texture.ID());
+
+	Visual::Renderer::DrawText("Sowa Engine", font, Matrix::CalculateTransform({20.f, 600.f}, 0.f, {1.f, 1.f}));
 
 	Visual::Renderer::End();
 

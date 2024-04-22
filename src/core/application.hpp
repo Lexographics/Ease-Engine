@@ -5,6 +5,8 @@
 #include "visual/viewport.hpp"
 #include "visual/window.hpp"
 
+#include "filesystem/filesystem.hpp"
+
 class Application {
   public:
 	Application(int argc, char const *argv[]);
@@ -13,10 +15,15 @@ class Application {
 	void Init();
 	void Update();
 
-  private:
-	Window _window;
+	inline FileSystem *FS() { return _fs; }
 
+  private:
+	FileSystem *_fs = nullptr;
+
+	Window _window;
 	Viewport _mainViewport;
 };
+
+Application &App();
 
 #endif // APPLICATION_HPP

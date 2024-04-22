@@ -7,7 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "core/file.hpp"
+#include "core/application.hpp"
 
 ImageTexture::~ImageTexture() {
 	Delete();
@@ -23,7 +23,7 @@ void ImageTexture::Unbind() {
 }
 
 void ImageTexture::Load(const char *path) {
-	auto file = File::Load(path);
+	auto file = App().FS()->Load(path);
 
 	stbi_set_flip_vertically_on_load(true);
 	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->buffer.data()), file->buffer.size(), &_width, &_height, &_channels, 4);

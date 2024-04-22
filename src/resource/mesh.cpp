@@ -8,7 +8,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#include "core/file.hpp"
+#include "core/application.hpp"
 
 Mesh::~Mesh() {
 }
@@ -23,7 +23,7 @@ void Mesh::Load(const char *path) {
 	std::string err;
 	std::string warn;
 
-	auto file = File::Load(path);
+	auto file = App().FS()->Load(path);
 	std::string data{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
 	std::istringstream ss(data);
 
