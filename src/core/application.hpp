@@ -7,6 +7,8 @@
 
 #include "filesystem/filesystem.hpp"
 
+#include "data/project_settings.hpp"
+
 class Application {
   public:
 	Application(int argc, char const *argv[]);
@@ -19,6 +21,8 @@ class Application {
 
   private:
 	FileSystem *_fs = nullptr;
+
+	ProjectSettings _projectSettings;
 
 	Window _window;
 	Viewport _mainViewport;
