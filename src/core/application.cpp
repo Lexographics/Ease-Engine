@@ -60,6 +60,11 @@ void Application::Init() {
 		_projectSettings.rendering.viewport.width,
 		_projectSettings.rendering.viewport.height);
 
+	NodeTypeID typeid_node = _nodeDB.NewNodeType<Node>("Node");
+	_currentScene = NewScene();
+
+	Node *node = _currentScene->Create("Node");
+
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(
 		[](void *self) {
@@ -107,4 +112,11 @@ void Application::Update() {
 	Visual::Renderer::DrawFullscreen(_mainViewport.GetTargetTextureID(0));
 
 	_window.SwapBuffers();
+}
+
+std::shared_ptr<Scene> Application::NewScene() {
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+	scene->_nodeDB = &_nodeDB;
+
+	return scene;
 }

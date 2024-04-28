@@ -19,5 +19,6 @@ using f64 = double;
 
 using NodeID = std::size_t;
 using TypeID = std::size_t;
+using NodeTypeID = std::size_t;
 
 #endif // SOWA_HPP
