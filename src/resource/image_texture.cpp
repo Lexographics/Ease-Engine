@@ -24,6 +24,9 @@ void ImageTexture::Unbind() {
 
 void ImageTexture::Load(const char *path) {
 	auto file = App().FS()->Load(path);
+	if (!file) {
+		return;
+	}
 
 	stbi_set_flip_vertically_on_load(false);
 	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->buffer.data()), file->buffer.size(), &_width, &_height, &_channels, 4);

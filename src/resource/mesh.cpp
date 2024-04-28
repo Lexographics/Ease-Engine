@@ -24,6 +24,9 @@ void Mesh::Load(const char *path) {
 	std::string warn;
 
 	auto file = App().FS()->Load(path);
+	if (!file) {
+		return;
+	}
 	std::string data{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
 	std::istringstream ss(data);
 
