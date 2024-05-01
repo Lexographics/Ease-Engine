@@ -3,5 +3,6 @@
 #pragma once
 
 #include "random.hpp"
+#include "string.hpp"
 
 #endif // UTILS_HPP
