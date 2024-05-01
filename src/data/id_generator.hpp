@@ -4,6 +4,19 @@
 
 #include "sowa.hpp"
 
+#include "random_number_generator.hpp"
+#include "utils/utils.hpp"
+
+class UUIDGenerator {
+  public:
+	inline u64 Next() {
+		return gen.U64();
+	}
+
+  private:
+	RandomNumberGenerator gen;
+};
+
 template <typename T = u32>
 class LinearIDGenerator {
   public:
