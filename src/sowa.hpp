@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 using u8 = uint8_t;
 using u16 = uint16_t;
@@ -20,5 +21,14 @@ using f64 = double;
 using NodeID = std::size_t;
 using TypeID = std::size_t;
 using NodeTypeID = std::size_t;
+using RID = std::size_t;
+
+template <typename T>
+using Ref = std::shared_ptr<T>;
+
+template <typename T>
+Ref<T> MakeRef() {
+	return std::make_shared<T>();
+}
 
 #endif // SOWA_HPP
