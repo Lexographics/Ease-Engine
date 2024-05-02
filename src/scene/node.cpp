@@ -1,5 +1,7 @@
 #include "node.hpp"
 
+#include "core/application.hpp"
+
 void Node::RemoveChild(Node *child) {
 	child->_parent = nullptr;
 	removeChild(child);
@@ -53,7 +55,7 @@ static void PrintIndent(int count) {
 
 void Node::PrintHierarchy(int indent) {
 	PrintIndent(indent);
-	std::cout << Name() << std::endl;
+	std::cout << Name() << " (" << App().GetNodeDB().GetNodeTypename(TypeID()) << ")" << std::endl;
 
 	Node *node = this;
 	for (Node *child : GetChildren()) {

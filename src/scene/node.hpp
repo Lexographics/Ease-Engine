@@ -12,6 +12,11 @@
 
 class Node {
   public:
+	virtual ~Node() = default;
+
+	virtual void Start() {}
+	virtual void Update() {}
+	
 	//
 	inline NodeTypeID TypeID() const { return _typeid; }
 	inline NodeID ID() const { return _id; }
