@@ -2,6 +2,7 @@
 #define SCENE_HPP
 #pragma once
 
+#include <set>
 #include <sowa.hpp>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,7 @@ class Scene {
   private:
 	friend class Application;
 	std::unordered_map<NodeID, Node *> _nodes;
+	std::set<Node *> _nodeIter;
 
 	NodeDB *_nodeDB = nullptr;
 };

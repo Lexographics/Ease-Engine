@@ -3,6 +3,9 @@
 void Scene::Start() {
 }
 void Scene::Update() {
+	for (Node *node : _nodeIter) {
+		node->Update();
+	}
 }
 void Scene::Shutdown() {
 }
@@ -14,10 +17,12 @@ Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
 	if (!node)
 		return nullptr;
 
-	node->_id = (id != 0 && !HasNode(id)) ? id : gen.Next();
+	NodeID nodeId = (id != 0 && !HasNode(id)) ? id : gen.Next();
+	node->_id = nodeId;
 	node->Rename(name);
 
-	_nodes[id] = node;
+	_nodes[nodeId] = node;
+	_nodeIter.insert(node);
 	return node;
 }
 
