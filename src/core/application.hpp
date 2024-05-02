@@ -2,6 +2,8 @@
 #define APPLICATION_HPP
 #pragma once
 
+#include "sowa.hpp"
+
 #include "visual/viewport.hpp"
 #include "visual/window.hpp"
 
@@ -12,6 +14,9 @@
 #include "scene/node_db.hpp"
 #include "scene/scene.hpp"
 
+#include "resource/font.hpp"
+#include "resource/resource_registry.hpp"
+
 class Application {
   public:
 	Application(int argc, char const *argv[]);
@@ -21,8 +26,11 @@ class Application {
 	void Update();
 
 	inline FileSystem *FS() { return _fs; }
+	inline NodeDB &GetNodeDB() { return _nodeDB; }
+	inline ResourceRegistry &GetResourceRegistry() { return _resourceRegistry; }
+	inline Font *GetDefaultFont() { return &_defaultFont; }
 
-	std::shared_ptr<Scene> NewScene();
+	Ref<Scene> NewScene();
 
   private:
 	FileSystem *_fs = nullptr;
@@ -30,7 +38,10 @@ class Application {
 	ProjectSettings _projectSettings;
 
 	NodeDB _nodeDB;
-	std::shared_ptr<Scene> _currentScene;
+	Ref<Scene> _currentScene;
+
+	ResourceRegistry _resourceRegistry;
+	Font _defaultFont;
 
 	Window _window;
 	Viewport _mainViewport;
