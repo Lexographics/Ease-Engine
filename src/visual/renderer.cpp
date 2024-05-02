@@ -53,7 +53,7 @@ struct RendererState {
 	std::map<uint32_t, uint32_t> textures;
 	uint32_t textureCounter = 0;
 
-	ImageTexture blankTexture;
+	std::unique_ptr<ImageTexture> blankTexture;
 
 	Model fullscreenModel;
 	Shader fullscreenShader;
@@ -87,7 +87,8 @@ void Visual::Renderer::InitState() {
 	state.shader.Bind();
 
 	unsigned char pixel[] = {255, 255, 255, 255};
-	state.blankTexture.LoadFromData(pixel, 1, 1);
+	state.blankTexture = std::make_unique<ImageTexture>();
+	state.blankTexture->LoadFromData(pixel, 1, 1);
 
 	ModelBuilder::Quad2D(state.fullscreenModel, 2.f);
 	state.fullscreenShader.Load("res/fullscreen");
@@ -105,7 +106,7 @@ static void PushQuad(BatchVertex vertices[4]) {
 	for (int i = 0; i < 4; i++) {
 		uint32_t textureID = static_cast<uint32_t>(vertices[i].t_id);
 		if (textureID == 0) {
-			textureID = state.blankTexture.ID();
+			textureID = state.blankTexture->ID();
 		}
 
 		if (state.textures[textureID] == 0) {
@@ -165,12 +166,12 @@ void Visual::Renderer::PushQuad(float x, float y, float w, float h, float r, flo
 	PushQuad(vertices);
 }
 
-void Visual::Renderer::PushQuad(glm::mat4 transform, float textureID, float r /*= 1.f*/, float g /*= 1.f*/, float b /*= 1.f*/, float a /*= 1.f*/, float drawID /*= 1.f*/) {
+void Visual::Renderer::PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale, float r /*= 1.f*/, float g /*= 1.f*/, float b /*= 1.f*/, float a /*= 1.f*/, float drawID /*= 1.f*/) {
 	glm::vec4 points[4] = {
-		{-0.5f, 0.5f, 0.f, 1.f},
-		{-0.5f, -0.5f, 0.f, 1.f},
-		{0.5f, -0.5f, 0.f, 1.f},
-		{0.5f, 0.5f, 0.f, 1.f}};
+		{-0.5f * textureScale.x, 0.5f * textureScale.y, 0.f, 1.f},
+		{-0.5f * textureScale.x, -0.5f * textureScale.y, 0.f, 1.f},
+		{0.5f * textureScale.x, -0.5f * textureScale.y, 0.f, 1.f},
+		{0.5f * textureScale.x, 0.5f * textureScale.y, 0.f, 1.f}};
 	glm::vec2 uvs[4] = {
 		{0.f, 1.f},
 		{0.f, 0.f},
@@ -219,6 +220,7 @@ void Visual::Renderer::End() {
 	state.shader.UniformMat4("uView", glm::mat4(1.f));
 	state.shader.UniformMat4("uProj", glm::ortho(0.f, 1280.f, 0.f, 720.f, -128.f, 128.f));
 
+	glDisable(GL_DEPTH_TEST);
 	state.vao.Bind();
 	glDrawArrays(GL_TRIANGLES, 0, state.vertices.size());
 	state.vao.Unbind();
@@ -295,7 +297,7 @@ void Visual::Renderer::DrawMesh(const Mesh &mesh, const glm::mat4 &transform) {
 	state.shader3d.UniformMat4("uView", glm::mat4(1.f));
 	state.shader3d.UniformMat4("uProj", glm::perspective(glm::radians(90.f), 16.f / 9.f, 0.1f, 100.f));
 	state.shader3d.UniformMat4("uModel", transform);
-	state.shader3d.UniformTexture("uMat_AlbedoTex", 17);
+	state.shader3d.UniformTexture("uMat_AlbedoTex", 2);
 
 	mesh.Draw();
 }
