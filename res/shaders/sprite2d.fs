@@ -2,7 +2,7 @@
 precision mediump float;
 
 layout (location = 0) out vec4 color;
-// layout (location = 1) out int drawId;
+layout (location = 1) out uint drawId;
 
 in vec4 vColor;
 in vec2 vUV;
@@ -16,6 +16,7 @@ vec4 getTexture();
 
 void main() {
   color = getTexture() * vColor;
+  drawId = uint(vDrawID);
 
   if(color.a < 0.1f)
     discard;

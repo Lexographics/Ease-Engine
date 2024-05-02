@@ -16,7 +16,7 @@ out float vDrawID;
 out float vTexture;
 
 void main() {
-  gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 1.0, 1.0);
+  gl_Position = uProj * uView * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 
   vColor = aColor;
   vUV = aUV;

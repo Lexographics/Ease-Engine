@@ -4,7 +4,7 @@ precision mediump float;
 layout(location = 0) out vec4 gAlbedo;
 // layout(location = 1) out vec4 gPosition;
 // layout(location = 2) out vec4 gNormal;
-// layout(location = 3) out int gDrawID;
+layout(location = 1) out uint gDrawID;
 
 
 in vec2 vTexCoords;
@@ -33,4 +33,5 @@ void main()
 	// gNormal = vec4(normalize(vNormal), 1.0);
 
 	// gDrawID = uDrawID;
+	gDrawID = uint(1);
 }
