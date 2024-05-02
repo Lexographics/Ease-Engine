@@ -4,7 +4,9 @@
 
 #include <cstdint>
 
-class ImageTexture {
+#include "core/resource.hpp"
+
+class ImageTexture : public Resource {
   public:
 	ImageTexture() = default;
 	~ImageTexture();

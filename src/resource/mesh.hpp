@@ -5,9 +5,10 @@
 #include <cstdint>
 #include <vector>
 
+#include "core/resource.hpp"
 #include "visual/model.hpp"
 
-class Mesh {
+class Mesh : public Resource {
   public:
 	Mesh() = default;
 	~Mesh();

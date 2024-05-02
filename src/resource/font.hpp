@@ -7,8 +7,9 @@
 #include <string>
 
 #include "core/filesystem/filesystem.hpp"
+#include "core/resource.hpp"
 
-class Font {
+class Font : public Resource {
   public:
 	Font() = default;
 	~Font();
