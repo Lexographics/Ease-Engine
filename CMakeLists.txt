@@ -36,11 +36,8 @@ set(SOWA_THIRDPARTY_SOURCES "")
 set(SOWA_THIRDPARTY_INCLUDES "")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 
-if(NOT ${SOWA_THIRDPARTY_SOURCES} STREQUAL "")
-  add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
-  target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
-  set(LIB_THIRDPARTY "thirdparty")
-endif()
+add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
+target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 if(${TARGET_PLATFORM} STREQUAL "Web")
   add_compile_options("-s" "USE_FREETYPE=1")
@@ -60,7 +57,7 @@ target_compile_options(sowa PRIVATE "-Werror")
 # PRIVATE
     # glfw
 # )
-target_link_libraries( sowa PUBLIC ${LIB_THIRDPARTY} PRIVATE freetype yaml-cpp )
+target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt )
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
   target_link_libraries( sowa PRIVATE glfw )
 endif()
