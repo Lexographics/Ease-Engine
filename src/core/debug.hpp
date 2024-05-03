@@ -7,6 +7,7 @@
 
 #include "fmt/core.h"
 
+#include "debug_fmt.hpp"
 #include "utils/utils.hpp"
 
 namespace Debug {
