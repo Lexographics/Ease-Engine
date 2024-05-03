@@ -13,15 +13,18 @@ class Node2D : public Node {
 	glm::mat4 GetTransform();
 	glm::mat4 GetLocalTransform();
 	glm::mat4 GetParentTransform();
+	int GetZIndex();
 
 	inline glm::vec2 &Position() { return _position; }
 	inline float &Rotation() { return _rotation; }
 	inline glm::vec2 &Scale() { return _scale; }
+	inline int &ZIndex() { return _zIndex; }
 
   private:
 	glm::vec2 _position{0.f, 0.f};
 	float _rotation{0.f};
 	glm::vec2 _scale{1.f, 1.f};
+	int _zIndex = 0;
 };
 
 #endif // NODE2D_HPP

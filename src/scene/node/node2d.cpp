@@ -17,3 +17,11 @@ glm::mat4 Node2D::GetParentTransform() {
 
 	return glm::mat4(1.f);
 }
+
+int Node2D::GetZIndex() {
+	if (Node2D *parent = dynamic_cast<Node2D *>(GetParent()); nullptr != parent) {
+		return _zIndex + parent->GetZIndex();
+	}
+
+	return _zIndex;
+}
