@@ -19,6 +19,8 @@
 #include "scene/node/sprite2d.hpp"
 #include "scene/node/text2d.hpp"
 
+#include "debug.hpp"
+
 static Application *s_app = nullptr;
 
 Application &App() {
@@ -49,7 +51,11 @@ void Application::Init() {
 
 	Input::InitState(&_window);
 	Visual::InitState(&_window);
-	Visual::Renderer::InitState();
+	_renderer.Init();
+	_renderer.RegisterRenderer2D("2D", "res/shaders/sprite2d");
+	_renderer.RegisterRenderer2D("Text", "res/shaders/text2d");
+
+	_editor.Init();
 
 	Input::SetActionKeys("ui_accept", {Key::Enter});
 	Input::SetActionKeys("ui_exit", {Key::Escape});
@@ -59,8 +65,8 @@ void Application::Init() {
 
 	texture->Load("tile.png");
 	GetResourceRegistry().AddResource(texture.get());
+	Debug::Info("Texture: {}", *texture);
 
-	std::cout << texture->ID() << std::endl;
 	texture->Bind(0);
 
 	mesh->Load("teapot.obj");
@@ -78,8 +84,8 @@ void Application::Init() {
 	_currentScene = NewScene();
 
 	Node *node = _currentScene->Create("Node");
-	Node *child1 = _currentScene->Create("Text2D", "Child1");
-	Node *child1child1 = _currentScene->Create("Sprite2D", "Child1Child1");
+	Node *child1 = _currentScene->Create("Sprite2D", "Child1");
+	Node *child1child1 = _currentScene->Create("Text2D", "Child1Child1");
 	Node *child2 = _currentScene->Create("Node", "Child2");
 	Node *child2child1 = _currentScene->Create("Node", "Child2Child1");
 
@@ -91,13 +97,17 @@ void Application::Init() {
 
 	node->GetNode("Child1")->AddChild(child1child1);
 
-	ssss = dynamic_cast<Sprite2D *>(node->GetNode("Child1/Child1Child1"));
+	ssss = dynamic_cast<Sprite2D *>(node->GetNode("Child1"));
 	ssss->Position() = {0.f, 0.f};
 	ssss->Scale() = {.06f, .06f};
 	ssss->GetTexture() = texture->GetRID();
 
-	ss = dynamic_cast<Text2D *>(node->GetNode("Child1"));
+	ss = dynamic_cast<Text2D *>(node->GetNode("Child1/Child1Child1"));
 	ss->Text() = "This is a text";
+	ss->Scale() = {20.f, 20.f};
+	ss->ZIndex() = 1;
+
+	Debug::Info("Text node is ::: -> {}", *child1child1);
 
 	node->PrintHierarchy();
 
@@ -127,31 +137,32 @@ void Application::Update() {
 	static float f = 0.f;
 	f += 0.2f;
 	glEnable(GL_DEPTH_TEST);
-	Visual::Renderer::DrawMesh(*mesh, Matrix::CalculateTransform3D({0.f, -20.f, -50.f}, {0.f, f, 0.f}, {10.f, 10.f, 10.f}));
+	GetRenderer().DrawMesh(*mesh, Matrix::CalculateTransform3D({0.f, -20.f, -50.f}, {0.f, f, 0.f}, {10.f, 10.f, 10.f}));
 	glDisable(GL_DEPTH_TEST);
 
-	Visual::Renderer::Reset();
+	GetRenderer().BeginDraw();
 
-	ss->Position() = {300.f, 400.f};
-	ss->Rotation() += 0.6f;
-	ssss->Rotation() += 0.2f;
+	ssss->Position() = {300.f, 400.f};
+	ssss->Rotation() += 0.6f;
+	ss->Rotation() += 0.2f;
+
+	static float d = 0.f;
+	d += 1.f;
+	d = std::fmod(d, 360);
+	ss->Modulate() = Color::HSV(d, 0.5f, 0.5f);
 
 	_currentScene->Update();
 
-	Visual::Renderer::PushQuad(10, 10, 100, 100, 1, 1, 1, 1, 1, texture->ID());
-	Visual::Renderer::PushQuad(120, 10, 100, 100, 1, 0, 1, 1, 1, 0);
-	Visual::Renderer::PushQuad(230, 10, 100, 100, 0, 1, 1, 1, 1, texture->ID());
-
-	Visual::Renderer::DrawText("Sowa Engine", _defaultFont, Matrix::CalculateTransform({20.f, 600.f}, 0.f, {1.f, 1.f}));
-
-	Visual::Renderer::End();
+	GetRenderer().EndDraw();
 
 	Visual::UseViewport(nullptr);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	Visual::Renderer::DrawFullscreen(_mainViewport.GetTargetTextureID(0));
+	glDisable(GL_DEPTH_TEST);
+	GetRenderer().DrawFullscreen(_mainViewport.GetTargetTextureID(0));
+	glEnable(GL_DEPTH_TEST);
 
 	_window.SwapBuffers();
 }

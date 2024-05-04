@@ -12,5 +12,5 @@ void Text2D::Update() {
 		res = App().GetDefaultFont();
 	}
 
-	Visual::Renderer::DrawText(_text, *res, GetTransform());
+	App().GetRenderer().GetRenderer2D("Text").DrawText(_text, *res, GetTransform(), GetZIndex(), Modulate());
 }

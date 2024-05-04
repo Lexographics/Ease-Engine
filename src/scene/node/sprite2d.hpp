@@ -4,6 +4,7 @@
 
 #include "sowa.hpp"
 
+#include "data/color.hpp"
 #include "node2d.hpp"
 
 class Sprite2D : public Node2D {
@@ -13,9 +14,11 @@ class Sprite2D : public Node2D {
 	void Update() override;
 
 	inline RID &GetTexture() { return _texture; }
+	inline Color &Modulate() { return _modulate; }
 
   private:
 	RID _texture;
+	Color _modulate;
 };
 
 #endif // SPRITE2D_HPP

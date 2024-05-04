@@ -11,5 +11,5 @@ void Sprite2D::Update() {
 	if (!res)
 		return;
 
-	Visual::Renderer::PushQuad(GetTransform(), res->ID(), glm::vec2(res->Width(), res->Height()));
+	App().GetRenderer().GetRenderer2D("2D").PushQuad(GetTransform(), res->ID(), glm::vec2(res->Width(), res->Height()), GetZIndex(), Modulate(), ID());
 }
