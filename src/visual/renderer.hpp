@@ -2,27 +2,59 @@
 #define RENDERER_HPP
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 #include <glm/glm.hpp>
 
 #include "model.hpp"
+#include "renderer2d.hpp"
+#include "shader.hpp"
+
 #include "resource/font.hpp"
+#include "resource/image_texture.hpp"
 #include "resource/mesh.hpp"
 
-namespace Visual::Renderer {
+#include "data/color.hpp"
 
-void InitState();
+struct BatchVertex {
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
 
-void Reset();
-void PushQuad(float x, float y, float w, float h, float r, float g, float b, float a, float drawID, float textureID);
-void PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale = glm::vec2{1.f, 1.f}, float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f, float drawID = 1.f);
-void End();
+	float u = 0.f;
+	float v = 0.f;
 
-void DrawText(const std::string &text, Font &font, const glm::mat4 &transform);
+	float r = 1.f;
+	float g = 1.f;
+	float b = 1.f;
+	float a = 1.f;
 
-void DrawFullscreen(uint32_t textureID);
+	float d_id = 0.f; // draw id
+	float t_id = 0.f; // texture id
+};
 
-void DrawMesh(const Mesh &mesh, const glm::mat4 &transform);
+class Renderer {
+  public:
+	void Init();
 
-} // namespace Visual::Renderer
+	void RegisterRenderer2D(const char *name, const char *shaderPath);
+	Renderer2D &GetRenderer2D(const char *name);
+
+	void BeginDraw();
+	void EndDraw();
+
+	void DrawFullscreen(uint32_t textureID);
+
+	void DrawMesh(const Mesh &mesh, const glm::mat4 &transform);
+
+  private:
+	Model _fullscreenModel;
+	Shader _fullscreenShader;
+
+	Shader _shader3d;
+
+	std::unordered_map<std::string, Renderer2D> _renderer2ds;
+};
 
 #endif // RENDERER_HPP
