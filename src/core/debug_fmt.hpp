@@ -4,10 +4,25 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+
 #include "core/application.hpp"
 #include "data/color.hpp"
 #include "resource/image_texture.hpp"
 #include "scene/node.hpp"
+
+template <>
+struct fmt::formatter<std::filesystem::path> {
+  public:
+	constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin()) {
+		return ctx.begin();
+	}
+
+	template <typename Context>
+	auto format(const std::filesystem::path &value, Context &ctx) const {
+		return format_to(ctx.out(), value.string());
+	}
+};
 
 template <>
 struct fmt::formatter<Color> {
