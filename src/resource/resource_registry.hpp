@@ -10,7 +10,8 @@
 class ResourceRegistry {
   public:
 	Resource *GetResource(RID rid);
-	void AddResource(Resource *res);
+	const std::unordered_map<RID, Resource *> GetResources();
+	void AddResource(Resource *res, RID rid = 0);
 	void RemoveResource(Resource *res);
 
   private:

@@ -8,10 +8,17 @@ Resource *ResourceRegistry::GetResource(RID rid) {
 	return _resources[rid];
 }
 
-void ResourceRegistry::AddResource(Resource *res) {
+const std::unordered_map<RID, Resource *> ResourceRegistry::GetResources() {
+	return _resources;
+}
+
+void ResourceRegistry::AddResource(Resource *res, RID rid) {
+	if (rid != 0)
+		res->_rid = rid;
+
 	if (res->GetRID() == 0) {
 		static UUIDGenerator gen;
-		res->_rid = gen.Next();
+		res->_rid = gen.NextI32();
 	}
 
 	_resources[res->GetRID()] = res;

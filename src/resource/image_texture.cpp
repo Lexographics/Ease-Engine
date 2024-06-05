@@ -9,6 +9,10 @@
 
 #include "core/application.hpp"
 
+ImageTexture::ImageTexture() {
+	_resourceType = typeid(ImageTexture).hash_code();
+}
+
 ImageTexture::~ImageTexture() {
 	Delete();
 }
@@ -36,6 +40,7 @@ void ImageTexture::Load(const char *path) {
 		return;
 	}
 
+	_filepath = path;
 	LoadFromData(pixels, _width, _height);
 
 	stbi_image_free(pixels);

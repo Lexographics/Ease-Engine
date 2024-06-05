@@ -10,6 +10,10 @@
 
 #include "core/application.hpp"
 
+Mesh::Mesh() {
+	_resourceType = typeid(Mesh).hash_code();
+}
+
 Mesh::~Mesh() {
 }
 

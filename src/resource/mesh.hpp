@@ -10,8 +10,8 @@
 
 class Mesh : public Resource {
   public:
-	Mesh() = default;
-	~Mesh();
+	Mesh();
+	virtual ~Mesh();
 
 	void Load(const char *path);
 

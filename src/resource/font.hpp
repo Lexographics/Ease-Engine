@@ -11,8 +11,8 @@
 
 class Font : public Resource {
   public:
-	Font() = default;
-	~Font();
+	Font();
+	virtual ~Font();
 
 	void LoadTTF(const char *path);
 

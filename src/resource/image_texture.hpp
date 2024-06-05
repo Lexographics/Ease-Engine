@@ -8,8 +8,8 @@
 
 class ImageTexture : public Resource {
   public:
-	ImageTexture() = default;
-	~ImageTexture();
+	ImageTexture();
+	virtual ~ImageTexture();
 
 	void Bind(int slot = 0);
 	void Unbind();

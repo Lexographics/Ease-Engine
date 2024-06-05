@@ -18,12 +18,17 @@ Font::~Font() {
 	FT_Done_Face(reinterpret_cast<FT_Face>(_face));
 }
 
+Font::Font() {
+	_resourceType = typeid(Font).hash_code();
+}
+
 void Font::LoadTTF(const char *path) {
 	_buffer = App().FS()->Load(path);
 	if (!_buffer) {
 		return;
 	}
 
+	_filepath = path;
 	LoadFont();
 }
 
