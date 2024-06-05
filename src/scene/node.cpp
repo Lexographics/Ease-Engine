@@ -7,6 +7,21 @@ void Node::RemoveChild(Node *child) {
 	removeChild(child);
 }
 
+bool Node::Serialize(Document &doc) {
+	doc.SetString("Type", App().GetNodeDB().GetNodeTypename(TypeID()));
+	doc.SetString("Name", Name());
+	doc.SetU64("ID", ID());
+
+	return true;
+}
+
+bool Node::Deserialize(const Document &doc) {
+	Rename(doc.GetString("Name", Name()));
+	_id = doc.GetU64("ID", ID());
+
+	return true;
+}
+
 void Node::AddChild(Node *child) {
 	if (child->_parent != nullptr) {
 		child->_parent->removeChild(child);

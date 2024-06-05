@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "core/serialize/document.hpp"
 #include "sowa.hpp"
 #include "utils/utils.hpp"
 
@@ -16,7 +17,10 @@ class Node {
 
 	virtual void Start() {}
 	virtual void Update() {}
-	
+
+	virtual bool Serialize(Document &doc);
+	virtual bool Deserialize(const Document &doc);
+
 	//
 	inline NodeTypeID TypeID() const { return _typeid; }
 	inline NodeID ID() const { return _id; }

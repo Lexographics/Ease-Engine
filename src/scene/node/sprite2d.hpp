@@ -12,6 +12,8 @@ class Sprite2D : public Node2D {
 	virtual ~Sprite2D() = default;
 
 	void Update() override;
+	bool Serialize(Document &doc) override;
+	bool Deserialize(const Document &doc) override;
 
 	inline RID &GetTexture() { return _texture; }
 	inline Color &Modulate() { return _modulate; }

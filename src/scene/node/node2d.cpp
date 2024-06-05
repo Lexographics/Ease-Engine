@@ -2,6 +2,28 @@
 
 #include "math/matrix.hpp"
 
+bool Node2D::Serialize(Document &doc) {
+	if (!Node::Serialize(doc))
+		return false;
+
+	doc.SetVec2("Position", Position());
+	doc.SetFloat("Rotation", Rotation());
+	doc.SetVec2("Scale", Scale());
+
+	return true;
+}
+
+bool Node2D::Deserialize(const Document &doc) {
+	if (!Node::Deserialize(doc))
+		return false;
+
+	Position() = doc.GetVec2("Position", Position());
+	Rotation() = doc.GetFloat("Rotation", Rotation());
+	Scale() = doc.GetVec2("Scale", Scale());
+
+	return true;
+}
+
 glm::mat4 Node2D::GetTransform() {
 	return Matrix::CalculateTransform(_position, _rotation, _scale, GetParentTransform());
 }

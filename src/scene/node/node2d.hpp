@@ -10,6 +10,9 @@ class Node2D : public Node {
   public:
 	virtual ~Node2D() = default;
 
+	bool Serialize(Document &doc) override;
+	bool Deserialize(const Document &doc) override;
+
 	glm::mat4 GetTransform();
 	glm::mat4 GetLocalTransform();
 	glm::mat4 GetParentTransform();

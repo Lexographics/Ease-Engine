@@ -3,8 +3,27 @@
 #include "math/matrix.hpp"
 
 #include "core/application.hpp"
+#include "core/debug.hpp"
 #include "resource/image_texture.hpp"
 #include "visual/renderer.hpp"
+
+bool Sprite2D::Serialize(Document &doc) {
+	if (!Node2D::Serialize(doc))
+		return false;
+
+	doc.SetInt("Texture", GetTexture());
+
+	return true;
+}
+
+bool Sprite2D::Deserialize(const Document &doc) {
+	if (!Node2D::Deserialize(doc))
+		return false;
+
+	GetTexture() = doc.GetInt("Texture", GetTexture());
+
+	return true;
+}
 
 void Sprite2D::Update() {
 	ImageTexture *res = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(_texture));
