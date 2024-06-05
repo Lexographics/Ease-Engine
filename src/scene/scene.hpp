@@ -2,6 +2,7 @@
 #define SCENE_HPP
 #pragma once
 
+#include <filesystem>
 #include <set>
 #include <sowa.hpp>
 #include <string>
@@ -24,12 +25,25 @@ class Scene {
 	bool HasNode(NodeID id);
 	Node *GetNode(NodeID id);
 
+	// TODO: if root has parent, deattach from its parent
+	void SetRoot(Node *node);
+	Node *GetRoot();
+
+	const std::filesystem::path &GetFilepath();
+
+	bool SaveToFile(const char *path = nullptr);
+	bool LoadFromFile(const char *path);
+
   private:
 	friend class Application;
 	std::unordered_map<NodeID, Node *> _nodes;
 	std::set<Node *> _nodeIter;
 
+	Node *_root = nullptr;
+
 	NodeDB *_nodeDB = nullptr;
+
+	std::filesystem::path _scenePath = "";
 };
 
 #endif // SCENE_HPP
