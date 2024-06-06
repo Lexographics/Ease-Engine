@@ -18,7 +18,7 @@ class ProjectSettings {
 			int height = 720;
 		} window;
 
-    struct {
+		struct {
 			int width = 1280;
 			int height = 720;
 		} viewport;

@@ -15,3 +15,13 @@ std::vector<std::string> Utils::Split(std::string str, std::string delimiter) {
 
 	return tokens;
 }
+
+int Utils::FormatArgCount(const std::string &fmt) {
+	int count = 0;
+	for (size_t i = 0; i < fmt.length(); ++i) {
+		if (fmt[i] == '{') {
+			count++;
+		}
+	}
+	return count;
+}

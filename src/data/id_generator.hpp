@@ -13,6 +13,10 @@ class UUIDGenerator {
 		return gen.U64();
 	}
 
+	inline i32 NextI32() {
+		return gen.I32();
+	}
+
   private:
 	RandomNumberGenerator gen;
 };
