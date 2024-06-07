@@ -30,6 +30,10 @@ void Node::AddChild(Node *child) {
 	_children.push_back(child);
 }
 
+void Node::Free() {
+	App().GetCurrentScene()->FreeNode(ID());
+}
+
 size_t Node::GetChildCount() {
 	return _children.size();
 }

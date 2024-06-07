@@ -7,6 +7,7 @@
 #include <sowa.hpp>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "node.hpp"
 #include "node_db.hpp"
@@ -29,15 +30,22 @@ class Scene {
 	void SetRoot(Node *node);
 	Node *GetRoot();
 
+	void FreeNode(NodeID id);
+
 	const std::filesystem::path &GetFilepath();
 
 	bool SaveToFile(const char *path = nullptr);
 	bool LoadFromFile(const char *path);
 
   private:
+	void freeNode(NodeID id);
+
+  private:
 	friend class Application;
 	std::unordered_map<NodeID, Node *> _nodes;
 	std::set<Node *> _nodeIter;
+
+	std::vector<NodeID> _freeList;
 
 	Node *_root = nullptr;
 

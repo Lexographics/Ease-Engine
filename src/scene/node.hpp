@@ -33,6 +33,7 @@ class Node {
 
 	void RemoveChild(Node *child);
 	void AddChild(Node *child);
+	void Free();
 
 	size_t GetChildCount();
 	Node *GetChild(size_t index);

@@ -8,6 +8,11 @@
 void Scene::Start() {
 }
 void Scene::Update() {
+	for (NodeID id : _freeList) {
+		freeNode(id);
+	}
+	_freeList.clear();
+
 	for (Node *node : _nodeIter) {
 		node->Update();
 	}
@@ -51,6 +56,10 @@ void Scene::SetRoot(Node *node) {
 
 Node *Scene::GetRoot() {
 	return _root;
+}
+
+void Scene::FreeNode(NodeID id) {
+	_freeList.push_back(id);
 }
 
 const std::filesystem::path &Scene::GetFilepath() {
@@ -203,4 +212,29 @@ bool Scene::LoadFromFile(const char *path) {
 	SetRoot(loadNode(root));
 
 	return true;
+}
+
+void Scene::freeNode(NodeID id) {
+	Node *node = GetNode(id);
+	if (!node)
+		return;
+
+	if (node == _root) {
+		_root = nullptr;
+	}
+
+	if (Node *parent = node->GetParent(); nullptr != parent) {
+		parent->RemoveChild(node);
+	}
+	for (Node *child : node->GetChildren()) {
+		child->_parent = nullptr;
+	}
+
+	for (size_t i = 0; i < node->GetChildren().size(); i++) {
+		freeNode(node->GetChildren()[i]->ID());
+	}
+
+	_nodeDB->Destroy(node);
+	_nodes.erase(id);
+	_nodeIter.erase(node);
 }

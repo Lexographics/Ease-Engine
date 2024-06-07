@@ -11,10 +11,10 @@
 
 class Color {
   public:
-	Color() : color{1.f, 1.f, 1.f, 1.f} {}
-	Color(f32 v) : color{v, v, v, 1.f} {}
-	Color(f32 r, f32 g, f32 b) : color{r, g, b, 1.f} {}
-	Color(f32 r, f32 g, f32 b, f32 a) : color{r, g, b, a} {}
+	Color() : r(1.f), g(1.f), b(1.f), a(1.f) {}
+	Color(f32 v) : r(v), g(v), b(v), a(1.f) {}
+	Color(f32 r, f32 g, f32 b) : r(r), g(g), b(b), a(1.f) {}
+	Color(f32 r, f32 g, f32 b, f32 a) : r(r), g(g), b(b), a(a) {}
 
 	static Color RGBAFloat(f32 r, f32 g, f32 b, f32 a = 1.f) {
 		return Color(r, g, b, a);
@@ -55,12 +55,10 @@ class Color {
 		}
 	}
 
-	f32 color[4];
-
-	f32 &r = color[0];
-	f32 &g = color[1];
-	f32 &b = color[2];
-	f32 &a = color[3];
+	f32 r;
+	f32 g;
+	f32 b;
+	f32 a;
 };
 
 #endif // COLOR_HPP
