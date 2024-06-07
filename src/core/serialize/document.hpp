@@ -7,6 +7,8 @@
 
 #include "sowa.hpp"
 
+#include "data/color.hpp"
+
 class Document {
   public:
 	inline void SetInt(const char *name, i32 value) { _node[name] = value; }
@@ -17,6 +19,12 @@ class Document {
 	inline void SetVec2(const char *name, const glm::vec2 &value) {
 		_node[name]["x"] = value.x;
 		_node[name]["y"] = value.y;
+	}
+	inline void SetColor(const char *name, Color color) {
+		_node[name]["r"] = color.r;
+		_node[name]["g"] = color.g;
+		_node[name]["b"] = color.b;
+		_node[name]["a"] = color.a;
 	}
 	inline void SetDocument(const char *name, const Document &doc) { _node[name] = doc._node; }
 
@@ -30,6 +38,16 @@ class Document {
 		if (vec) {
 			callback.x = vec["x"].as<float>(callback.x);
 			callback.y = vec["y"].as<float>(callback.y);
+		}
+		return callback;
+	}
+	inline Color GetColor(const char *name, Color callback) const {
+		auto color = _node[name];
+		if (color) {
+			callback.r = color["r"].as<float>(callback.r);
+			callback.g = color["g"].as<float>(callback.g);
+			callback.b = color["b"].as<float>(callback.b);
+			callback.a = color["a"].as<float>(callback.a);
 		}
 		return callback;
 	}

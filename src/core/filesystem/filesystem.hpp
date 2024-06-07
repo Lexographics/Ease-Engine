@@ -17,10 +17,17 @@ struct FileEntry {
 	bool is_directory = false;
 };
 
+struct PathData {
+	std::string scheme;
+	std::string path;
+};
+
 class FileSystem {
   public:
 	virtual FileData Load(const char *path) = 0;
 	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) { return std::vector<FileEntry>{}; }
+
+	PathData ResolvePath(const std::string &path);
 };
 
 class FolderFileSystem : public FileSystem {

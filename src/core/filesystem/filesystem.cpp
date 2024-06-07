@@ -5,6 +5,18 @@
 
 #include "core/debug.hpp"
 
+PathData FileSystem::ResolvePath(const std::string &path) {
+	PathData pathData;
+
+	auto data = Utils::Split(path, "://");
+	if (data.size() == 2) {
+		pathData.scheme = data[0];
+		pathData.path = data[1];
+	}
+
+	return pathData;
+}
+
 FolderFileSystem::FolderFileSystem(const std::filesystem::path &path) {
 	_basePath = path;
 }
@@ -12,7 +24,7 @@ FolderFileSystem::FolderFileSystem(const std::filesystem::path &path) {
 FileData FolderFileSystem::Load(const char *path) {
 	FileData data = std::make_shared<FileDataInternal>();
 
-	std::ifstream file{_basePath / std::filesystem::path(path), std::ios::binary};
+	std::ifstream file{GetPath(path), std::ios::binary};
 	if (!file.good())
 		return nullptr;
 
@@ -28,7 +40,7 @@ FileData FolderFileSystem::Load(const char *path) {
 
 std::vector<FileEntry> FolderFileSystem::ReadDirectory(const std::filesystem::path &path) {
 	std::vector<FileEntry> entries;
-	std::filesystem::path dir = Utils::Format("{}/{}", _basePath.string(), path.string());
+	std::filesystem::path dir = GetPath(path);
 
 	if (std::filesystem::is_directory(dir))
 		for (const auto &dirEntry : std::filesystem::directory_iterator(dir)) {
@@ -41,5 +53,11 @@ std::vector<FileEntry> FolderFileSystem::ReadDirectory(const std::filesystem::pa
 }
 
 std::filesystem::path FolderFileSystem::GetPath(std::filesystem::path path) {
-	return _basePath / path;
+	auto pathData = ResolvePath(path);
+
+	if (pathData.scheme == "res") {
+		return _basePath / pathData.path;
+	}
+
+	return path;
 }
