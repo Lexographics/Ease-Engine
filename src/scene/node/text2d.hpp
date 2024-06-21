@@ -15,12 +15,14 @@ class Text2D : public Node2D {
 	virtual ~Text2D() = default;
 
 	void Update() override;
+	bool Serialize(Document &doc) override;
+	bool Deserialize(const Document &doc) override;
 
 	inline RID &GetFont() { return _font; }
 	inline std::string &Text() { return _text; }
 	inline Color &Modulate() { return _modulate; }
 
-  private:
+  public:
 	RID _font;
 	std::string _text;
 	Color _modulate;

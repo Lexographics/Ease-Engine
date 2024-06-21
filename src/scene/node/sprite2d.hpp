@@ -18,7 +18,7 @@ class Sprite2D : public Node2D {
 	inline RID &GetTexture() { return _texture; }
 	inline Color &Modulate() { return _modulate; }
 
-  private:
+  public:
 	RID _texture;
 	Color _modulate;
 };

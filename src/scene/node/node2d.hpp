@@ -23,7 +23,7 @@ class Node2D : public Node {
 	inline glm::vec2 &Scale() { return _scale; }
 	inline int &ZIndex() { return _zIndex; }
 
-  private:
+  public:
 	glm::vec2 _position{0.f, 0.f};
 	float _rotation{0.f};
 	glm::vec2 _scale{1.f, 1.f};

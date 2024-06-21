@@ -12,6 +12,7 @@ bool Sprite2D::Serialize(Document &doc) {
 		return false;
 
 	doc.SetInt("Texture", GetTexture());
+	doc.SetColor("Modulate", Modulate());
 
 	return true;
 }
@@ -21,6 +22,7 @@ bool Sprite2D::Deserialize(const Document &doc) {
 		return false;
 
 	GetTexture() = doc.GetInt("Texture", GetTexture());
+	Modulate() = doc.GetColor("Modulate", Modulate());
 
 	return true;
 }

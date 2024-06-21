@@ -14,3 +14,25 @@ void Text2D::Update() {
 
 	App().GetRenderer().GetRenderer2D("Text").DrawText(_text, *res, GetTransform(), GetZIndex(), Modulate());
 }
+
+bool Text2D::Serialize(Document &doc) {
+	if (!Node2D::Serialize(doc))
+		return false;
+
+	doc.SetString("Text", Text());
+	doc.SetInt("Font", GetFont());
+	doc.SetColor("Modulate", Modulate());
+
+	return true;
+}
+
+bool Text2D::Deserialize(const Document &doc) {
+	if (!Node2D::Deserialize(doc))
+		return false;
+
+	Text() = doc.GetString("Text", Text());
+	GetFont() = doc.GetInt("Font", GetFont());
+	Modulate() = doc.GetColor("Modulate", Modulate());
+
+	return true;
+}
