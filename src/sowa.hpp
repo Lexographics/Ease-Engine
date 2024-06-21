@@ -18,10 +18,10 @@ using i64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-using NodeID = std::size_t;
-using TypeID = std::size_t;
-using NodeTypeID = std::size_t;
-using RID = std::size_t;
+using NodeID = u64;
+using TypeID = u64;
+using NodeTypeID = u64;
+using RID = i32;
 
 template <typename T>
 using Ref = std::shared_ptr<T>;

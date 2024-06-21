@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include "glm/glm.hpp"
+
 #include "data/color.hpp"
 
 #include "gl.hpp"
@@ -44,8 +46,11 @@ class Renderer2D {
 	void PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale, float z = 0.f, Color color = Color{}, float drawID = 1.f);
 	void DrawText(const std::string &text, Font &font, const glm::mat4 &transform, float z = 0.f, Color color = Color{});
 
+	void SetProjectionMatrix(const glm::mat4 &proj);
+
   private:
 	Shader _shader;
+	glm::mat4 _projection;
 
 	Buffer _buffer;
 	VertexArray _vao;

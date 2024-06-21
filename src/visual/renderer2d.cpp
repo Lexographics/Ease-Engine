@@ -17,6 +17,8 @@
 #define BATCH2D_MAX_TEXTURE 16
 
 void Renderer2D::Init(const char *shaderPath) {
+	_projection = glm::ortho(0.f, 1280.f, 0.f, 720.f, -128.f, 128.f);
+
 	_vao.New();
 	_buffer.New(BufferType::VertexBuffer);
 
@@ -165,7 +167,7 @@ void Renderer2D::End() {
 	_shader.Uniformiv("uTextures", textures);
 
 	_shader.UniformMat4("uView", glm::mat4(1.f));
-	_shader.UniformMat4("uProj", glm::ortho(0.f, 1280.f, 0.f, 720.f, -128.f, 128.f));
+	_shader.UniformMat4("uProj", _projection);
 
 	glEnable(GL_DEPTH_TEST);
 	_vao.Bind();
@@ -231,6 +233,10 @@ void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &
 		PushQuad(vertices);
 		x += (ch.advance >> 6);
 	}
+}
+
+void Renderer2D::SetProjectionMatrix(const glm::mat4 &proj) {
+	_projection = proj;
 }
 
 /*
