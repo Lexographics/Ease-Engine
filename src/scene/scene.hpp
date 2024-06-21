@@ -30,6 +30,10 @@ class Scene {
 	void SetRoot(Node *node);
 	Node *GetRoot();
 
+	void SetCurrentCamera2D(NodeID id);
+	NodeID GetCurrentCamera2D();
+	glm::mat4 GetMatrix2D();
+
 	void FreeNode(NodeID id);
 
 	const std::filesystem::path &GetFilepath();
@@ -48,6 +52,7 @@ class Scene {
 	std::vector<NodeID> _freeList;
 
 	Node *_root = nullptr;
+	NodeID _currentCamera2D = 0;
 
 	NodeDB *_nodeDB = nullptr;
 

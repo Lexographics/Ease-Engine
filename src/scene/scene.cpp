@@ -5,6 +5,8 @@
 #include "core/debug.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "scene/node/camera2d.hpp"
+
 void Scene::Start() {
 }
 void Scene::Update() {
@@ -58,6 +60,25 @@ Node *Scene::GetRoot() {
 	return _root;
 }
 
+void Scene::SetCurrentCamera2D(NodeID id) {
+	_currentCamera2D = id;
+}
+
+NodeID Scene::GetCurrentCamera2D() {
+	return _currentCamera2D;
+}
+
+glm::mat4 Scene::GetMatrix2D() {
+	if (_currentCamera2D == 0)
+		return Camera2D::GetBlankMatrix();
+
+	Camera2D *camera = dynamic_cast<Camera2D *>(GetNode(_currentCamera2D));
+	if (!camera)
+		return Camera2D::GetBlankMatrix();
+
+	return camera->GetMatrix();
+}
+
 void Scene::FreeNode(NodeID id) {
 	_freeList.push_back(id);
 }
@@ -78,6 +99,10 @@ bool Scene::SaveToFile(const char *path) {
 	}
 
 	YAML::Node out;
+
+	YAML::Node scene;
+	scene["Camera2D"] = GetCurrentCamera2D();
+	out["Scene"] = scene;
 
 	YAML::Node resources;
 	for (auto &[rid, res] : App().GetResourceRegistry().GetResources()) {
@@ -210,6 +235,11 @@ bool Scene::LoadFromFile(const char *path) {
 
 	YAML::Node root = doc["Root"];
 	SetRoot(loadNode(root));
+
+	YAML::Node scene = doc["Scene"];
+	if (scene) {
+		SetCurrentCamera2D(scene["Camera2D"].as<NodeID>(GetCurrentCamera2D()));
+	}
 
 	return true;
 }
