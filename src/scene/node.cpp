@@ -22,6 +22,11 @@ bool Node::Deserialize(const Document &doc) {
 	return true;
 }
 
+bool Node::Copy(Node *dst) {
+	dst->Rename(Name());
+	return true;
+}
+
 void Node::AddChild(Node *child) {
 	if (child->_parent != nullptr) {
 		child->_parent->removeChild(child);

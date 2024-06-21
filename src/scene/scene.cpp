@@ -7,6 +7,10 @@
 
 #include "scene/node/camera2d.hpp"
 
+Scene::~Scene() {
+	Clear();
+}
+
 void Scene::Start() {
 }
 void Scene::Update() {
@@ -28,6 +32,7 @@ Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
 	Node *node = _nodeDB->Create(type);
 	if (!node)
 		return nullptr;
+	node->_pScene = this;
 
 	NodeID nodeId = (id != 0 && !HasNode(id)) ? id : gen.Next();
 	node->_id = nodeId;
@@ -242,6 +247,30 @@ bool Scene::LoadFromFile(const char *path) {
 	}
 
 	return true;
+}
+
+void Scene::Clear() {
+	if (GetRoot())
+		freeNode(GetRoot()->ID());
+}
+
+// static
+void Scene::Copy(Scene *src, Scene *dst) {
+	dst->Clear();
+
+	std::function<Node *(Node * src)> copyNode;
+	copyNode = [&](Node *src) -> Node * {
+		Node *node = dst->Create(src->TypeID(), src->Name(), src->ID());
+		src->Copy(node);
+
+		for (Node *child : src->GetChildren()) {
+			node->AddChild(copyNode(child));
+		}
+
+		return node;
+	};
+
+	dst->SetRoot(copyNode(src->GetRoot()));
 }
 
 void Scene::freeNode(NodeID id) {

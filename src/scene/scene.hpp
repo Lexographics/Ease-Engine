@@ -16,6 +16,8 @@
 
 class Scene {
   public:
+	~Scene();
+
 	void Start();
 	void Update();
 	void Shutdown();
@@ -40,6 +42,9 @@ class Scene {
 
 	bool SaveToFile(const char *path = nullptr);
 	bool LoadFromFile(const char *path);
+
+	void Clear();
+	static void Copy(Scene *src, Scene *dst);
 
   private:
 	void freeNode(NodeID id);

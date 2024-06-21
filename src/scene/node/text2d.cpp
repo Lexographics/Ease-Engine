@@ -36,3 +36,16 @@ bool Text2D::Deserialize(const Document &doc) {
 
 	return true;
 }
+
+bool Text2D::Copy(Node *dst) {
+	if (!Node2D::Copy(dst)) {
+		return false;
+	}
+
+	Text2D *dstNode = dynamic_cast<Text2D *>(dst);
+	dstNode->Text() = Text();
+	dstNode->GetFont() = GetFont();
+	dstNode->Modulate() = Modulate();
+
+	return true;
+}

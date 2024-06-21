@@ -27,6 +27,18 @@ bool Sprite2D::Deserialize(const Document &doc) {
 	return true;
 }
 
+bool Sprite2D::Copy(Node *dst) {
+	if (!Node2D::Copy(dst)) {
+		return false;
+	}
+
+	Sprite2D *dstNode = dynamic_cast<Sprite2D *>(dst);
+	dstNode->GetTexture() = GetTexture();
+	dstNode->Modulate() = Modulate();
+
+	return true;
+}
+
 void Sprite2D::Update() {
 	ImageTexture *res = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(_texture));
 	if (!res)

@@ -11,6 +11,8 @@
 #include "sowa.hpp"
 #include "utils/utils.hpp"
 
+class Scene;
+
 class Node {
   public:
 	virtual ~Node() = default;
@@ -20,6 +22,8 @@ class Node {
 
 	virtual bool Serialize(Document &doc);
 	virtual bool Deserialize(const Document &doc);
+
+	virtual bool Copy(Node *dst);
 
 	//
 	inline NodeTypeID TypeID() const { return _typeid; }
@@ -56,6 +60,8 @@ class Node {
 
 	Node *_parent = nullptr;
 	std::vector<Node *> _children;
+
+	Scene *_pScene = nullptr;
 };
 
 #endif // NODE_HPP

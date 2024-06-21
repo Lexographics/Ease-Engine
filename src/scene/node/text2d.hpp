@@ -18,6 +18,8 @@ class Text2D : public Node2D {
 	bool Serialize(Document &doc) override;
 	bool Deserialize(const Document &doc) override;
 
+	bool Copy(Node *dst) override;
+
 	inline RID &GetFont() { return _font; }
 	inline std::string &Text() { return _text; }
 	inline Color &Modulate() { return _modulate; }

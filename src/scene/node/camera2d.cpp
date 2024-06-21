@@ -17,6 +17,17 @@ bool Camera2D::Deserialize(const Document &doc) {
 	return true;
 }
 
+bool Camera2D::Copy(Node *dst) {
+	if (!Node2D::Copy(dst)) {
+		return false;
+	}
+
+	Camera2D *dstNode = dynamic_cast<Camera2D *>(dst);
+	dstNode->Rotatable() = Rotatable();
+
+	return true;
+}
+
 glm::mat4 Camera2D::GetMatrix() {
 	glm::mat4 transform = GetTransform();
 	if (!Rotatable()) {

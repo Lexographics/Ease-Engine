@@ -24,6 +24,20 @@ bool Node2D::Deserialize(const Document &doc) {
 	return true;
 }
 
+bool Node2D::Copy(Node *dst) {
+	if (!Node::Copy(dst)) {
+		return false;
+	}
+
+	Node2D *dstNode = dynamic_cast<Node2D *>(dst);
+	dstNode->Position() = Position();
+	dstNode->Rotation() = Rotation();
+	dstNode->Scale() = Scale();
+	dstNode->ZIndex() = ZIndex();
+
+	return true;
+}
+
 glm::mat4 Node2D::GetTransform() {
 	return Matrix::CalculateTransform(_position, _rotation, _scale, GetParentTransform());
 }
