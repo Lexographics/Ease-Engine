@@ -7,6 +7,9 @@
 
 #include <vector>
 
+#include "eventpp/callbacklist.h"
+#include "glm/glm.hpp"
+
 class Window;
 
 namespace Input {
@@ -152,6 +155,36 @@ enum class Key {
 	MouseMiddle = Mouse3,
 };
 
+enum class EventType {
+	Key = 0,
+	Button,
+	MouseMove,
+	Scroll,
+};
+struct Event {
+	EventType type;
+
+	struct {
+		Key key;
+		int action;
+	} key;
+
+	struct {
+		Key key;
+		int action;
+	} button;
+
+	struct {
+		double deltaX;
+		double deltaY;
+	} mouseMove;
+
+	struct {
+		double xOffset;
+		double yOffset;
+	} scroll;
+};
+
 void InitState(Window *window);
 
 void Poll();
@@ -164,9 +197,17 @@ bool IsActionPressed(const char *actionName);
 bool IsActionJustPressed(const char *actionName);
 bool IsActionJustReleased(const char *actionName);
 
+glm::vec2 GetMousePosition();
+float GetMouseScrollY();
+float GetMouseScrollX();
+
+eventpp::CallbackList<void(Event e)> &InputEvent();
+
 namespace Callback {
 void Key(GLFWwindow *window, int key, int scancode, int action, int mods);
 void MouseButton(GLFWwindow *window, int button, int action, int mods);
+void MouseMove(GLFWwindow *window, double x, double y);
+void Scroll(GLFWwindow *window, double xOffset, double yOffset);
 } // namespace Callback
 }; // namespace Input
 
