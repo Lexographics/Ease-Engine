@@ -1,3 +1,6 @@
 [submodule "thirdparty/eventpp"]
 	path = thirdparty/eventpp
 	url = https://github.com/sowaengine/thirdparty-eventpp
+[submodule "thirdparty/lua"]
+	path = thirdparty/lua
+	url = https://github.com/sowaengine/thirdparty-lua
