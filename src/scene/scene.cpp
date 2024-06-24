@@ -271,6 +271,7 @@ void Scene::Copy(Scene *src, Scene *dst) {
 	};
 
 	dst->SetRoot(copyNode(src->GetRoot()));
+	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
 }
 
 void Scene::freeNode(NodeID id) {

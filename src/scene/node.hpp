@@ -30,6 +30,7 @@ class Node {
 	inline NodeID ID() const { return _id; }
 
 	inline const std::string &Name() const { return _name; }
+	inline const std::string &GetName() const { return _name; }
 	inline void Rename(const std::string &name) { _name = name; }
 
 	inline std::vector<Node *> GetChildren() { return _children; }

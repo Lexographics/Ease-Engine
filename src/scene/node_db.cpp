@@ -19,5 +19,13 @@ NodeTypeID NodeDB::GetNodeTypeID(const std::string &typeName) {
 }
 
 const char *NodeDB::GetNodeTypename(NodeTypeID typeId) {
-	return _typenames[typeId].c_str();
+	return _types[typeId].name.c_str();
+}
+
+const NodeType &NodeDB::GetNodeType(NodeTypeID typeId) {
+	return _types[typeId];
+}
+
+const std::unordered_map<NodeTypeID, NodeType> &NodeDB::GetNodeTypes() {
+	return _types;
 }
