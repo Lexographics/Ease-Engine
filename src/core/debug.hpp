@@ -20,6 +20,15 @@ enum class LogSeverity {
 	Error,
 };
 
+inline const char *LogSeverityToString(LogSeverity severity) {
+	return severity == LogSeverity::Default ? " [DEFAULT]"
+		   : severity == LogSeverity::Log	? " [LOG]"
+		   : severity == LogSeverity::Info	? " [Info]"
+		   : severity == LogSeverity::Warn	? " [WARN]"
+		   : severity == LogSeverity::Error ? " [ERROR]"
+											: "";
+}
+
 struct LogMessage {
 	std::string message;
 	LogSeverity severity;
