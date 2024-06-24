@@ -40,9 +40,6 @@ Application::~Application() {
 std::unique_ptr<ImageTexture> texture;
 std::unique_ptr<Mesh> mesh;
 
-Sprite2D *ssss;
-Text2D *ss;
-
 void Application::Init() {
 	_fs = new FolderFileSystem("res");
 	_projectSettings.Load();
@@ -147,9 +144,7 @@ void Application::Init() {
 			EditorNodePropType::Bool,
 			[](Node *node) -> void * { return reinterpret_cast<void *>(&dynamic_cast<Camera2D *>(node)->Rotatable()); }));
 
-	_currentScene = NewScene();
 	_backgroundScene = NewScene();
-	_currentScene->LoadFromFile("res://game.sscn");
 
 	Input::InputEvent().append([this](Input::Event event) {
 		if (event.type == Input::EventType::Key) {
@@ -203,7 +198,8 @@ void Application::Update() {
 	}
 	GetRenderer().BeginDraw();
 
-	_currentScene->Update();
+	if (_currentScene)
+		_currentScene->Update();
 
 	GetRenderer().EndDraw();
 
@@ -224,6 +220,11 @@ void Application::Update() {
 }
 
 void Application::Start() {
+	if (!_currentScene) {
+		Debug::Error("Start scene is not selected");
+		return;
+	}
+
 	if (_isRunning)
 		return;
 	_isRunning = true;

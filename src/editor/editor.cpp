@@ -102,6 +102,19 @@ void Editor::Init() {
 			}
 		}
 	});
+
+	_fileClickEvent[".sscn"] = [this](std::filesystem::path path) {
+		for (size_t i = 0; i < this->_scenes.size(); i++) {
+			if (this->_scenes[i]->GetFilepath().string() == path.string()) {
+				App().SetCurrentScene(this->_scenes[i]);
+				return;
+			}
+		}
+
+		Ref<Scene> scene = _scenes.emplace_back(App().NewScene());
+		scene->LoadFromFile(path.string().c_str());
+		App().SetCurrentScene(scene);
+	};
 }
 
 void Editor::Begin() {
@@ -178,95 +191,128 @@ void Editor::Update() {
 
 	ImGui::Begin("Filesystem");
 
+	std::function<void(std::filesystem::path path)> drawDir;
+	drawDir = [&drawDir, this](std::filesystem::path path) {
+		auto dir = App().FS()->ReadDirectory(path);
+
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth;
+
+		for (auto &entry : dir) {
+			if (!entry.is_directory)
+				continue;
+
+			if (ImGui::TreeNodeEx(entry.path.filename().string().c_str(), flags)) {
+				drawDir(Utils::Format("{}/{}", path, entry.path.filename()));
+				ImGui::TreePop();
+			}
+		}
+
+		for (auto &entry : dir) {
+			if (entry.is_directory)
+				continue;
+
+			if (ImGui::TreeNodeEx(entry.path.filename().string().c_str(), flags | ImGuiTreeNodeFlags_Leaf)) {
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+					auto fn = _fileClickEvent[entry.path.extension().string()];
+					if (fn) {
+						fn(entry.path);
+					}
+				}
+				ImGui::TreePop();
+			}
+		}
+	};
+	drawDir("res://");
+
 	ImGui::End();
 
 	ImGui::Begin("Scene");
 	Ref<Scene> scene = App().GetCurrentScene();
+	if (scene) {
+		std::function<void(Node *)> drawNode;
 
-	std::function<void(Node *)> drawNode;
+		bool sceneNodeRclick = false;
 
-	bool sceneNodeRclick = false;
+		drawNode = [this, &drawNode, &sceneNodeRclick](Node *node) -> void {
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+			if (nullptr == node->GetParent())
+				flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-	drawNode = [this, &drawNode, &sceneNodeRclick](Node *node) -> void {
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-		if (nullptr == node->GetParent())
-			flags |= ImGuiTreeNodeFlags_DefaultOpen;
+			if (node->GetChildCount() == 0)
+				flags |= ImGuiTreeNodeFlags_Leaf;
 
-		if (node->GetChildCount() == 0)
-			flags |= ImGuiTreeNodeFlags_Leaf;
+			ImGui::PushID(std::to_string(node->ID()).c_str());
 
-		ImGui::PushID(std::to_string(node->ID()).c_str());
+			if (node->ID() == this->_selectedNodeID) {
+				flags |= ImGuiTreeNodeFlags_Selected;
+			}
+			bool open = ImGui::TreeNodeEx(node->Name().c_str(), flags);
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+				this->_selectedNodeID = node->ID();
+			}
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+				sceneNodeRclick = true;
+				this->_selectedNodeID = node->ID();
+			}
 
-		if (node->ID() == this->_selectedNodeID) {
-			flags |= ImGuiTreeNodeFlags_Selected;
+			if (open) {
+				for (Node *child : node->GetChildren()) {
+					drawNode(child);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::PopID();
+		};
+		Node *root = scene->GetRoot();
+		if (root)
+			drawNode(root);
+
+		if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			_selectedNodeID = 0;
 		}
-		bool open = ImGui::TreeNodeEx(node->Name().c_str(), flags);
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-			this->_selectedNodeID = node->ID();
-		}
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+
+		if (!root && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			_selectedNodeID = 0;
 			sceneNodeRclick = true;
-			this->_selectedNodeID = node->ID();
 		}
 
-		if (open) {
-			for (Node *child : node->GetChildren()) {
-				drawNode(child);
-			}
+		if (sceneNodeRclick)
+			ImGui::OpenPopup("Scene__Node_RClick");
 
-			ImGui::TreePop();
-		}
-
-		ImGui::PopID();
-	};
-	Node *root = scene->GetRoot();
-	if (root)
-		drawNode(root);
-
-	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-		_selectedNodeID = 0;
-	}
-
-	if (!root && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-		_selectedNodeID = 0;
-		sceneNodeRclick = true;
-	}
-
-	if (sceneNodeRclick)
-		ImGui::OpenPopup("Scene__Node_RClick");
-
-	if (ImGui::BeginPopup("Scene__Node_RClick")) {
-		Node *selectedNode = App().GetCurrentScene()->GetNode(_selectedNodeID);
-		if (selectedNode) {
-			if (ImGui::Selectable("Delete Node")) {
-				selectedNode->Free();
-			}
-
-			if (Camera2D *camera = dynamic_cast<Camera2D *>(selectedNode); nullptr != camera) {
-				if (ImGui::Selectable("Make Current")) {
-					camera->MakeCurrent();
+		if (ImGui::BeginPopup("Scene__Node_RClick")) {
+			Node *selectedNode = App().GetCurrentScene()->GetNode(_selectedNodeID);
+			if (selectedNode) {
+				if (ImGui::Selectable("Delete Node")) {
+					selectedNode->Free();
 				}
-			}
-		}
 
-		if (ImGui::BeginMenu("Create New")) {
-			for (auto &[typeId, nodeType] : App().GetNodeDB().GetNodeTypes())
-				if (ImGui::Selectable(nodeType.name.c_str())) {
-					Node *node = App().GetCurrentScene()->Create(typeId, "New Node");
-					if (selectedNode) {
-						selectedNode->AddChild(node);
-					} else {
-						App().GetCurrentScene()->SetRoot(node);
+				if (Camera2D *camera = dynamic_cast<Camera2D *>(selectedNode); nullptr != camera) {
+					if (ImGui::Selectable("Make Current")) {
+						camera->MakeCurrent();
 					}
-					_selectedNodeID = node->ID();
 				}
+			}
 
-			ImGui::EndMenu();
+			if (ImGui::BeginMenu("Create New")) {
+				for (auto &[typeId, nodeType] : App().GetNodeDB().GetNodeTypes())
+					if (ImGui::Selectable(nodeType.name.c_str())) {
+						Node *node = App().GetCurrentScene()->Create(typeId, "New Node");
+						if (selectedNode) {
+							selectedNode->AddChild(node);
+						} else {
+							App().GetCurrentScene()->SetRoot(node);
+						}
+						_selectedNodeID = node->ID();
+					}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndPopup();
 		}
-
-		ImGui::EndPopup();
 	}
-
 	ImGui::End();
 
 	ImGui::Begin("Properties");
@@ -336,19 +382,40 @@ void Editor::Update() {
 	ImGui::Separator();
 	ImGui::NewLine();
 
+	if (ImGui::CollapsingHeader("Editor", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		for (size_t i = 0; i < _scenes.size(); i++) {
+			ImGui::PushID((void *)_scenes[i].get());
+
+			ImGui::Text(_scenes[i]->GetFilepath().c_str());
+			ImGui::SameLine();
+
+			if (ImGui::Button("Open")) {
+				App().SetCurrentScene(_scenes[i]);
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::Unindent();
+	}
+
 	if (ImGui::CollapsingHeader("Scene", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
-		Camera2D *camera = dynamic_cast<Camera2D *>(App().GetCurrentScene()->GetNode(App().GetCurrentScene()->GetCurrentCamera2D()));
-		if (camera) {
-			ImGui::Text("2D Camera: \"%s\"", camera->Name().c_str());
+		if (scene) {
+			Camera2D *camera = dynamic_cast<Camera2D *>(scene->GetNode(scene->GetCurrentCamera2D()));
+			if (camera) {
+				ImGui::Text("2D Camera: \"%s\"", camera->Name().c_str());
 
-			ImGui::SameLine();
-			if (ImGui::Button("Clear")) {
-				App().GetCurrentScene()->SetCurrentCamera2D(0);
-			}
-		} else
-			ImGui::Text("2D Camera: <NONE>");
+				ImGui::SameLine();
+				if (ImGui::Button("Clear")) {
+					scene->SetCurrentCamera2D(0);
+				}
+			} else
+				ImGui::Text("2D Camera: <NONE>");
+		}
 
 		ImGui::Unindent();
 	}

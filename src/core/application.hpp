@@ -46,6 +46,7 @@ class Application {
 
 	Ref<Scene> NewScene();
 	inline Ref<Scene> GetCurrentScene() { return _currentScene; }
+	inline void SetCurrentScene(Ref<Scene> scene) { _currentScene = scene; }
 
   private:
 	bool _isRunning = false;

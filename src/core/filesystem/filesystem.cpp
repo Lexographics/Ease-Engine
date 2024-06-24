@@ -12,8 +12,20 @@ PathData FileSystem::ResolvePath(const std::string &path) {
 	if (data.size() == 2) {
 		pathData.scheme = data[0];
 		pathData.path = data[1];
+	} else if (data.size() == 1) {
+		// starts with ://
+		if (path[0] == ':' && path[1] == '/' && path[2] == '/') {
+			pathData.scheme = "";
+			pathData.path = data[0];
+		} else {
+			pathData.scheme = data[0];
+			pathData.path = "";
+		}
 	}
 
+	auto index = pathData.path.find_first_not_of('/');
+	if (index != std::string::npos)
+		pathData.path = pathData.path.substr(index);
 	return pathData;
 }
 
@@ -45,7 +57,8 @@ std::vector<FileEntry> FolderFileSystem::ReadDirectory(const std::filesystem::pa
 	if (std::filesystem::is_directory(dir))
 		for (const auto &dirEntry : std::filesystem::directory_iterator(dir)) {
 			entries.push_back(FileEntry{
-				.path = std::filesystem::relative(dirEntry.path(), _basePath),
+				// NOTE - path is always prefixed with res://. if its used with any other scheme. it will still use res://
+				.path = Utils::Format("res://{}", std::filesystem::relative(dirEntry.path(), _basePath).string()),
 				.is_directory = dirEntry.is_directory()});
 		}
 

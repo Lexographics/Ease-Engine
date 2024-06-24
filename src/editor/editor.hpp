@@ -11,6 +11,7 @@
 
 #include "scene/node.hpp"
 #include "scene/node/camera2d.hpp"
+#include "scene/scene.hpp"
 
 struct EditorSettings {
 	bool coloredLogMessages = true;
@@ -62,9 +63,14 @@ class Editor {
 
 	std::unordered_map<NodeTypeID, std::vector<EditorNodeProp>> _nodeProps;
 
+	// TODO: Editor cameras should be stored per scene
 	Camera2D _camera2d;
 	bool _cameraDragging = false;
 	float _cameraZoom = 1.f;
+
+	std::vector<Ref<Scene>> _scenes;
+	// [extension] = event
+	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileClickEvent;
 };
 
 #endif // EDITOR_HPP
