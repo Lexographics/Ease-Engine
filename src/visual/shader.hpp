@@ -12,7 +12,7 @@ class Shader {
 	Shader() = default;
 	~Shader();
 
-	// "res/sprite2d" -> loads "res/sprite2d.vs" and "res/sprite2d.fs"
+	// "res://sprite2d" -> loads "res://sprite2d.vs" and "res://sprite2d.fs"
 	void Load(const char *path);
 
 	void Delete();

@@ -7,12 +7,8 @@
 #include <iostream>
 #include <sstream>
 
-static std::string ReadFile(const char *path) {
-	std::ifstream ifstream(path);
-	std::stringstream ss;
-	ss << ifstream.rdbuf();
-	return ss.str();
-}
+#include "core/application.hpp"
+#include "core/debug.hpp"
 
 static bool HandleCompileError(uint32_t id, const char *shaderType) {
 	int success;
@@ -50,14 +46,25 @@ Shader::~Shader() {
 void Shader::Load(const char *path) {
 	Delete();
 
-	std::string vertexSource = ReadFile((std::string(path) + ".vs").c_str());
-	std::string fragmentSource = ReadFile((std::string(path) + ".fs").c_str());
+	FileData vertexFile = App().FS()->Load((std::string(path) + ".vs").c_str());
+	if (!vertexFile) {
+		Debug::Error("Failed to load vertex shader at {}.vs", std::string(path));
+	}
+
+	FileData fragmentFile = App().FS()->Load((std::string(path) + ".fs").c_str());
+	if (!fragmentFile) {
+		Debug::Error("Failed to load fragment shader at {}.fs", std::string(path));
+	}
+
+	std::string vertexSource{reinterpret_cast<char *>(vertexFile->buffer.data()), vertexFile->buffer.size()};
+	std::string fragmentSource{reinterpret_cast<char *>(fragmentFile->buffer.data()), fragmentFile->buffer.size()};
 
 	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const char *vertexSrc = vertexSource.c_str();
 	glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
 	glCompileShader(vertexShader);
 	if (!HandleCompileError(vertexShader, "vertex")) {
+		std::cout << "Failed to load shader: " << path << std::endl;
 		return;
 	}
 
@@ -66,6 +73,7 @@ void Shader::Load(const char *path) {
 	glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
 	glCompileShader(fragmentShader);
 	if (!HandleCompileError(fragmentShader, "fragment")) {
+		std::cout << "Failed to load shader: " << path << std::endl;
 		return;
 	}
 
@@ -75,6 +83,7 @@ void Shader::Load(const char *path) {
 
 	glLinkProgram(_id);
 	if (!HandleLinkError(_id)) {
+		std::cout << "Failed to link shader: " << path << std::endl;
 		return;
 	}
 

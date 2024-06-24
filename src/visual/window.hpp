@@ -26,6 +26,7 @@ class Window {
   private:
 	friend struct InputState;
 	friend struct WindowAccessor;
+	friend class Editor;
 	GLFWwindow *_window;
 
 	int _width = 0;

@@ -95,6 +95,10 @@ void Viewport::Clear(float r, float g, float b, float a /*= 1.0*/, bool depth /*
 			  : GL_COLOR_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, _targets[1].textureID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
 
 	glDrawBuffers(2, attachments);
