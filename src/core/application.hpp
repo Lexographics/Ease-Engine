@@ -2,6 +2,8 @@
 #define APPLICATION_HPP
 #pragma once
 
+#include "eventpp/callbacklist.h"
+
 #include "sowa.hpp"
 
 #include "visual/renderer.hpp"
@@ -45,8 +47,16 @@ class Application {
 	inline Editor &GetEditor() { return _editor; }
 
 	Ref<Scene> NewScene();
-	inline Ref<Scene> GetCurrentScene() { return _currentScene; }
-	inline void SetCurrentScene(Ref<Scene> scene) { _currentScene = scene; }
+	Ref<Scene> GetCurrentScene();
+	void SetCurrentScene(Ref<Scene> scene);
+
+  public:
+	inline void OnSceneChanged(const std::function<void()> fn) {
+		_onSceneChanged.append(fn);
+	}
+
+  private:
+	eventpp::CallbackList<void()> _onSceneChanged;
 
   private:
 	bool _isRunning = false;

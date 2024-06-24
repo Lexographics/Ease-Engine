@@ -113,8 +113,23 @@ void Editor::Init() {
 
 		Ref<Scene> scene = _scenes.emplace_back(App().NewScene());
 		scene->LoadFromFile(path.string().c_str());
+
+		this->_ignoreOnSceneChanged = true;
 		App().SetCurrentScene(scene);
+		this->_ignoreOnSceneChanged = false;
 	};
+
+	App().OnSceneChanged([this]() {
+		if (this->_ignoreOnSceneChanged || App().GetCurrentScene() == nullptr)
+			return;
+
+		for (size_t i = 0; i < this->_scenes.size(); i++) {
+			if (this->_scenes[i]->GetFilepath().string() == App().GetCurrentScene()->GetFilepath()) {
+				return;
+			}
+		}
+		_scenes.push_back(App().GetCurrentScene());
+	});
 }
 
 void Editor::Begin() {

@@ -71,6 +71,8 @@ class Editor {
 	std::vector<Ref<Scene>> _scenes;
 	// [extension] = event
 	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileClickEvent;
+
+	bool _ignoreOnSceneChanged = false;
 };
 
 #endif // EDITOR_HPP

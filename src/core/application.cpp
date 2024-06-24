@@ -145,6 +145,9 @@ void Application::Init() {
 			[](Node *node) -> void * { return reinterpret_cast<void *>(&dynamic_cast<Camera2D *>(node)->Rotatable()); }));
 
 	_backgroundScene = NewScene();
+	_currentScene = NewScene();
+	_currentScene->LoadFromFile("res://game.sscn");
+	SetCurrentScene(_currentScene);
 
 	Input::InputEvent().append([this](Input::Event event) {
 		if (event.type == Input::EventType::Key) {
@@ -247,4 +250,13 @@ Ref<Scene> Application::NewScene() {
 	scene->_nodeDB = &_nodeDB;
 
 	return scene;
+}
+
+Ref<Scene> Application::GetCurrentScene() {
+	return _currentScene;
+}
+
+void Application::SetCurrentScene(Ref<Scene> scene) {
+	_currentScene = scene;
+	_onSceneChanged();
 }
