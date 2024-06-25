@@ -1,0 +1,12 @@
+[submodule "thirdparty/eventpp"]
+	path = thirdparty/eventpp
+	url = https://github.com/sowaengine/thirdparty-eventpp
+[submodule "thirdparty/lua"]
+	path = thirdparty/lua
+	url = https://github.com/sowaengine/thirdparty-lua
+[submodule "thirdparty/imgui"]
+	path = thirdparty/imgui
+	url = https://github.com/sowaengine/thirdparty-imgui
+[submodule "thirdparty/LuaBridge3"]
+	path = thirdparty/LuaBridge3
+	url = https://github.com/sowaengine/thirdparty-LuaBridge3
