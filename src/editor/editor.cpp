@@ -430,6 +430,43 @@ void Editor::Update() {
 				}
 			} else
 				ImGui::Text("2D Camera: <NONE>");
+
+			if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Indent();
+
+				for (size_t i = 0; i < scene->_scripts.size();) {
+					ImGui::PushID((void *)&scene->_scripts[i]);
+
+					ImGui::Text("%s", scene->_scripts[i].c_str());
+					ImGui::SameLine();
+					if (ImGui::Button("x", ImVec2(24, 24))) {
+						scene->_scripts.erase(scene->_scripts.begin() + i);
+					} else {
+						i++;
+					}
+
+					ImGui::PopID();
+				}
+
+				if (ImGui::Button("+", ImVec2(24, 24))) {
+					ImGui::OpenPopup("Scene_Scripts_Add");
+				}
+
+				ImGui::Unindent();
+			}
+		}
+
+		if (ImGui::BeginPopup("Scene_Scripts_Add")) {
+			std::string buf = "";
+			ImGui::Text("Path");
+			ImGui::SameLine();
+
+			if (ImGui::InputText("##Path", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				scene->_scripts.push_back(buf);
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
 		}
 
 		ImGui::Unindent();

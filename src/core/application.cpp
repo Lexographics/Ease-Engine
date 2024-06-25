@@ -234,6 +234,7 @@ void Application::Start() {
 	Scene::Copy(_currentScene.get(), _backgroundScene.get());
 
 	_scriptServer.Init();
+	_currentScene->Start();
 	_scriptServer.CallStart();
 }
 

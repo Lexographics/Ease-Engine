@@ -15,6 +15,10 @@ using FileData = std::shared_ptr<FileDataInternal>;
 struct FileEntry {
 	std::filesystem::path path = "";
 	bool is_directory = false;
+
+	bool operator<(const FileEntry &other) {
+		return path.string() < other.path.string();
+	}
 };
 
 struct PathData {

@@ -62,6 +62,7 @@ std::vector<FileEntry> FolderFileSystem::ReadDirectory(const std::filesystem::pa
 				.is_directory = dirEntry.is_directory()});
 		}
 
+	std::sort(entries.begin(), entries.end());
 	return entries;
 }
 

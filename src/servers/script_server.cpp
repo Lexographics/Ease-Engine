@@ -164,8 +164,6 @@ void ScriptServer::Init() {
 		.beginClass<Scene>("Scene")
 		.addFunction("GetRoot", Lua_GetRoot)
 		.endClass();
-
-	LoadScript("res://scripts/main.lua");
 }
 
 void ScriptServer::CallStart() {

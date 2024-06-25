@@ -45,6 +45,7 @@ class Application {
 	inline Window &GetWindow() { return _window; }
 	inline Viewport &GetMainViewport() { return _mainViewport; }
 	inline Editor &GetEditor() { return _editor; }
+	inline ScriptServer &GetScriptServer() { return _scriptServer; }
 
 	Ref<Scene> NewScene();
 	Ref<Scene> GetCurrentScene();

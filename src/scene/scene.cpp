@@ -12,7 +12,11 @@ Scene::~Scene() {
 }
 
 void Scene::Start() {
+	for (auto &script : _scripts) {
+		App().GetScriptServer().LoadScript(script.c_str());
+	}
 }
+
 void Scene::Update() {
 	for (NodeID id : _freeList) {
 		freeNode(id);
@@ -107,6 +111,7 @@ bool Scene::SaveToFile(const char *path) {
 
 	YAML::Node scene;
 	scene["Camera2D"] = GetCurrentCamera2D();
+	scene["Scripts"] = _scripts;
 	out["Scene"] = scene;
 
 	YAML::Node resources;
@@ -244,6 +249,7 @@ bool Scene::LoadFromFile(const char *path) {
 	YAML::Node scene = doc["Scene"];
 	if (scene) {
 		SetCurrentCamera2D(scene["Camera2D"].as<NodeID>(GetCurrentCamera2D()));
+		_scripts = scene["Scripts"].as<std::vector<std::string>>(std::vector<std::string>{});
 	}
 
 	return true;
@@ -272,6 +278,8 @@ void Scene::Copy(Scene *src, Scene *dst) {
 
 	dst->SetRoot(copyNode(src->GetRoot()));
 	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
+	dst->_scripts = src->_scripts;
+	dst->_scenePath = src->_scenePath;
 }
 
 void Scene::freeNode(NodeID id) {
