@@ -1,3 +1,5 @@
+*.res.inc
+
 /build/
 /todo.md
 
