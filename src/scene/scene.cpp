@@ -167,16 +167,18 @@ bool Scene::SaveToFile(const char *path) {
 	YAML::Emitter emitter;
 	emitter << out;
 
-	FolderFileSystem *fs = dynamic_cast<FolderFileSystem *>(App().FS());
+	SaveableFileServer *fs = dynamic_cast<SaveableFileServer *>(App().FS().GetFileServer("res"));
 	if (fs == nullptr) {
 		Debug::Error("Failed to save scene: folder fs not found");
 		return false;
 	}
-	std::filesystem::path savePath = fs->GetPath(path);
 
-	std::ofstream fout(savePath);
+	std::ofstream fout;
+	fs->GetSaveStream(path, fout);
+
 	if (!fout.good()) {
 		Debug::Error("Failed to open file on '{}'", path);
+		return false;
 	}
 	fout << emitter.c_str();
 
@@ -187,7 +189,7 @@ bool Scene::SaveToFile(const char *path) {
 bool Scene::LoadFromFile(const char *path) {
 	_scenePath = path;
 
-	FileData data = App().FS()->Load(path);
+	FileData data = App().FS().Load(path);
 	if (!data) {
 		Debug::Error("Failed to open file: '{}'", path);
 		return false;
@@ -219,7 +221,7 @@ bool Scene::LoadFromFile(const char *path) {
 			}
 
 			Font *font = new Font;
-			font->LoadTTF(path.c_str());
+			font->Load(path.c_str());
 			App().GetResourceRegistry().AddResource(font, rid);
 		}
 	}

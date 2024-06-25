@@ -25,11 +25,11 @@ void Editor::Init() {
 	// ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui_ImplOpenGL3_Init("#version 100");
 
-	FileData guiData = App().FS()->Load("res://imgui.ini");
+	FileData guiData = App().FS().Load("res://imgui.ini");
 	if (guiData)
 		ImGui::LoadIniSettingsFromMemory((const char *)guiData->buffer.data(), guiData->buffer.size());
 
-	FileData font = App().FS()->Load("res://font.ttf");
+	FileData font = App().FS().Load("res://font.ttf");
 	if (font) {
 		io.Fonts->AddFontFromMemoryTTF(font->buffer.data(), font->buffer.size(), 17, nullptr, io.Fonts->GetGlyphRangesKorean());
 		io.Fonts->Build();
@@ -208,7 +208,7 @@ void Editor::Update() {
 
 	std::function<void(std::filesystem::path path)> drawDir;
 	drawDir = [&drawDir, this](std::filesystem::path path) {
-		auto dir = App().FS()->ReadDirectory(path);
+		auto dir = App().FS().ReadDirectory(path);
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth;
 

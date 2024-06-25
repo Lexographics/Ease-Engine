@@ -45,7 +45,7 @@ void Renderer::Init() {
 
 	// _vao.Unbind();
 
-	_shader3d.Load("res/shaders/default3d");
+	_shader3d.Load("res://shaders/default3d");
 
 	// _shader.Load("res/shaders/sprite2d");
 	// _shader.Bind();
@@ -55,7 +55,7 @@ void Renderer::Init() {
 	// _blankTexture->LoadFromData(pixel, 1, 1);
 
 	ModelBuilder::Quad2D(_fullscreenModel, 2.f);
-	_fullscreenShader.Load("res/shaders/fullscreen");
+	_fullscreenShader.Load("res://shaders/fullscreen");
 }
 
 void Renderer::RegisterRenderer2D(const char *name, const char *shaderPath) {

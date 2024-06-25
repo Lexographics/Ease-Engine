@@ -27,7 +27,7 @@ void Mesh::Load(const char *path) {
 	std::string err;
 	std::string warn;
 
-	auto file = App().FS()->Load(path);
+	auto file = App().FS().Load(path);
 	if (!file) {
 		return;
 	}

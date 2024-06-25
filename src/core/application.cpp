@@ -41,7 +41,7 @@ std::unique_ptr<ImageTexture> texture;
 std::unique_ptr<Mesh> mesh;
 
 void Application::Init() {
-	_fs = new FolderFileSystem("res");
+	_fs.RegisterFileServer("res", _fs.NewFolderFileServer("res", "res"));
 	_projectSettings.Load();
 
 	_window.Create(
@@ -74,7 +74,7 @@ void Application::Init() {
 
 	mesh->Load("res://teapot.obj");
 
-	_defaultFont.LoadTTF("res://font.ttf");
+	_defaultFont.Load("res://font.ttf");
 
 	_mainViewport.Create(
 		_projectSettings.rendering.viewport.width,

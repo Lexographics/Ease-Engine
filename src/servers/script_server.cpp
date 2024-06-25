@@ -185,7 +185,7 @@ void ScriptServer::CallUpdate() {
 }
 
 void ScriptServer::LoadScript(const char *path) {
-	auto file = App().FS()->Load(path);
+	auto file = App().FS().Load(path);
 	if (!file) {
 		Debug::Error("Failed to load script file at '{}'", path);
 		return;

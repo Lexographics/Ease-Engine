@@ -46,14 +46,16 @@ Shader::~Shader() {
 void Shader::Load(const char *path) {
 	Delete();
 
-	FileData vertexFile = App().FS()->Load((std::string(path) + ".vs").c_str());
+	FileData vertexFile = App().FS().Load((std::string(path) + ".vs").c_str());
 	if (!vertexFile) {
 		Debug::Error("Failed to load vertex shader at {}.vs", std::string(path));
+		return;
 	}
 
-	FileData fragmentFile = App().FS()->Load((std::string(path) + ".fs").c_str());
+	FileData fragmentFile = App().FS().Load((std::string(path) + ".fs").c_str());
 	if (!fragmentFile) {
 		Debug::Error("Failed to load fragment shader at {}.fs", std::string(path));
+		return;
 	}
 
 	std::string vertexSource{reinterpret_cast<char *>(vertexFile->buffer.data()), vertexFile->buffer.size()};

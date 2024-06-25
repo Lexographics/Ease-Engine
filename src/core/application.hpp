@@ -37,7 +37,7 @@ class Application {
 
 	inline bool IsRunning() { return _isRunning; }
 
-	inline FileSystem *FS() { return _fs; }
+	inline FileSystem &FS() { return _fs; }
 	inline NodeDB &GetNodeDB() { return _nodeDB; }
 	inline ResourceRegistry &GetResourceRegistry() { return _resourceRegistry; }
 	inline Font *GetDefaultFont() { return &_defaultFont; }
@@ -62,7 +62,7 @@ class Application {
   private:
 	bool _isRunning = false;
 
-	FileSystem *_fs = nullptr;
+	FileSystem _fs;
 
 	ProjectSettings _projectSettings;
 

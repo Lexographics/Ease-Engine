@@ -22,13 +22,23 @@ Font::Font() {
 	_resourceType = typeid(Font).hash_code();
 }
 
-void Font::LoadTTF(const char *path) {
-	_buffer = App().FS()->Load(path);
+void Font::Load(const char *path) {
+	_buffer = App().FS().Load(path);
 	if (!_buffer) {
 		return;
 	}
 
 	_filepath = path;
+	LoadFont();
+}
+
+void Font::LoadFromData(FileData data) {
+	_buffer = data;
+	if (!_buffer) {
+		return;
+	}
+
+	_filepath = "";
 	LoadFont();
 }
 

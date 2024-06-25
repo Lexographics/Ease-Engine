@@ -14,7 +14,8 @@ class Font : public Resource {
 	Font();
 	virtual ~Font();
 
-	void LoadTTF(const char *path);
+	void Load(const char *path);
+	void LoadFromData(FileData data);
 
 	uint32_t GetGlyphTextureID(int charcode);
 	glm::vec2 CalcTextSize(const std::string &text);

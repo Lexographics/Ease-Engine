@@ -7,7 +7,7 @@
 #include "core/application.hpp"
 
 void ProjectSettings::Load() {
-	FileData file = App().FS()->Load("res://project.sowa");
+	FileData file = App().FS().Load("res://project.sowa");
 	if (!file || file->buffer.size() == 0) {
 		return;
 	}

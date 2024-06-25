@@ -27,7 +27,7 @@ void ImageTexture::Unbind() {
 }
 
 void ImageTexture::Load(const char *path) {
-	auto file = App().FS()->Load(path);
+	auto file = App().FS().Load(path);
 	if (!file) {
 		return;
 	}

@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 struct FileDataInternal {
@@ -26,25 +27,31 @@ struct PathData {
 	std::string path;
 };
 
-class FileSystem {
+class FileServer {
   public:
-	virtual FileData Load(const char *path) = 0;
-	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) { return std::vector<FileEntry>{}; }
-
-	PathData ResolvePath(const std::string &path);
+	virtual FileData Load(const std::filesystem::path &path) = 0;
+	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) { return std::vector<FileEntry>{}; };
 };
 
-class FolderFileSystem : public FileSystem {
+class SaveableFileServer {
   public:
-	FolderFileSystem(const std::filesystem::path &path);
+	virtual void GetSaveStream(const std::filesystem::path &path, std::ofstream &out) = 0;
+};
 
-	FileData Load(const char *path) override;
-	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) override;
+class FileSystem {
+  public:
+	void RegisterFileServer(const char *scheme, FileServer *server);
+	FileServer *GetFileServer(const char *scheme);
+	bool HasFileServer(const char *scheme);
+	PathData ResolvePath(const std::string &path);
 
-	std::filesystem::path GetPath(std::filesystem::path path);
+	FileData Load(const std::filesystem::path &path);
+	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path);
+
+	FileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
 
   private:
-	std::filesystem::path _basePath = "";
+	std::unordered_map<std::string, FileServer *> _fileServers;
 };
 
 #endif // FILESYSTEM_HPP
