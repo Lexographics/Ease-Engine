@@ -148,7 +148,7 @@ void Application::Init() {
 
 	_backgroundScene = NewScene();
 	_currentScene = NewScene();
-	_currentScene->LoadFromFile("res://game.sscn");
+	_currentScene->LoadFromFile("res://scenes/game.sscn");
 	SetCurrentScene(_currentScene);
 
 	Input::InputEvent().append([this](Input::Event event) {

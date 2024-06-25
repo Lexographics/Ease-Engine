@@ -25,9 +25,11 @@ void Editor::Init() {
 	// ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui_ImplOpenGL3_Init("#version 100");
 
-	Ref<FileData> guiData = App().FS().Load("res://imgui.ini");
-	if (guiData)
-		ImGui::LoadIniSettingsFromMemory((const char *)guiData->Buffer().data(), guiData->Buffer().size());
+	Ref<FileData> guiData = App().FS().Load("data://imgui.ini");
+	if (guiData) {
+		io.IniFilename = NULL;
+		ImGui::LoadIniSettingsFromMemory((const char *)guiData->Data(), guiData->Size());
+	}
 
 	Ref<FileData> font = App().FS().Load("data://font.ttf");
 	if (font) {
