@@ -33,7 +33,7 @@ void ImageTexture::Load(const char *path) {
 	}
 
 	stbi_set_flip_vertically_on_load(false);
-	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->buffer.data()), file->buffer.size(), &_width, &_height, &_channels, 4);
+	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->Data()), file->Size(), &_width, &_height, &_channels, 4);
 	if (!pixels) {
 		Delete();
 		std::cout << "Failed to load texture path:" << path << std::endl;

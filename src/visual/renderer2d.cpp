@@ -16,7 +16,7 @@
 #define BATCH2D_MAX_VERTEX (BATCH2D_MAX_RECT * 6)
 #define BATCH2D_MAX_TEXTURE 16
 
-void Renderer2D::Init(const char *shaderPath) {
+void Renderer2D::Init(const char *vertexPath, const char *fragmentPath) {
 	_projection = glm::ortho(0.f, 1280.f, 0.f, 720.f, -128.f, 128.f);
 
 	_vao.New();
@@ -36,7 +36,7 @@ void Renderer2D::Init(const char *shaderPath) {
 	_vao.UploadAttributes();
 	_vao.Unbind();
 
-	_shader.Load(shaderPath);
+	_shader.Load(vertexPath, fragmentPath);
 
 	unsigned char pixel[] = {255, 255, 255, 255};
 	_blankTexture = std::make_unique<ImageTexture>();

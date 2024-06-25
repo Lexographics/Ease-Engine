@@ -32,7 +32,7 @@ void Font::Load(const char *path) {
 	LoadFont();
 }
 
-void Font::LoadFromData(FileData data) {
+void Font::LoadFromData(Ref<FileData> data) {
 	_buffer = data;
 	if (!_buffer) {
 		return;
@@ -64,7 +64,7 @@ glm::vec2 Font::CalcTextSize(const std::string &text) {
 
 void Font::LoadFont() {
 	FT_Library freetype = GetFreeType();
-	if (FT_New_Memory_Face(freetype, (const unsigned char *)_buffer->buffer.data(), _buffer->buffer.size(), 0, reinterpret_cast<FT_Face *>(&_face))) {
+	if (FT_New_Memory_Face(freetype, (const unsigned char *)_buffer->Data(), _buffer->Size(), 0, reinterpret_cast<FT_Face *>(&_face))) {
 		return;
 	}
 	FT_Set_Pixel_Sizes(reinterpret_cast<FT_Face>(_face), 0, 48);

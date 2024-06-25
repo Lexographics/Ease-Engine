@@ -5,6 +5,18 @@
 
 #include "core/debug.hpp"
 
+Ref<FileData> FileData::New() {
+	return std::make_shared<FileData>();
+}
+
+Ref<FileData> FileData::NewStatic(std::byte *data, size_t size) {
+	Ref<FileData> filedata = FileData::New();
+	filedata->dynamic = false;
+	filedata->data = data;
+	filedata->size = size;
+	return filedata;
+}
+
 void FileSystem::RegisterFileServer(const char *scheme, FileServer *server) {
 	_fileServers[scheme] = server;
 }
@@ -41,7 +53,7 @@ PathData FileSystem::ResolvePath(const std::string &path) {
 	return pathData;
 }
 
-FileData FileSystem::Load(const std::filesystem::path &path) {
+Ref<FileData> FileSystem::Load(const std::filesystem::path &path) {
 	PathData data = ResolvePath(path);
 	if (!HasFileServer(data.scheme.c_str()) || _fileServers[data.scheme] == nullptr)
 		return nullptr;
@@ -66,8 +78,8 @@ FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::files
 			_basePath = path;
 		}
 
-		FileData Load(const std::filesystem::path &path) {
-			FileData data = std::make_shared<FileDataInternal>();
+		Ref<FileData> Load(const std::filesystem::path &path) {
+			Ref<FileData> data = FileData::New();
 
 			std::ifstream file{GetPath(path), std::ios::binary};
 			if (!file.good())
@@ -77,8 +89,8 @@ FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::files
 			int size = static_cast<int>(file.tellg());
 			file.seekg(0, std::ios::beg);
 
-			data->buffer.resize(size);
-			file.read(reinterpret_cast<char *>(data->buffer.data()), static_cast<long>(size));
+			data->Buffer().resize(size);
+			file.read(reinterpret_cast<char *>(data->Buffer().data()), static_cast<long>(size));
 
 			return data;
 		}
@@ -113,4 +125,20 @@ FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::files
 	};
 
 	return reinterpret_cast<FileServer *>(new FolderFileServer(this, scheme, path));
+}
+
+DataFileServer *FileSystem::NewDataFileServer() {
+	return new DataFileServer();
+}
+
+DataFileServer &DataFileServer::AddFile(const char *path, Ref<FileData> data) {
+	_files[path] = data;
+	return *this;
+}
+
+Ref<FileData> DataFileServer::Load(const std::filesystem::path &path) {
+	if (_files.find(path.string()) == _files.end())
+		return nullptr;
+
+	return _files[path.string()];
 }

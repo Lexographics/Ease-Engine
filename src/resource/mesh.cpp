@@ -31,7 +31,7 @@ void Mesh::Load(const char *path) {
 	if (!file) {
 		return;
 	}
-	std::string data{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
+	std::string data{reinterpret_cast<char *>(file->Data()), file->Size()};
 	std::istringstream ss(data);
 
 	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &ss);

@@ -4,7 +4,6 @@
 #include "visual/visual.hpp"
 #include <fstream>
 #include <glm/glm.hpp>
-#include <iostream>
 #include <sstream>
 
 #include "core/application.hpp"
@@ -17,8 +16,7 @@ static bool HandleCompileError(uint32_t id, const char *shaderType) {
 
 	if (!success) {
 		glGetShaderInfoLog(id, 512, NULL, infoLog);
-		std::cout << shaderType << " shader error:"
-				  << infoLog << std::endl;
+		Debug::Error("{} shader error: {}", shaderType, infoLog);
 
 		return false;
 	}
@@ -32,8 +30,7 @@ static bool HandleLinkError(uint32_t id) {
 
 	if (!success) {
 		glGetProgramInfoLog(id, 512, NULL, infoLog);
-		std::cout << "Shader program compilation failed"
-				  << infoLog << std::endl;
+		Debug::Error("Shader program compilation failed: {}", infoLog);
 		return false;
 	}
 	return true;
@@ -43,30 +40,30 @@ Shader::~Shader() {
 	Delete();
 }
 
-void Shader::Load(const char *path) {
+void Shader::Load(const char *vertexPath, const char *fragmentPath) {
 	Delete();
 
-	FileData vertexFile = App().FS().Load((std::string(path) + ".vs").c_str());
+	Ref<FileData> vertexFile = App().FS().Load(vertexPath);
 	if (!vertexFile) {
-		Debug::Error("Failed to load vertex shader at {}.vs", std::string(path));
+		Debug::Error("Failed to load vertex shader at {}", vertexPath);
 		return;
 	}
 
-	FileData fragmentFile = App().FS().Load((std::string(path) + ".fs").c_str());
+	Ref<FileData> fragmentFile = App().FS().Load(fragmentPath);
 	if (!fragmentFile) {
-		Debug::Error("Failed to load fragment shader at {}.fs", std::string(path));
+		Debug::Error("Failed to load fragment shader at {}", fragmentPath);
 		return;
 	}
 
-	std::string vertexSource{reinterpret_cast<char *>(vertexFile->buffer.data()), vertexFile->buffer.size()};
-	std::string fragmentSource{reinterpret_cast<char *>(fragmentFile->buffer.data()), fragmentFile->buffer.size()};
+	std::string vertexSource{reinterpret_cast<char *>(vertexFile->Data()), vertexFile->Size()};
+	std::string fragmentSource{reinterpret_cast<char *>(fragmentFile->Data()), fragmentFile->Size()};
 
 	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const char *vertexSrc = vertexSource.c_str();
 	glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
 	glCompileShader(vertexShader);
 	if (!HandleCompileError(vertexShader, "vertex")) {
-		std::cout << "Failed to load shader: " << path << std::endl;
+		Debug::Error("Failed to load shader: {}", vertexPath);
 		return;
 	}
 
@@ -75,7 +72,7 @@ void Shader::Load(const char *path) {
 	glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
 	glCompileShader(fragmentShader);
 	if (!HandleCompileError(fragmentShader, "fragment")) {
-		std::cout << "Failed to load shader: " << path << std::endl;
+		Debug::Error("Failed to load shader: {}", fragmentPath);
 		return;
 	}
 
@@ -85,7 +82,7 @@ void Shader::Load(const char *path) {
 
 	glLinkProgram(_id);
 	if (!HandleLinkError(_id)) {
-		std::cout << "Failed to link shader: " << path << std::endl;
+		Debug::Error("Failed to link shader: {}, {}", vertexPath, fragmentPath);
 		return;
 	}
 

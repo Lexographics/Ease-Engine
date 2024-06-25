@@ -8,10 +8,40 @@
 #include <unordered_map>
 #include <vector>
 
-struct FileDataInternal {
+#include "sowa.hpp"
+
+struct FileData {
+  public:
+	FileData() = default;
+	~FileData() = default;
+
+	static Ref<FileData> New();
+	// Returns a FileData that contains static data. Dynamic buffer can still be accessed. but .Data() and .Size() functions will return static data
+	static Ref<FileData> NewStatic(std::byte *data, size_t size);
+
+	std::byte *Data() {
+		if (dynamic)
+			return buffer.data();
+		return data;
+	}
+
+	size_t Size() {
+		if (dynamic)
+			return buffer.size();
+		return size;
+	}
+
+	std::vector<std::byte> &Buffer() {
+		return buffer;
+	}
+
+  private:
+	std::byte *data;
+	size_t size;
+
+	bool dynamic = true;
 	std::vector<std::byte> buffer;
 };
-using FileData = std::shared_ptr<FileDataInternal>;
 
 struct FileEntry {
 	std::filesystem::path path = "";
@@ -29,13 +59,23 @@ struct PathData {
 
 class FileServer {
   public:
-	virtual FileData Load(const std::filesystem::path &path) = 0;
+	virtual Ref<FileData> Load(const std::filesystem::path &path) = 0;
 	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) { return std::vector<FileEntry>{}; };
 };
 
 class SaveableFileServer {
   public:
 	virtual void GetSaveStream(const std::filesystem::path &path, std::ofstream &out) = 0;
+};
+
+class DataFileServer : public FileServer {
+  public:
+	DataFileServer &AddFile(const char *path, Ref<FileData> data);
+
+	Ref<FileData> Load(const std::filesystem::path &path) override;
+
+  private:
+	std::unordered_map<std::string, Ref<FileData>> _files;
 };
 
 class FileSystem {
@@ -45,10 +85,11 @@ class FileSystem {
 	bool HasFileServer(const char *scheme);
 	PathData ResolvePath(const std::string &path);
 
-	FileData Load(const std::filesystem::path &path);
+	Ref<FileData> Load(const std::filesystem::path &path);
 	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path);
 
 	FileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
+	DataFileServer *NewDataFileServer();
 
   private:
 	std::unordered_map<std::string, FileServer *> _fileServers;

@@ -7,12 +7,12 @@
 #include "core/application.hpp"
 
 void ProjectSettings::Load() {
-	FileData file = App().FS().Load("res://project.sowa");
-	if (!file || file->buffer.size() == 0) {
+	Ref<FileData> file = App().FS().Load("res://project.sowa");
+	if (!file || file->Size() == 0) {
 		return;
 	}
 
-	std::string str{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
+	std::string str{reinterpret_cast<char *>(file->Buffer().data()), file->Buffer().size()};
 	YAML::Node doc = YAML::Load(str);
 
 	name = doc["Name"].as<std::string>(name);

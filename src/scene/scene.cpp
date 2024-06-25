@@ -189,12 +189,12 @@ bool Scene::SaveToFile(const char *path) {
 bool Scene::LoadFromFile(const char *path) {
 	_scenePath = path;
 
-	FileData data = App().FS().Load(path);
+	Ref<FileData> data = App().FS().Load(path);
 	if (!data) {
 		Debug::Error("Failed to open file: '{}'", path);
 		return false;
 	}
-	std::string str{reinterpret_cast<char *>(data->buffer.data()), data->buffer.size()};
+	std::string str{reinterpret_cast<char *>(data->Data()), data->Size()};
 	YAML::Node doc = YAML::Load(str);
 
 	YAML::Node resources = doc["Resources"];

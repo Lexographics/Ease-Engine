@@ -36,7 +36,7 @@ struct DefaultVertex2D {
 
 class Renderer2D {
   public:
-	void Init(const char *shaderPath);
+	void Init(const char *vertexPath, const char *fragmentPath);
 
 	void Reset();
 	void End();

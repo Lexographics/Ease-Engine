@@ -191,7 +191,7 @@ void ScriptServer::LoadScript(const char *path) {
 		return;
 	}
 
-	std::string str{reinterpret_cast<char *>(file->buffer.data()), file->buffer.size()};
+	std::string str{reinterpret_cast<char *>(file->Data()), file->Size()};
 	if (luaL_dostring(state, str.c_str()) != LUA_OK) {
 		Debug::Error("Lua update error: {}", lua_tostring(state, -1));
 	}

@@ -38,7 +38,7 @@ class Renderer {
   public:
 	void Init();
 
-	void RegisterRenderer2D(const char *name, const char *shaderPath);
+	void RegisterRenderer2D(const char *name, const char *vertexPath, const char *fragmentPath);
 	Renderer2D &GetRenderer2D(const char *name);
 
 	void BeginDraw();
