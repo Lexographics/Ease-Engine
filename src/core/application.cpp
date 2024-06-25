@@ -42,6 +42,8 @@ std::unique_ptr<Mesh> mesh;
 
 void Application::Init() {
 	_fs.RegisterFileServer("res", _fs.NewFolderFileServer("res", "res"));
+	RegisterBuiltinData();
+
 	_projectSettings.Load();
 
 	_window.Create(
@@ -52,8 +54,8 @@ void Application::Init() {
 	Input::InitState(&_window);
 	Visual::InitState(&_window);
 	_renderer.Init();
-	_renderer.RegisterRenderer2D("2D", "res://shaders/sprite2d");
-	_renderer.RegisterRenderer2D("Text", "res://shaders/text2d");
+	_renderer.RegisterRenderer2D("2D", "data://sprite2d.vs", "data://sprite2d.fs");
+	_renderer.RegisterRenderer2D("Text", "data://text2d.vs", "data://text2d.fs");
 
 	_editor.Init();
 
@@ -74,7 +76,7 @@ void Application::Init() {
 
 	mesh->Load("res://teapot.obj");
 
-	_defaultFont.Load("res://font.ttf");
+	_defaultFont.Load("data://font.ttf");
 
 	_mainViewport.Create(
 		_projectSettings.rendering.viewport.width,

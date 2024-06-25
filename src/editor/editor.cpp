@@ -25,13 +25,13 @@ void Editor::Init() {
 	// ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui_ImplOpenGL3_Init("#version 100");
 
-	FileData guiData = App().FS().Load("res://imgui.ini");
+	Ref<FileData> guiData = App().FS().Load("res://imgui.ini");
 	if (guiData)
-		ImGui::LoadIniSettingsFromMemory((const char *)guiData->buffer.data(), guiData->buffer.size());
+		ImGui::LoadIniSettingsFromMemory((const char *)guiData->Buffer().data(), guiData->Buffer().size());
 
-	FileData font = App().FS().Load("res://font.ttf");
+	Ref<FileData> font = App().FS().Load("data://font.ttf");
 	if (font) {
-		io.Fonts->AddFontFromMemoryTTF(font->buffer.data(), font->buffer.size(), 17, nullptr, io.Fonts->GetGlyphRangesKorean());
+		io.Fonts->AddFontFromMemoryTTF(font->Data(), font->Size(), 17, nullptr, io.Fonts->GetGlyphRangesKorean());
 		io.Fonts->Build();
 	}
 

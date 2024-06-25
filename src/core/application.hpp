@@ -56,6 +56,8 @@ class Application {
 		_onSceneChanged.append(fn);
 	}
 
+	void RegisterBuiltinData();
+
   private:
 	eventpp::CallbackList<void()> _onSceneChanged;
 

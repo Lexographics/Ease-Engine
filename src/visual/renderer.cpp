@@ -27,40 +27,15 @@
 #define BATCH2D_MAX_TEXTURE 16
 
 void Renderer::Init() {
-	// _vao.New();
-	// _buffer.New(BufferType::VertexBuffer);
-
-	// _vao.Bind();
-	// _buffer.Bind();
-
-	// _buffer.BufferData(nullptr, sizeof(BatchVertex) * BATCH2D_MAX_VERTEX, BufferUsage::DynamicDraw);
-
-	// _vao.ResetAttributes();
-	// _vao.SetAttribute(0, AttributeType::Vec3);
-	// _vao.SetAttribute(1, AttributeType::Vec2);
-	// _vao.SetAttribute(2, AttributeType::Vec4);
-	// _vao.SetAttribute(3, AttributeType::Float);
-	// _vao.SetAttribute(4, AttributeType::Float);
-	// _vao.UploadAttributes();
-
-	// _vao.Unbind();
-
-	_shader3d.Load("res://shaders/default3d");
-
-	// _shader.Load("res/shaders/sprite2d");
-	// _shader.Bind();
-
-	// unsigned char pixel[] = {255, 255, 255, 255};
-	// _blankTexture = std::make_unique<ImageTexture>();
-	// _blankTexture->LoadFromData(pixel, 1, 1);
-
 	ModelBuilder::Quad2D(_fullscreenModel, 2.f);
-	_fullscreenShader.Load("res://shaders/fullscreen");
+
+	_shader3d.Load("data://default3d.vs", "data://default3d.fs");
+	_fullscreenShader.Load("data://fullscreen.vs", "data://fullscreen.fs");
 }
 
-void Renderer::RegisterRenderer2D(const char *name, const char *shaderPath) {
+void Renderer::RegisterRenderer2D(const char *name, const char *vertexPath, const char *fragmentPath) {
 	Renderer2D &renderer = _renderer2ds[name];
-	renderer.Init(shaderPath);
+	renderer.Init(vertexPath, fragmentPath);
 }
 
 Renderer2D &Renderer::GetRenderer2D(const char *name) {
