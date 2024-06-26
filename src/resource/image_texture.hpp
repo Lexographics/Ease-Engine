@@ -14,6 +14,16 @@ class ImageTexture : public Resource {
 	void Bind(int slot = 0);
 	void Unbind();
 
+	void LoadResource(const Document &doc) override {
+		std::string path = doc.Get("Path", std::string(""));
+		if (path != "")
+			Load(path.c_str());
+	}
+
+	void SaveResource(Document &doc) override {
+		doc.Set("Path", Filepath());
+	}
+
 	void Load(const char *path);
 	// data must be RGBA
 	void LoadFromData(unsigned char *data, int width, int height);

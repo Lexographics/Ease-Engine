@@ -17,6 +17,16 @@ class Font : public Resource {
 	void Load(const char *path);
 	void LoadFromData(Ref<FileData> data);
 
+	void LoadResource(const Document &doc) override {
+		std::string path = doc.Get("Path", std::string(""));
+		if (path != "")
+			Load(path.c_str());
+	}
+
+	void SaveResource(Document &doc) override {
+		doc.Set("Path", Filepath());
+	}
+
 	uint32_t GetGlyphTextureID(int charcode);
 	glm::vec2 CalcTextSize(const std::string &text);
 
