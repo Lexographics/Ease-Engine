@@ -34,6 +34,17 @@ struct DefaultVertex2D {
 	float t_id = 0.f; // texture id
 };
 
+struct PushQuadArgs {
+	glm::mat4 transform = glm::mat4(1.f);
+	float textureID = 0.f;
+	float z = 0.f;
+	float drawID = 1.f;
+	Color color = Color{};
+	glm::vec2 textureScale = glm::vec2(1.f, 1.f);
+	glm::vec2 uvTopLeft = glm::vec2(0.f, 1.f);
+	glm::vec2 uvBottomRight = glm::vec2(1.f, 0.f);
+};
+
 class Renderer2D {
   public:
 	void Init(const char *vertexPath, const char *fragmentPath);
@@ -44,6 +55,7 @@ class Renderer2D {
 	void PushQuad(DefaultVertex2D vertices[4]);
 	void PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID);
 	void PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale, float z = 0.f, Color color = Color{}, float drawID = 1.f);
+	void PushQuad(const PushQuadArgs &args);
 	void DrawText(const std::string &text, Font &font, const glm::mat4 &transform, float z = 0.f, Color color = Color{});
 
 	void SetProjectionMatrix(const glm::mat4 &proj);

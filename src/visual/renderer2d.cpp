@@ -147,6 +147,39 @@ void Renderer2D::PushQuad(glm::mat4 transform, float textureID, glm::vec2 textur
 	PushQuad(vertices);
 }
 
+void Renderer2D::PushQuad(const PushQuadArgs &args) {
+	glm::vec4 points[4] = {
+		{-0.5f * args.textureScale.x, 0.5f * args.textureScale.y, 0.f, 1.f},
+		{-0.5f * args.textureScale.x, -0.5f * args.textureScale.y, 0.f, 1.f},
+		{0.5f * args.textureScale.x, -0.5f * args.textureScale.y, 0.f, 1.f},
+		{0.5f * args.textureScale.x, 0.5f * args.textureScale.y, 0.f, 1.f}};
+
+	glm::vec2 uvs[4] = {
+		{args.uvTopLeft.x, args.uvTopLeft.y},
+		{args.uvTopLeft.x, args.uvBottomRight.y},
+		{args.uvBottomRight.x, args.uvBottomRight.y},
+		{args.uvBottomRight.x, args.uvTopLeft.y}};
+
+	DefaultVertex2D vertices[4];
+	for (int i = 0; i < 4; i++) {
+		points[i] = args.transform * points[i];
+
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = args.z;
+		vertices[i].r = args.color.r;
+		vertices[i].g = args.color.g;
+		vertices[i].b = args.color.b;
+		vertices[i].a = args.color.a;
+		vertices[i].u = uvs[i].x;
+		vertices[i].v = uvs[i].y;
+		vertices[i].t_id = args.textureID;
+		vertices[i].d_id = args.drawID;
+	}
+
+	PushQuad(vertices);
+}
+
 void Renderer2D::End() {
 	if (_vertices.size() == 0)
 		return;

@@ -15,6 +15,7 @@
 
 #include <iostream>
 
+#include "scene/node/animatedsprite2d.hpp"
 #include "scene/node/camera2d.hpp"
 #include "scene/node/node2d.hpp"
 #include "scene/node/sprite2d.hpp"
@@ -87,6 +88,7 @@ void Application::Init() {
 	NodeTypeID typeId_Sprite2D = _nodeDB.NewNodeType<Sprite2D>("Sprite2D", typeId_Node2D);
 	NodeTypeID typeId_Text2D = _nodeDB.NewNodeType<Text2D>("Text2D", typeId_Node2D);
 	NodeTypeID typeId_Camera2D = _nodeDB.NewNodeType<Camera2D>("Camera2D", typeId_Node2D);
+	NodeTypeID typeId_AnimatedSprite2D = _nodeDB.NewNodeType<AnimatedSprite2D>("AnimatedSprite2D", typeId_Node2D);
 
 	_editor.RegisterNodeProp(
 		typeId_Node2D,
@@ -145,6 +147,18 @@ void Application::Init() {
 			"Rotatable",
 			EditorNodePropType::Bool,
 			[](Node *node) -> void * { return reinterpret_cast<void *>(&dynamic_cast<Camera2D *>(node)->Rotatable()); }));
+
+	_editor.RegisterNodeProp(
+		typeId_AnimatedSprite2D,
+		EditorNodeProp(
+			"Animation",
+			EditorNodePropType::RID,
+			[](Node *node) -> void * { return reinterpret_cast<void *>(&dynamic_cast<AnimatedSprite2D *>(node)->_animation); }));
+
+	GetResourceRegistry().AddResourceType<ImageTexture>("ImageTexture");
+	GetResourceRegistry().AddResourceType<Font>("Font");
+	GetResourceRegistry().AddResourceType<SpriteSheetAnimation>("SpriteSheetAnimation");
+	GetResourceRegistry().AddResourceType<Mesh>("Mesh");
 
 	_backgroundScene = NewScene();
 	_currentScene = NewScene();
