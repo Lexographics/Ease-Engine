@@ -26,6 +26,10 @@ class SpriteSheetAnimation : public Resource {
 		return &_animations[name];
 	}
 
+	const std::unordered_map<std::string, SpriteSheet> &GetAnimations() {
+		return _animations;
+	}
+
 	void SetAnimation(const std::string &name, const SpriteSheet &anim) {
 		_animations[name] = anim;
 	}

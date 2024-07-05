@@ -1,5 +1,7 @@
 #include "animatedsprite2d.hpp"
 
+#include "imgui.h"
+
 #include "core/application.hpp"
 
 void AnimatedSprite2D::Update() {
@@ -17,7 +19,7 @@ void AnimatedSprite2D::Update() {
 
 	float delta = 1.f / 60;
 
-	_animationDelta += delta;
+	_animationDelta += std::max(delta * _animationScale, 0.f);
 	if (_animationDelta > anim->speed) {
 		_animationDelta -= anim->speed;
 		_frameIndex++;
@@ -49,6 +51,7 @@ bool AnimatedSprite2D::Serialize(Document &doc) {
 
 	doc.Set("Animation", _animation);
 	doc.Set("CurrentAnimation", _currentAnimation);
+	doc.Set("AnimationScale", _animationScale);
 	return true;
 }
 
@@ -59,6 +62,7 @@ bool AnimatedSprite2D::Deserialize(const Document &doc) {
 
 	_animation = doc.Get("Animation", _animation);
 	_currentAnimation = doc.Get("CurrentAnimation", _currentAnimation);
+	_animationScale = doc.Get("CurrentAnimation", _animationScale);
 	return true;
 }
 
@@ -70,7 +74,25 @@ bool AnimatedSprite2D::Copy(Node *dst) {
 	AnimatedSprite2D *dstNode = dynamic_cast<AnimatedSprite2D *>(dst);
 	dstNode->_animation = _animation;
 	dstNode->SetCurrentAnimation(_currentAnimation);
+	dstNode->_animationScale = _animationScale;
 	return true;
+}
+
+void AnimatedSprite2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("AnimatedSprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Animation");
+		ImGui::SameLine();
+		ImGui::InputInt("##Animation", &_animation);
+
+		ImGui::Text("%s", "Animation Scale");
+		ImGui::SameLine();
+		ImGui::DragFloat("##AnimationScale", &_animationScale, 0.1f, 0.f);
+
+		ImGui::Unindent();
+	}
+	Node2D::UpdateEditor();
 }
 
 const std::string &AnimatedSprite2D::GetCurrentAnimation() {

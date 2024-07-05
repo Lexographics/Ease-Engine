@@ -1,8 +1,10 @@
 #include "text2d.hpp"
 
-#include "math/matrix.hpp"
+#include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
 
 #include "core/application.hpp"
+#include "math/matrix.hpp"
 #include "resource/font.hpp"
 #include "visual/renderer.hpp"
 
@@ -48,4 +50,26 @@ bool Text2D::Copy(Node *dst) {
 	dstNode->Modulate() = Modulate();
 
 	return true;
+}
+
+void Text2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Text2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Text");
+		ImGui::SameLine();
+		ImGui::InputText("##Text", &_text);
+
+		ImGui::Text("%s", "Modulate");
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##Modulate", &_modulate.r);
+
+		ImGui::Text("%s", "Font");
+		ImGui::SameLine();
+		ImGui::InputInt("##Font", &_font);
+
+		ImGui::Unindent();
+	}
+
+	Node2D::UpdateEditor();
 }

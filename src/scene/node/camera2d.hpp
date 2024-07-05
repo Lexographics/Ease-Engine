@@ -15,6 +15,7 @@ class Camera2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
+	void UpdateEditor() override;
 
 	glm::mat4 GetMatrix();
 	static glm::mat4 GetBlankMatrix();

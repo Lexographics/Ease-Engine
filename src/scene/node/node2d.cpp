@@ -2,6 +2,8 @@
 
 #include "math/matrix.hpp"
 
+#include "imgui.h"
+
 bool Node2D::Serialize(Document &doc) {
 	if (!Node::Serialize(doc))
 		return false;
@@ -36,6 +38,29 @@ bool Node2D::Copy(Node *dst) {
 	dstNode->ZIndex() = ZIndex();
 
 	return true;
+}
+
+void Node2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Node2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Position");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Position", &_position.x, 1.f);
+
+		ImGui::Text("%s", "Rotation");
+		ImGui::SameLine();
+		float rad = glm::radians(_rotation);
+		ImGui::SliderAngle("##Rotation", &rad, 1.f);
+		_rotation = glm::degrees(rad);
+
+		ImGui::Text("%s", "Scale");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Scale", &_scale.x, 0.005f);
+
+		ImGui::Unindent();
+	}
+	Node::UpdateEditor();
 }
 
 glm::mat4 Node2D::GetTransform() {

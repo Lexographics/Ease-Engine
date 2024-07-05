@@ -20,6 +20,7 @@ class AnimatedSprite2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
+	void UpdateEditor() override;
 
 	// SpriteSheetAnimation
 	RID _animation;
@@ -31,6 +32,7 @@ class AnimatedSprite2D : public Node2D {
 	std::string _currentAnimation = "";
 	int _frameIndex = 0;
 	float _animationDelta = 0.f;
+	float _animationScale = 1.f;
 };
 
 #endif // ANIMATEDSPRITE2D_HPP

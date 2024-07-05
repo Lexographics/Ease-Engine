@@ -353,45 +353,9 @@ void Editor::Update() {
 				node->Rename(name);
 			}
 
-			std::function<void(Node * node, NodeTypeID nodeType)> drawNodeProps;
-
-			drawNodeProps = [this, &drawNodeProps](Node *node, NodeTypeID nodeType) -> void {
-				if (_nodeProps[nodeType].size() > 0 && ImGui::CollapsingHeader(App().GetNodeDB().GetNodeTypename(nodeType), ImGuiTreeNodeFlags_DefaultOpen)) {
-					ImGui::Indent();
-
-					for (EditorNodeProp &prop : _nodeProps[nodeType]) {
-						ImGui::Text("%s", prop.propName.c_str());
-						ImGui::SameLine();
-
-						ImGui::PushID(node->ID());
-						if (prop.propType == EditorNodePropType::Int32) {
-							ImGui::InputInt(("##" + prop.propName).c_str(), reinterpret_cast<int *>(prop.getFunction(node)));
-						} else if (prop.propType == EditorNodePropType::Float) {
-							ImGui::DragFloat(("##" + prop.propName).c_str(), reinterpret_cast<float *>(prop.getFunction(node)));
-						} else if (prop.propType == EditorNodePropType::Vec2) {
-							ImGui::DragFloat2(("##" + prop.propName).c_str(), &((reinterpret_cast<glm::vec2 *>(prop.getFunction(node)))->x));
-						} else if (prop.propType == EditorNodePropType::RID) {
-							ImGui::InputInt(("##" + prop.propName).c_str(), reinterpret_cast<RID *>(prop.getFunction(node)));
-						} else if (prop.propType == EditorNodePropType::Color) {
-							ImGui::ColorEdit3(("##" + prop.propName).c_str(), &reinterpret_cast<Color *>(prop.getFunction(node))->r);
-						} else if (prop.propType == EditorNodePropType::String) {
-							ImGui::InputText(("##" + prop.propName).c_str(), reinterpret_cast<std::string *>(prop.getFunction(node)));
-						} else if (prop.propType == EditorNodePropType::Bool) {
-							ImGui::Checkbox(("##" + prop.propName).c_str(), reinterpret_cast<bool *>(prop.getFunction(node)));
-						}
-						ImGui::PopID();
-					}
-
-					ImGui::Unindent();
-				}
-
-				const NodeType &typeData = App().GetNodeDB().GetNodeType(nodeType);
-				if (typeData.extends != 0) {
-					drawNodeProps(node, typeData.extends);
-				}
-			};
-
-			drawNodeProps(node, node->TypeID());
+			ImGui::PushID(node->ID());
+			node->UpdateEditor();
+			ImGui::PopID();
 		}
 	}
 
@@ -405,7 +369,7 @@ void Editor::Update() {
 		for (size_t i = 0; i < _scenes.size(); i++) {
 			ImGui::PushID((void *)_scenes[i].get());
 
-			ImGui::Text(_scenes[i]->GetFilepath().c_str());
+			ImGui::Text("%s", _scenes[i]->GetFilepath().c_str());
 			ImGui::SameLine();
 
 			if (ImGui::Button("Open")) {

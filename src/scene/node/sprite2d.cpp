@@ -1,9 +1,10 @@
 #include "sprite2d.hpp"
 
-#include "math/matrix.hpp"
+#include "imgui.h"
 
 #include "core/application.hpp"
 #include "core/debug.hpp"
+#include "math/matrix.hpp"
 #include "resource/image_texture.hpp"
 #include "visual/renderer.hpp"
 
@@ -37,6 +38,23 @@ bool Sprite2D::Copy(Node *dst) {
 	dstNode->Modulate() = Modulate();
 
 	return true;
+}
+
+void Sprite2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Texture");
+		ImGui::SameLine();
+		ImGui::InputInt("##Texture", &_texture);
+
+		ImGui::Text("%s", "Modulate");
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##Modulate", &_modulate.r);
+
+		ImGui::Unindent();
+	}
+	Node2D::UpdateEditor();
 }
 
 void Sprite2D::Update() {

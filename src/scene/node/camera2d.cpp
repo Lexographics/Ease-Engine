@@ -1,5 +1,7 @@
 #include "camera2d.hpp"
 
+#include "imgui.h"
+
 #include "core/application.hpp"
 #include "math/matrix.hpp"
 
@@ -26,6 +28,20 @@ bool Camera2D::Copy(Node *dst) {
 	dstNode->Rotatable() = Rotatable();
 
 	return true;
+}
+
+void Camera2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Rotatable");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Rotatable", &_rotatable);
+
+		ImGui::Unindent();
+	}
+
+	Node2D::UpdateEditor();
 }
 
 glm::mat4 Camera2D::GetMatrix() {

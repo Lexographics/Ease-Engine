@@ -12,8 +12,9 @@ class Node2D : public Node {
 
 	bool Serialize(Document &doc) override;
 	bool Deserialize(const Document &doc) override;
-	
+
 	bool Copy(Node *dst) override;
+	void UpdateEditor() override;
 
 	glm::mat4 GetTransform();
 	glm::mat4 GetLocalTransform();
