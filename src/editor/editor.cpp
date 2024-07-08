@@ -108,7 +108,7 @@ void Editor::Init() {
 		}
 	});
 
-	_fileClickEvent[".sscn"] = [this](std::filesystem::path path) {
+	_fileLeftClickEvent[".sscn"] = [this](std::filesystem::path path) {
 		for (size_t i = 0; i < this->_scenes.size(); i++) {
 			if (this->_scenes[i]->GetFilepath().string() == path.string()) {
 				App().SetCurrentScene(this->_scenes[i]);
@@ -122,6 +122,20 @@ void Editor::Init() {
 		this->_ignoreOnSceneChanged = true;
 		App().SetCurrentScene(scene);
 		this->_ignoreOnSceneChanged = false;
+	};
+
+	_fileContextMenu[".png"] = [this](std::filesystem::path path) {
+		if (ImGui::MenuItem("Import to scene")) {
+			ImageTexture *texture = App().GetResourceRegistry().NewResource<ImageTexture>();
+			texture->Load(path.string().c_str());
+			App().GetResourceRegistry().AddResource(texture);
+		}
+	};
+
+	_fileContextMenu[".lua"] = [this](std::filesystem::path path) {
+		if (ImGui::MenuItem("Add to scene")) {
+			App().GetCurrentScene()->_scripts.push_back(path.string());
+		}
 	};
 
 	App().OnSceneChanged([this]() {
@@ -348,8 +362,9 @@ void Editor::Update() {
 
 	ImGui::Begin("Filesystem");
 
+	bool openFileContext = false;
 	std::function<void(std::filesystem::path path)> drawDir;
-	drawDir = [&drawDir, this](std::filesystem::path path) {
+	drawDir = [&drawDir, this, &openFileContext](std::filesystem::path path) {
 		auto dir = App().FS().ReadDirectory(path);
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth;
@@ -370,16 +385,39 @@ void Editor::Update() {
 
 			if (ImGui::TreeNodeEx(entry.path.filename().string().c_str(), flags | ImGuiTreeNodeFlags_Leaf)) {
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-					auto fn = _fileClickEvent[entry.path.extension().string()];
+					auto fn = _fileLeftClickEvent[entry.path.extension().string()];
 					if (fn) {
 						fn(entry.path);
 					}
 				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+					this->_currentRClickPath = entry;
+					openFileContext = true;
+				}
+
 				ImGui::TreePop();
 			}
 		}
 	};
 	drawDir("res://");
+
+	if (openFileContext) {
+		ImGui::OpenPopup("##FileRclick");
+	}
+
+	if (ImGui::BeginPopup("##FileRclick")) {
+		if (ImGui::MenuItem("Delete")) {
+			Debug::Log("Deleted file");
+		}
+
+		auto fn = _fileContextMenu[_currentRClickPath.path.extension().string()];
+		if (fn) {
+			fn(_currentRClickPath.path);
+		}
+
+		ImGui::EndPopup();
+	}
 
 	ImGui::End();
 
