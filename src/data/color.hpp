@@ -21,7 +21,7 @@ class Color {
 	}
 
 	static Color RGB(u8 r, u8 g, u8 b, u8 a = 255) {
-		return Color(255.f / r, 255.f / g, 255.f / b, 255.f / a);
+		return Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
 	}
 
 	static Color HSV(f32 h, f32 s, f32 v) {

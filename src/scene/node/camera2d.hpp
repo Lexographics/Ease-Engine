@@ -7,6 +7,8 @@
 #include "glm/glm.hpp"
 #include "node2d.hpp"
 
+#include "math/rect.hpp"
+
 class Camera2D : public Node2D {
   public:
 	virtual ~Camera2D() = default;
@@ -19,6 +21,8 @@ class Camera2D : public Node2D {
 
 	glm::mat4 GetMatrix();
 	static glm::mat4 GetBlankMatrix();
+
+	Rect GetBounds();
 
 	void MakeCurrent();
 

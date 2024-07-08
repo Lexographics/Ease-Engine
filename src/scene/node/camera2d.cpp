@@ -63,6 +63,23 @@ glm::mat4 Camera2D::GetBlankMatrix() {
 	return Matrix::CalculateOrtho(-640.f, 640.f, -360.f, 360.f);
 }
 
+Rect Camera2D::GetBounds() {
+	auto mat = GetTransform();
+
+	glm::vec2 position;
+	float rotation;
+	glm::vec2 scale;
+	Matrix::DecomposeTransform(mat, &position, &rotation, &scale);
+
+	Rect rect;
+	rect.x = position.x - (640 * scale.x);
+	rect.y = position.y - (360 * scale.y);
+	rect.w = 1280 * scale.x;
+	rect.h = 720 * scale.y;
+
+	return rect;
+}
+
 void Camera2D::MakeCurrent() {
 	App().GetCurrentScene()->SetCurrentCamera2D(this->ID());
 }

@@ -153,7 +153,23 @@ void Application::Update() {
 	GetRenderer().BeginDraw();
 
 	if (_currentScene)
+		for (Node *node : _currentScene->_nodeIter) {
+			Camera2D *camera = dynamic_cast<Camera2D *>(node);
+			if (!camera)
+				continue;
+
+			Rect bounds = camera->GetBounds();
+			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y}, {bounds.x + bounds.w, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
+			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y}, {bounds.x + bounds.w, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
+			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y + bounds.h}, {bounds.x, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
+			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y + bounds.h}, {bounds.x, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
+		}
+
+	if (_currentScene)
 		_currentScene->Update();
+
+	GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 4.f, Color::RGB(200, 120, 100, 170));
+	GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 4.f, Color::RGB(120, 255, 100, 170));
 
 	GetRenderer().EndDraw();
 
