@@ -19,6 +19,8 @@ class ScriptServer {
 
 	void LoadScript(const char *path);
 
+	int PushModule(const char* path);
+
   private:
 	lua_State *state = nullptr;
 

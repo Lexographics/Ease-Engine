@@ -24,6 +24,9 @@ static void AssignNodeMetatable(lua_State *L, Node *node) {
 
 static luabridge::LuaRef Lua_GetRoot(Scene *scene, lua_State *L) {
 	Node *root = scene->GetRoot();
+	if (!root) {
+		return luabridge::LuaRef(L, nullptr);
+	}
 
 	auto ref = luabridge::LuaRef(L, root);
 	ref.push(L);
@@ -34,6 +37,9 @@ static luabridge::LuaRef Lua_GetRoot(Scene *scene, lua_State *L) {
 
 static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, bool recursive, lua_State *L) {
 	Node *n = node->GetNode(path, recursive);
+	if (!n) {
+		return luabridge::LuaRef(L, nullptr);
+	}
 
 	auto ref = luabridge::LuaRef(L, n);
 	ref.push(L);
@@ -88,8 +94,31 @@ static int Lua_DebugError(lua_State *L) {
 	return Lua_DebugPrint(L, Debug::LogSeverity::Error);
 }
 
-template <>
-struct luabridge::Stack<Key> : luabridge::Enum<Key> {};
+int ModuleLoader(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	return App().GetScriptServer().PushModule(path);
+}
+
+int ScriptServer::PushModule(const char *path) {
+	Ref<FileData> file = App().FS().Load(path);
+	if (!file) {
+		Debug::Error("Failed to find module: {}", path);
+		lua_pushboolean(state, false);
+		return 1;
+	}
+
+	std::string mod{reinterpret_cast<char *>(file->Buffer().data()), file->Buffer().size()};
+
+	if (luaL_loadbuffer(state, mod.c_str(), mod.size(), path)) {
+		Debug::Error("Failed to run module: {}", path);
+		lua_pop(state, 1);
+
+		lua_pushboolean(state, false);
+		return 1;
+	}
+
+	return 1;
+}
 
 void ScriptServer::Init() {
 	using namespace luabridge;
@@ -99,6 +128,9 @@ void ScriptServer::Init() {
 	_updateFuncs.clear();
 
 	luaL_openlibs(state);
+
+	lua_register(state, "module_loader", ModuleLoader);
+	luaL_dostring(state, "package.searchers = { module_loader }");
 
 	getGlobalNamespace(state)
 		.beginNamespace("Debug")
@@ -145,6 +177,8 @@ void ScriptServer::Init() {
 		.addProperty("position", &Node2D::_position)
 		.addProperty("rotation", &Node2D::_rotation)
 		.addProperty("scale", &Node2D::_scale)
+		.addProperty("z_index", &Node2D::_zIndex)
+		.addProperty("visible", &Node2D::_visible)
 		.endClass()
 
 		.deriveClass<Sprite2D, Node2D>("Sprite2D")
@@ -193,7 +227,7 @@ void ScriptServer::LoadScript(const char *path) {
 
 	std::string str{reinterpret_cast<char *>(file->Data()), file->Size()};
 	if (luaL_dostring(state, str.c_str()) != LUA_OK) {
-		Debug::Error("Lua update error: {}", lua_tostring(state, -1));
+		Debug::Error("Lua load error: {}", lua_tostring(state, -1));
 	}
 
 	lua_getglobal(state, "Start");
