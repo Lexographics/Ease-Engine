@@ -19,6 +19,7 @@ class ResourceRegistry {
 	const std::unordered_map<RID, Resource *> GetResources();
 	void AddResource(Resource *res, RID rid = 0);
 	void RemoveResource(Resource *res);
+	void RemoveResourceByID(RID rid);
 
 	template <typename T>
 	void AddResourceType(const char *name) {

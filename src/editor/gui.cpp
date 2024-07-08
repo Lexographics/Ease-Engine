@@ -45,3 +45,27 @@ bool Gui::TexturePicker(const char *id, RID &rid) {
 	ImGui::PopID();
 	return changed;
 }
+
+void Gui::AnimationInput(const char *id, RID &rid) {
+	ImGui::PushID(id);
+
+	ImGui::InputInt("##RID", &rid);
+	if (rid == 0) {
+		if (ImGui::Button("Create")) {
+			Resource *res = App().GetResourceRegistry().CreateResource("SpriteSheetAnimation");
+			App().GetResourceRegistry().AddResource(res, 0);
+			rid = res->GetRID();
+		}
+	} else {
+		if (ImGui::Button("Edit")) {
+			App().GetEditor().SetCurrentAnimation(rid);
+		}
+
+		if (ImGui::Button("Delete")) {
+			App().GetResourceRegistry().RemoveResourceByID(rid);
+			rid = 0;
+		}
+	}
+
+	ImGui::PopID();
+}

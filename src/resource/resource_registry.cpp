@@ -25,4 +25,9 @@ void ResourceRegistry::AddResource(Resource *res, RID rid) {
 }
 
 void ResourceRegistry::RemoveResource(Resource *res) {
+	// TODO: Implement
+}
+
+void ResourceRegistry::RemoveResourceByID(RID rid) {
+	// TODO: Implement
 }

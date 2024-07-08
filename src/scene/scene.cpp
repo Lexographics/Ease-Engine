@@ -13,6 +13,10 @@ Scene::~Scene() {
 }
 
 void Scene::Start() {
+	for (Node *node : _nodeIter) {
+		node->Start();
+	}
+
 	for (auto &script : _scripts) {
 		App().GetScriptServer().LoadScript(script.c_str());
 	}

@@ -9,6 +9,7 @@
 
 #include "sowa.hpp"
 
+#include "core/filesystem/filesystem.hpp"
 #include "scene/node.hpp"
 #include "scene/node/camera2d.hpp"
 #include "scene/scene.hpp"
@@ -29,6 +30,11 @@ class Editor {
 
 	glm::mat4 GetCamera2DMatrix();
 
+	inline void SetCurrentAnimation(RID animation) {
+		_currentAnimation = animation;
+		_currentAnimName = "";
+	}
+
   private:
 	EditorSettings _settings;
 	NodeID _selectedNodeID = 0;
@@ -40,9 +46,14 @@ class Editor {
 
 	std::vector<Ref<Scene>> _scenes;
 	// [extension] = event
-	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileClickEvent;
+	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileLeftClickEvent;
+	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileContextMenu;
+	FileEntry _currentRClickPath;
 
 	bool _ignoreOnSceneChanged = false;
+
+	RID _currentAnimation = 0;
+	std::string _currentAnimName = "";
 };
 
 #endif // EDITOR_HPP

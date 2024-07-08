@@ -20,6 +20,7 @@ class Node2D : public Node {
 	glm::mat4 GetLocalTransform();
 	glm::mat4 GetParentTransform();
 	int GetZIndex();
+	bool IsVisible();
 
 	inline glm::vec2 &Position() { return _position; }
 	inline float &Rotation() { return _rotation; }
@@ -31,6 +32,7 @@ class Node2D : public Node {
 	float _rotation{0.f};
 	glm::vec2 _scale{1.f, 1.f};
 	int _zIndex = 0;
+	bool _visible = true;
 };
 
 #endif // NODE2D_HPP

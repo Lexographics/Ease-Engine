@@ -34,6 +34,13 @@ class SpriteSheetAnimation : public Resource {
 		_animations[name] = anim;
 	}
 
+	void RemoveAnimation(const std::string &name) {
+		if (!HasAnimation(name))
+			return;
+
+		_animations.erase(_animations.find(name));
+	}
+
 	bool HasAnimation(const std::string &name) {
 		return _animations.find(name) != _animations.end();
 	}

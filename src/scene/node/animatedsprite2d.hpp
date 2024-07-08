@@ -14,6 +14,7 @@ class AnimatedSprite2D : public Node2D {
   public:
 	virtual ~AnimatedSprite2D() = default;
 
+	void Start() override;
 	void Update() override;
 
 	bool Serialize(Document &doc) override;
@@ -28,11 +29,14 @@ class AnimatedSprite2D : public Node2D {
 	const std::string &GetCurrentAnimation();
 	void SetCurrentAnimation(const std::string &name);
 
+	void RestartAnimation();
+
   public:
 	std::string _currentAnimation = "";
 	int _frameIndex = 0;
 	float _animationDelta = 0.f;
 	float _animationScale = 1.f;
+	bool _playing = false;
 };
 
 #endif // ANIMATEDSPRITE2D_HPP

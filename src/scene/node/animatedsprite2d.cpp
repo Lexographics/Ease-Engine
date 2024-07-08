@@ -3,6 +3,12 @@
 #include "imgui.h"
 
 #include "core/application.hpp"
+#include "editor/gui.hpp"
+
+void AnimatedSprite2D::Start() {
+	_playing = true;
+	RestartAnimation();
+}
 
 void AnimatedSprite2D::Update() {
 	SpriteSheetAnimation *res = dynamic_cast<SpriteSheetAnimation *>(App().GetResourceRegistry().GetResource(_animation));
@@ -13,19 +19,25 @@ void AnimatedSprite2D::Update() {
 	if (!anim)
 		return;
 
+	if (anim->frames.size() == 0)
+		return;
+
 	ImageTexture *texture = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(anim->texture));
 	if (!texture)
 		return;
 
-	float delta = 1.f / 60;
+	if (_playing) {
+		float delta = 1.f / 60;
 
-	_animationDelta += std::max(delta * _animationScale, 0.f);
-	if (_animationDelta > anim->speed) {
-		_animationDelta -= anim->speed;
-		_frameIndex++;
+		_animationDelta += std::max(delta * _animationScale, 0.f);
+		if (_animationDelta > anim->speed) {
+			// _animationDelta -= anim->speed;
+			_animationDelta = 0;
+			_frameIndex++;
+		}
+
+		_frameIndex = _frameIndex % anim->frames.size();
 	}
-
-	_frameIndex = _frameIndex % anim->frames.size();
 
 	glm::vec2 frameSize;
 	frameSize.x = 1.f / anim->gridSize.x;
@@ -52,6 +64,7 @@ bool AnimatedSprite2D::Serialize(Document &doc) {
 	doc.Set("Animation", _animation);
 	doc.Set("CurrentAnimation", _currentAnimation);
 	doc.Set("AnimationScale", _animationScale);
+	doc.Set("Playing", _playing);
 	return true;
 }
 
@@ -62,7 +75,8 @@ bool AnimatedSprite2D::Deserialize(const Document &doc) {
 
 	_animation = doc.Get("Animation", _animation);
 	_currentAnimation = doc.Get("CurrentAnimation", _currentAnimation);
-	_animationScale = doc.Get("CurrentAnimation", _animationScale);
+	_animationScale = doc.Get("AnimationScale", _animationScale);
+	_playing = doc.Get("Playing", _playing);
 	return true;
 }
 
@@ -75,6 +89,9 @@ bool AnimatedSprite2D::Copy(Node *dst) {
 	dstNode->_animation = _animation;
 	dstNode->SetCurrentAnimation(_currentAnimation);
 	dstNode->_animationScale = _animationScale;
+	dstNode->_playing = _playing;
+	dstNode->_frameIndex = _frameIndex;
+	dstNode->_animationDelta = _animationDelta;
 	return true;
 }
 
@@ -84,11 +101,34 @@ void AnimatedSprite2D::UpdateEditor() {
 
 		ImGui::Text("%s", "Animation");
 		ImGui::SameLine();
-		ImGui::InputInt("##Animation", &_animation);
+		Gui::AnimationInput("##Animation", _animation);
+
+		SpriteSheetAnimation *animation = dynamic_cast<SpriteSheetAnimation *>(App().GetResourceRegistry().GetResource(_animation));
+
+		ImGui::Text("%s", "Current Animation");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##CurrentAnimation", _currentAnimation.c_str())) {
+			if (animation) {
+				for (auto &[name, anim] : animation->GetAnimations()) {
+					if (ImGui::Selectable(name.c_str())) {
+						SetCurrentAnimation(name);
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
 
 		ImGui::Text("%s", "Animation Scale");
 		ImGui::SameLine();
 		ImGui::DragFloat("##AnimationScale", &_animationScale, 0.1f, 0.f);
+
+		ImGui::Text("%s", "Playing");
+		ImGui::SameLine();
+		if (ImGui::Checkbox("##Playing", &_playing)) {
+			if (_playing) {
+				RestartAnimation();
+			}
+		}
 
 		ImGui::Unindent();
 	}
@@ -101,6 +141,10 @@ const std::string &AnimatedSprite2D::GetCurrentAnimation() {
 
 void AnimatedSprite2D::SetCurrentAnimation(const std::string &name) {
 	_currentAnimation = name;
+	RestartAnimation();
+}
+
+void AnimatedSprite2D::RestartAnimation() {
 	_frameIndex = 0;
 	_animationDelta = 0.f;
 }

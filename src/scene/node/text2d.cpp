@@ -9,6 +9,9 @@
 #include "visual/renderer.hpp"
 
 void Text2D::Update() {
+	if (!IsVisible())
+		return;
+
 	Font *res = dynamic_cast<Font *>(App().GetResourceRegistry().GetResource(_font));
 	if (!res) {
 		res = App().GetDefaultFont();

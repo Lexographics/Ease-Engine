@@ -12,6 +12,9 @@
 #include "math/matrix.hpp"
 #include "scene/node/camera2d.hpp"
 
+#include "gui.hpp"
+#include "resource/sprite_sheet_animation.hpp"
+
 void Editor::Init() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -33,7 +36,7 @@ void Editor::Init() {
 
 	Ref<FileData> font = App().FS().Load("data://font.ttf");
 	if (font) {
-		io.Fonts->AddFontFromMemoryTTF(font->Data(), font->Size(), 17, nullptr, io.Fonts->GetGlyphRangesKorean());
+		io.Fonts->AddFontFromMemoryTTF(font->Data(), font->Size(), 18, nullptr, io.Fonts->GetGlyphRangesKorean());
 		io.Fonts->Build();
 	}
 
@@ -205,6 +208,143 @@ void Editor::Update() {
 	}
 
 	ImGui::End();
+
+	if (_currentAnimation != 0) {
+		SpriteSheetAnimation *anim = dynamic_cast<SpriteSheetAnimation *>(App().GetResourceRegistry().GetResource(_currentAnimation));
+		if (anim) {
+			if (ImGui::Begin("Animation")) {
+
+				ImGui::BeginTable("##Table", 2, ImGuiTableFlags_Resizable);
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, ImGui::GetWindowSize().x * 0.2f);
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableNextColumn();
+
+				auto anims = anim->GetAnimations();
+
+				std::string animationToDelete = "";
+				bool animationDeleted = false;
+				for (auto &[name, sheet] : anims) {
+					ImGui::PushID(name.c_str());
+					if (_currentAnimName == "") {
+						_currentAnimName = name;
+					}
+
+					ImGui::Text("%s", name.c_str());
+					ImGui::SameLine();
+					if (ImGui::Button("Edit")) {
+						_currentAnimName = name;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Delete")) {
+						animationToDelete = name;
+						animationDeleted = true;
+					}
+
+					ImGui::PopID();
+				}
+				if (animationDeleted) {
+					anim->RemoveAnimation(animationToDelete);
+				}
+
+				if (ImGui::Button("Create New")) {
+					ImGui::OpenPopup("Animation_CreateNew");
+				}
+
+				if (ImGui::BeginPopup("Animation_CreateNew")) {
+					std::string name;
+					if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+						anim->SetAnimation(name, SpriteSheet());
+						ImGui::CloseCurrentPopup();
+					}
+
+					ImGui::EndPopup();
+				}
+
+				ImGui::TableNextColumn();
+
+				if (_currentAnimName != "" && anim->HasAnimation(_currentAnimName)) {
+					SpriteSheet *sheet = anim->GetAnimation(_currentAnimName);
+
+					ImGui::Text("Animation: %s", _currentAnimName.c_str());
+					Gui::TexturePicker("##Texture", sheet->texture);
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(120.f);
+					ImGui::InputInt2("Frame Count", &sheet->gridSize.x);
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(120.f);
+					ImGui::DragFloat("Speed", &sheet->speed, 0.1f, 0.f, FLT_MAX, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+					ImageTexture *tex = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(sheet->texture));
+					if (tex) {
+						static float textureScale = 1.f;
+						ImGui::SliderFloat("Scale", &textureScale, 0.1f, 10.f);
+
+						// ImGui::Image((ImTextureID)(intptr_t)tex->ID(), ImVec2(tex->Width() * textureScale, tex->Height() * textureScale), ImVec2(0, 1), ImVec2(1, 0));
+
+						ImVec2 uvSize = ImVec2(1.f / sheet->gridSize.x, 1.f / sheet->gridSize.y);
+
+						for (int y = 0; y < sheet->gridSize.y; y++) {
+							ImGui::PushID(y);
+							for (int x = 0; x < sheet->gridSize.x; x++) {
+								ImGui::PushID(x);
+								int invertedY = sheet->gridSize.y - y - 1;
+
+								auto it = std::find(sheet->frames.begin(), sheet->frames.end(), glm::ivec2(x, y));
+								if (it != sheet->frames.end()) {
+									ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)ImColor(0.1f, 0.1f, 0.8f, 1.f));
+								} else {
+									ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)ImColor(0.1f, 0.1f, 0.1f, 1.f));
+								}
+
+								ImVec2 imageTopLeft = ImGui::GetWindowPos();
+								imageTopLeft.x += ImGui::GetCursorPos().x;
+								imageTopLeft.y += ImGui::GetCursorPos().y;
+
+								imageTopLeft.x -= ImGui::GetScrollX();
+								imageTopLeft.y -= ImGui::GetScrollY();
+
+								if (ImGui::ImageButton(
+										"Image",
+										(ImTextureID)(intptr_t)tex->ID(),
+										ImVec2(
+											tex->Width() * textureScale / sheet->gridSize.x,
+											tex->Height() * textureScale / sheet->gridSize.y),
+
+										ImVec2(x * uvSize.x, (invertedY * uvSize.y) + uvSize.y),
+										ImVec2((x * uvSize.x) + uvSize.x, (invertedY * uvSize.y))
+										// ImVec2((x * (sheet->gridSize.x + 1) * uvSize.x) + uvSize.x, (y * sheet->gridSize.y * uvSize.y) + uvSize.y)
+										// ImVec2(1, 0)
+										)) {
+
+									auto it = std::find(sheet->frames.begin(), sheet->frames.end(), glm::ivec2(x, y));
+									if (it != sheet->frames.end()) {
+										sheet->frames.erase(it);
+									} else {
+										sheet->frames.push_back(glm::ivec2(x, y));
+									}
+								}
+
+								if (it != sheet->frames.end()) {
+									ImGui::GetWindowDrawList()->AddText(imageTopLeft, 0xFFFFFFFF, std::to_string(static_cast<int>(it - sheet->frames.begin())).c_str());
+								}
+
+								ImGui::PopStyleColor();
+
+								if (x + 1 < sheet->gridSize.x)
+									ImGui::SameLine();
+
+								ImGui::PopID();
+							}
+							ImGui::PopID();
+						}
+					}
+				}
+
+				ImGui::EndTable();
+			}
+			ImGui::End();
+		}
+	}
 
 	ImGui::Begin("Filesystem");
 
@@ -440,7 +580,10 @@ void Editor::Update() {
 
 	ImGui::End();
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1, 1));
 	ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoBackground);
+	ImGui::PopStyleVar();
+
 	ImVec2 pos;
 	ImVec2 size;
 
@@ -485,8 +628,8 @@ void Editor::Update() {
 		startPos.y += ImGui::GetWindowPos().y;
 
 		ImGui::GetWindowDrawList()->AddRect(
-			ImVec2(startPos.x - 4, startPos.y - 4),
-			ImVec2(startPos.x + size.x + 4, startPos.y + size.y + 4),
+			ImVec2(startPos.x, startPos.y),
+			ImVec2(startPos.x + size.x, startPos.y + size.y),
 			ImColor(10, 20, 200), 0.f, 0, 4.f);
 	}
 

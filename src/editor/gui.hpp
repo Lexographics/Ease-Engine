@@ -6,6 +6,7 @@
 
 namespace Gui {
 bool TexturePicker(const char *id, RID &rid);
+void AnimationInput(const char *id, RID &rid);
 } // namespace Gui
 
 #endif // GUI_HPP
