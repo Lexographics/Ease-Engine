@@ -58,6 +58,8 @@ class Renderer2D {
 	void PushQuad(const PushQuadArgs &args);
 	void DrawText(const std::string &text, Font &font, const glm::mat4 &transform, float z = 0.f, Color color = Color{});
 
+	void DrawLine(const glm::vec2& p1, const glm::vec2& p2, float thickness, Color color = Color{});
+
 	void SetProjectionMatrix(const glm::mat4 &proj);
 
   private:

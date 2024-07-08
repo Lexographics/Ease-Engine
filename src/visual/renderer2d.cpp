@@ -9,6 +9,7 @@
 #include <utf8.h>
 
 #include "gl/vertex_array.hpp"
+#include "math/matrix.hpp"
 
 #define MAX_VERTEX(max_quad) (max_quad * 6)
 
@@ -266,6 +267,21 @@ void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &
 		PushQuad(vertices);
 		x += (ch.advance >> 6);
 	}
+}
+
+void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, Color color /*= Color{}*/) {
+	float rot = atan2(-p1.y - -p2.y, p1.x - p2.x) * 180 / M_PI;
+
+	glm::vec2 sub = {p2.x - p1.x, -p2.y - -p1.y};
+	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
+
+	auto mat = Matrix::CalculateTransform({p1.x, p1.y}, rot, {len, thickness}, {-len / 2.f, 0.f});
+
+	PushQuadArgs args;
+	args.transform = mat;
+	args.color = color;
+	args.textureID = _blankTexture->ID();
+	PushQuad(args);
 }
 
 void Renderer2D::SetProjectionMatrix(const glm::mat4 &proj) {
