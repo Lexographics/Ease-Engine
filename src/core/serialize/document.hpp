@@ -8,6 +8,7 @@
 #include "sowa.hpp"
 
 #include "data/color.hpp"
+#include "math/vector2.hpp"
 
 namespace YAML {
 template <>
@@ -38,7 +39,7 @@ class Document {
 	inline void SetU64(const char *name, u64 value) { _node[name] = value; }
 	inline void SetFloat(const char *name, f32 value) { _node[name] = value; }
 	inline void SetString(const char *name, const std::string &value) { _node[name] = value; }
-	inline void SetVec2(const char *name, const glm::vec2 &value) {
+	inline void SetVec2(const char *name, const Vector2 &value) {
 		_node[name]["x"] = value.x;
 		_node[name]["y"] = value.y;
 	}
@@ -59,7 +60,7 @@ class Document {
 	inline u64 GetU64(const char *name, u64 fallback) const { return _node[name].as<u64>(fallback); }
 	inline f32 GetFloat(const char *name, f32 fallback) const { return _node[name].as<f32>(fallback); }
 	inline std::string GetString(const char *name, const std::string &fallback) const { return _node[name].as<std::string>(fallback); }
-	inline glm::vec2 GetVec2(const char *name, glm::vec2 callback) const {
+	inline Vector2 GetVec2(const char *name, Vector2 callback) const {
 		auto vec = _node[name];
 		if (vec) {
 			callback.x = vec["x"].as<float>(callback.x);

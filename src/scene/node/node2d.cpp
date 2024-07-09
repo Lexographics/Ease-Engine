@@ -77,11 +77,11 @@ void Node2D::UpdateEditor() {
 }
 
 glm::mat4 Node2D::GetTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale, glm::vec2(0, 0), GetParentTransform());
+	return Matrix::CalculateTransform(_position, _rotation, _scale, Vector2(0, 0), GetParentTransform());
 }
 
 glm::mat4 Node2D::GetLocalTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale, glm::vec2(0, 0));
+	return Matrix::CalculateTransform(_position, _rotation, _scale, Vector2(0, 0));
 }
 
 glm::mat4 Node2D::GetParentTransform() {

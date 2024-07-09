@@ -47,8 +47,8 @@ void Camera2D::UpdateEditor() {
 glm::mat4 Camera2D::GetMatrix() {
 	glm::mat4 transform = GetTransform();
 	if (!Rotatable()) {
-		glm::vec2 position;
-		glm::vec2 scale;
+		Vector2 position;
+		Vector2 scale;
 		Matrix::DecomposeTransform(transform, &position, nullptr, &scale);
 
 		transform = Matrix::CalculateTransform(position, 0, scale);
@@ -66,9 +66,9 @@ glm::mat4 Camera2D::GetBlankMatrix() {
 Rect Camera2D::GetBounds() {
 	auto mat = GetTransform();
 
-	glm::vec2 position;
+	Vector2 position;
 	float rotation;
-	glm::vec2 scale;
+	Vector2 scale;
 	Matrix::DecomposeTransform(mat, &position, &rotation, &scale);
 
 	Rect rect;

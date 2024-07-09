@@ -4,6 +4,8 @@
 
 #include "core/debug.hpp"
 
+#include <map>
+
 class SpriteSheet {
   public:
 	RID texture = 0;
@@ -26,7 +28,7 @@ class SpriteSheetAnimation : public Resource {
 		return &_animations[name];
 	}
 
-	const std::unordered_map<std::string, SpriteSheet> &GetAnimations() {
+	const std::map<std::string, SpriteSheet> &GetAnimations() {
 		return _animations;
 	}
 
@@ -54,7 +56,7 @@ class SpriteSheetAnimation : public Resource {
 	}
 
   private:
-	std::unordered_map<std::string, SpriteSheet> _animations;
+	std::map<std::string, SpriteSheet> _animations;
 };
 
 namespace YAML {

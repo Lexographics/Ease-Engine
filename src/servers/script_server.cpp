@@ -4,8 +4,11 @@
 #include <fmt/args.h>
 
 #include "core/debug.hpp"
+#include "math/rect.hpp"
+#include "math/vector2.hpp"
 
 #include "scene/node.hpp"
+#include "scene/node/animatedsprite2d.hpp"
 #include "scene/node/node2d.hpp"
 #include "scene/node/sprite2d.hpp"
 #include "scene/node/text2d.hpp"
@@ -159,17 +162,30 @@ void ScriptServer::Init() {
 	getGlobalNamespace(state)
 		.addFunction("GetScene", GetScene)
 
-		.beginClass<glm::vec2>("Vector2")
+		.beginClass<Vector2>("Vector2")
 		.addConstructor<void(), void(float), void(float, float)>()
-		.addProperty("x", &glm::vec2::x)
-		.addProperty("y", &glm::vec2::y)
-		.addFunction("__tostring", [](glm::vec2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
+		.addProperty("x", &Vector2::x)
+		.addProperty("y", &Vector2::y)
+		.addFunction("Length", &Vector2::Length)
+		.addFunction("LengthSquared", &Vector2::LengthSquared)
+		.addFunction("__add", &Vector2::operator+)
+		.addFunction("__sub", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator-))
+		.addFunction("__div", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator/))
+		.addFunction("__unm", static_cast<Vector2 (Vector2::*)() const>(&Vector2::operator-))
+		.addFunction("__eq", &Vector2::operator==)
+		.addFunction("__tostring", +[](Vector2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
+		.endClass()
+
+		.beginClass<Rect>("Rect")
+		.addConstructor<void(), void(float, float), void(float, float, float, float)>()
+		.addProperty("x", &Rect::x)
+		.addProperty("y", &Rect::y)
+		.addProperty("w", &Rect::w)
+		.addProperty("h", &Rect::h)
 		.endClass()
 
 		.beginClass<Node>("Node")
-		.addFunction("GetNode",
-					 luabridge::overload<Node *, std::string, bool, lua_State *>(&Lua_GetNode),
-					 luabridge::overload<Node *, std::string, lua_State *>(&Lua_GetNode))
+		.addFunction("GetNode", luabridge::overload<Node *, std::string, bool, lua_State *>(&Lua_GetNode), luabridge::overload<Node *, std::string, lua_State *>(&Lua_GetNode))
 		.addProperty("name", &Node::GetName, &Node::Rename)
 		.endClass()
 
@@ -193,6 +209,14 @@ void ScriptServer::Init() {
 		.endClass()
 
 		.deriveClass<Camera2D, Node2D>("Camera2D")
+		.endClass()
+
+		.deriveClass<AnimatedSprite2D, Node2D>("AnimatedSprite2D")
+		.addProperty("animation_scale", &AnimatedSprite2D::_animationScale)
+		.addProperty("playing", &AnimatedSprite2D::_playing)
+		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation)
+		.addFunction("GetCurrentAnimation", &AnimatedSprite2D::GetCurrentAnimation)
+		.addFunction("RestartAnimation", &AnimatedSprite2D::RestartAnimation)
 		.endClass()
 
 		.beginClass<Scene>("Scene")

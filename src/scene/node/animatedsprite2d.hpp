@@ -32,11 +32,13 @@ class AnimatedSprite2D : public Node2D {
 	void RestartAnimation();
 
   public:
-	std::string _currentAnimation = "";
-	int _frameIndex = 0;
-	float _animationDelta = 0.f;
-	float _animationScale = 1.f;
 	bool _playing = false;
+	float _animationScale = 1.f;
+
+  private:
+	int _frameIndex = 0;
+	std::string _currentAnimation = "";
+	float _animationDelta = 0.f;
 };
 
 #endif // ANIMATEDSPRITE2D_HPP

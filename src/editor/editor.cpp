@@ -675,7 +675,7 @@ void Editor::Update() {
 		if (ImGui::IsItemHovered()) {
 			_cameraZoom -= (Input::GetMouseScrollY() * 0.1);
 			_cameraZoom = std::clamp(_cameraZoom, 0.1f, 10.f);
-			_camera2d.Scale() = glm::vec2(_cameraZoom, _cameraZoom);
+			_camera2d.Scale() = Vector2(_cameraZoom, _cameraZoom);
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
