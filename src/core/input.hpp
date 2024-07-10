@@ -9,6 +9,7 @@
 
 #include "eventpp/callbacklist.h"
 #include "glm/glm.hpp"
+#include "math/vector2.hpp"
 
 class Window;
 
@@ -196,6 +197,8 @@ const std::vector<Key> &GetActionKeys(const char *actionName);
 bool IsActionPressed(const char *actionName);
 bool IsActionJustPressed(const char *actionName);
 bool IsActionJustReleased(const char *actionName);
+float GetActionWeight(const char *negativeAction, const char *positiveAction);
+Vector2 GetActionWeight2(const char *negativeActionX, const char *positiveActionX, const char *negativeActionY, const char *positiveActionY);
 
 glm::vec2 GetMousePosition();
 float GetMouseScrollY();

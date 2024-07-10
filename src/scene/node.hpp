@@ -46,7 +46,8 @@ class Node {
 
 	Node *GetNode(const std::string nodePath, bool recursive = true);
 
-	void PrintHierarchy(int indent = 0);
+	// If no scene is given, duplicates in current scene
+	Node *Duplicate(Scene *scene = nullptr);
 
   private:
 	// Internal hierarchy functions that does not modify other than the node passed

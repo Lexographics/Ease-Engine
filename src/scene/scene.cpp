@@ -234,19 +234,7 @@ void Scene::Clear() {
 void Scene::Copy(Scene *src, Scene *dst) {
 	dst->Clear();
 
-	std::function<Node *(Node * src)> copyNode;
-	copyNode = [&](Node *src) -> Node * {
-		Node *node = dst->Create(src->TypeID(), src->Name(), src->ID());
-		src->Copy(node);
-
-		for (Node *child : src->GetChildren()) {
-			node->AddChild(copyNode(child));
-		}
-
-		return node;
-	};
-
-	dst->SetRoot(copyNode(src->GetRoot()));
+	dst->SetRoot(src->GetRoot()->Duplicate(dst));
 	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
 	dst->_scripts = src->_scripts;
 	dst->_scenePath = src->_scenePath;

@@ -21,8 +21,23 @@ class Vector2 {
 		return x * x + y * y;
 	}
 
-	float Distance(const Vector2 &point) const {
+	float DistanceTo(const Vector2 &point) const {
 		return Vector2(point - *this).Length();
+	}
+
+	void Normalize() {
+		float len = Length();
+		if (len == 0.f)
+			return;
+
+		x = x / len;
+		y = y / len;
+	}
+
+	Vector2 Normalized() {
+		Vector2 vec(*this);
+		vec.Normalize();
+		return vec;
 	}
 
 	Vector2 operator-() const {

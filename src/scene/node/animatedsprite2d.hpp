@@ -27,7 +27,7 @@ class AnimatedSprite2D : public Node2D {
 	RID _animation;
 
 	const std::string &GetCurrentAnimation();
-	void SetCurrentAnimation(const std::string &name);
+	void SetCurrentAnimation(const std::string &name, bool reset = true);
 
 	void RestartAnimation();
 

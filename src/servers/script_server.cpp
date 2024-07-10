@@ -4,8 +4,7 @@
 #include <fmt/args.h>
 
 #include "core/debug.hpp"
-#include "math/rect.hpp"
-#include "math/vector2.hpp"
+#include "math/math.hpp"
 
 #include "scene/node.hpp"
 #include "scene/node/animatedsprite2d.hpp"
@@ -53,6 +52,29 @@ static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, bool recursiv
 
 static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, lua_State *L) {
 	return Lua_GetNode(node, path, true, L);
+}
+
+static luabridge::LuaRef Lua_Duplicate(Node *node, lua_State *L) {
+	Node *dup = node->Duplicate(nullptr);
+
+	auto ref = luabridge::LuaRef(L, dup);
+	ref.push(L);
+	AssignNodeMetatable(L, dup);
+
+	return ref;
+}
+
+static luabridge::LuaRef Lua_GetChild(Node *node, size_t index, lua_State *L) {
+	Node *child = node->GetChild(index);
+	if (!child) {
+		return luabridge::LuaRef(L, nullptr);
+	}
+
+	auto ref = luabridge::LuaRef(L, child);
+	ref.push(L);
+	AssignNodeMetatable(L, child);
+
+	return ref;
 }
 
 static int Lua_DebugPrint(lua_State *L, Debug::LogSeverity severity) {
@@ -145,8 +167,17 @@ void ScriptServer::Init() {
 
 	getGlobalNamespace(state)
 		.beginNamespace("Key")
+		.addVariable("Unknown", Key::Unknown)
 		.addVariable("W", Key::W)
+		.addVariable("A", Key::A)
+		.addVariable("S", Key::S)
+		.addVariable("D", Key::D)
 		.addVariable("Space", Key::Space)
+		.addVariable("Enter", Key::Enter)
+		.endNamespace()
+
+		.beginNamespace("Math")
+		.addFunction("Clamp", Math::Clamp<float>)
 		.endNamespace();
 
 	getGlobalNamespace(state)
@@ -157,6 +188,8 @@ void ScriptServer::Init() {
 		.addFunction("IsKeyDown", +[](i32 key) { return Input::IsKeyDown((Input::Key)key); })
 		.addFunction("IsKeyJustPressed", +[](i32 key) { return Input::IsKeyJustPressed((Input::Key)key); })
 		.addFunction("IsKeyJustReleased", +[](i32 key) { return Input::IsKeyJustReleased((Input::Key)key); })
+		.addFunction("GetActionWeight", Input::GetActionWeight)
+		.addFunction("GetActionWeight2", Input::GetActionWeight2)
 		.endNamespace();
 
 	getGlobalNamespace(state)
@@ -168,9 +201,13 @@ void ScriptServer::Init() {
 		.addProperty("y", &Vector2::y)
 		.addFunction("Length", &Vector2::Length)
 		.addFunction("LengthSquared", &Vector2::LengthSquared)
+		.addFunction("DistanceTo", &Vector2::DistanceTo)
+		.addFunction("Normalize", &Vector2::Normalize)
+		.addFunction("Normalized", &Vector2::Normalized)
 		.addFunction("__add", &Vector2::operator+)
 		.addFunction("__sub", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator-))
-		.addFunction("__div", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator/))
+		.addFunction("__mul", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator*), static_cast<Vector2 (Vector2::*)(float) const>(&Vector2::operator*))
+		.addFunction("__div", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator/), static_cast<Vector2 (Vector2::*)(float) const>(&Vector2::operator/))
 		.addFunction("__unm", static_cast<Vector2 (Vector2::*)() const>(&Vector2::operator-))
 		.addFunction("__eq", &Vector2::operator==)
 		.addFunction("__tostring", +[](Vector2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
@@ -182,10 +219,19 @@ void ScriptServer::Init() {
 		.addProperty("y", &Rect::y)
 		.addProperty("w", &Rect::w)
 		.addProperty("h", &Rect::h)
+		.addFunction("Left", &Rect::Left)
+		.addFunction("Right", &Rect::Right)
+		.addFunction("Bottom", &Rect::Bottom)
+		.addFunction("Top", &Rect::Top)
 		.endClass()
 
 		.beginClass<Node>("Node")
 		.addFunction("GetNode", luabridge::overload<Node *, std::string, bool, lua_State *>(&Lua_GetNode), luabridge::overload<Node *, std::string, lua_State *>(&Lua_GetNode))
+		.addFunction("AddChild", &Node::AddChild)
+		.addFunction("GetChildCount", &Node::GetChildCount)
+		.addFunction("GetChild", &Lua_GetChild)
+		.addFunction("Free", &Node::Free)
+		.addFunction("Duplicate", &Lua_Duplicate)
 		.addProperty("name", &Node::GetName, &Node::Rename)
 		.endClass()
 
@@ -214,7 +260,7 @@ void ScriptServer::Init() {
 		.deriveClass<AnimatedSprite2D, Node2D>("AnimatedSprite2D")
 		.addProperty("animation_scale", &AnimatedSprite2D::_animationScale)
 		.addProperty("playing", &AnimatedSprite2D::_playing)
-		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation)
+		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation, +[](AnimatedSprite2D *node, const std::string &name) { node->SetCurrentAnimation(name, true); })
 		.addFunction("GetCurrentAnimation", &AnimatedSprite2D::GetCurrentAnimation)
 		.addFunction("RestartAnimation", &AnimatedSprite2D::RestartAnimation)
 		.endClass()

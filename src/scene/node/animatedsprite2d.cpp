@@ -139,9 +139,10 @@ const std::string &AnimatedSprite2D::GetCurrentAnimation() {
 	return _currentAnimation;
 }
 
-void AnimatedSprite2D::SetCurrentAnimation(const std::string &name) {
+void AnimatedSprite2D::SetCurrentAnimation(const std::string &name, bool reset /* = true*/) {
 	_currentAnimation = name;
-	RestartAnimation();
+	if (reset)
+		RestartAnimation();
 }
 
 void AnimatedSprite2D::RestartAnimation() {

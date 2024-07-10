@@ -44,7 +44,7 @@ size_t Node::GetChildCount() {
 }
 
 Node *Node::GetChild(size_t index) {
-	if (_children.size() >= index)
+	if (index >= _children.size())
 		return nullptr;
 	return _children[index];
 }
@@ -70,21 +70,20 @@ Node *Node::GetNode(const std::string nodePath, bool recursive) {
 	return nullptr;
 }
 
-static void PrintIndent(int count) {
-	for (int i = 0; i < count; i++) {
-		std::cout << "=";
-	}
-	std::cout << "> ";
-}
+Node *Node::Duplicate(Scene *scene /*= nullptr*/) {
+	if (!scene)
+		scene = App().GetCurrentScene().get();
+	if (!scene)
+		return nullptr;
 
-void Node::PrintHierarchy(int indent) {
-	PrintIndent(indent);
-	std::cout << Name() << " (" << App().GetNodeDB().GetNodeTypename(TypeID()) << ")" << std::endl;
+	Node *node = scene->Create(TypeID(), Name(), ID());
+	Copy(node);
 
-	Node *node = this;
 	for (Node *child : GetChildren()) {
-		child->PrintHierarchy(indent + 1);
+		node->AddChild(child->Duplicate(scene));
 	}
+
+	return node;
 }
 
 void Node::removeChild(Node *child) {
