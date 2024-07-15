@@ -17,11 +17,13 @@ class Node2D : public Node {
 	bool Copy(Node *dst) override;
 	void UpdateEditor() override;
 
-	glm::mat4 GetTransform();
-	glm::mat4 GetLocalTransform();
+	glm::mat4 GetTransform(const Vector2 &offset = Vector2(0.f, 0.f));
+	glm::mat4 GetLocalTransform(const Vector2 &offset = Vector2(0.f, 0.f));
 	glm::mat4 GetParentTransform();
 	int GetZIndex();
 	bool IsVisible();
+
+	Vector2 GetGlobalPosition();
 
 	inline Vector2 &Position() { return _position; }
 	inline float &Rotation() { return _rotation; }

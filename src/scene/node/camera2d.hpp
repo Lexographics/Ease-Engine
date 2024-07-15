@@ -28,8 +28,9 @@ class Camera2D : public Node2D {
 
 	inline bool &Rotatable() { return _rotatable; }
 
-  private:
+  public:
 	bool _rotatable = false;
+	Vector2 _offset = Vector2(0.f);
 };
 
 #endif // CAMERA2D_HPP

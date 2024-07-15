@@ -34,6 +34,10 @@ void Camera2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
+		ImGui::Text("%s", "Offset");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Offset", &_offset.x);
+
 		ImGui::Text("%s", "Rotatable");
 		ImGui::SameLine();
 		ImGui::Checkbox("##Rotatable", &_rotatable);
@@ -45,13 +49,15 @@ void Camera2D::UpdateEditor() {
 }
 
 glm::mat4 Camera2D::GetMatrix() {
-	glm::mat4 transform = GetTransform();
+	glm::mat4 transform;
 	if (!Rotatable()) {
 		Vector2 position;
 		Vector2 scale;
-		Matrix::DecomposeTransform(transform, &position, nullptr, &scale);
+		Matrix::DecomposeTransform(GetTransform(), &position, nullptr, &scale);
 
-		transform = Matrix::CalculateTransform(position, 0, scale);
+		transform = Matrix::CalculateTransform(position, 0, scale, _offset);
+	} else {
+		transform = GetTransform(_offset);
 	}
 	transform = glm::inverse(transform);
 

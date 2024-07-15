@@ -76,12 +76,12 @@ void Node2D::UpdateEditor() {
 	Node::UpdateEditor();
 }
 
-glm::mat4 Node2D::GetTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale, Vector2(0, 0), GetParentTransform());
+glm::mat4 Node2D::GetTransform(const Vector2 &offset) {
+	return Matrix::CalculateTransform(_position, _rotation, _scale, offset, GetParentTransform());
 }
 
-glm::mat4 Node2D::GetLocalTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale, Vector2(0, 0));
+glm::mat4 Node2D::GetLocalTransform(const Vector2 &offset) {
+	return Matrix::CalculateTransform(_position, _rotation, _scale, offset);
 }
 
 glm::mat4 Node2D::GetParentTransform() {
@@ -110,4 +110,10 @@ bool Node2D::IsVisible() {
 	}
 
 	return _visible;
+}
+
+Vector2 Node2D::GetGlobalPosition() {
+	Vector2 pos;
+	Matrix::DecomposeTransform(GetTransform(), &pos, nullptr, nullptr);
+	return pos;
 }

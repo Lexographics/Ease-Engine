@@ -11,6 +11,9 @@ void AnimatedSprite2D::Start() {
 }
 
 void AnimatedSprite2D::Update() {
+	if (!IsVisible())
+		return;
+
 	SpriteSheetAnimation *res = dynamic_cast<SpriteSheetAnimation *>(App().GetResourceRegistry().GetResource(_animation));
 	if (!res)
 		return;
@@ -27,9 +30,7 @@ void AnimatedSprite2D::Update() {
 		return;
 
 	if (_playing) {
-		float delta = 1.f / 60;
-
-		_animationDelta += std::max(delta * _animationScale, 0.f);
+		_animationDelta += std::max(App().Delta() * _animationScale, 0.f);
 		if (_animationDelta > anim->speed) {
 			// _animationDelta -= anim->speed;
 			_animationDelta = 0;
