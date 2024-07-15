@@ -89,6 +89,13 @@ bool Input::IsActionJustReleased(const char *actionName) {
 	return false;
 }
 
+float Input::GetActionWeight(const char *negativeAction, const char *positiveAction) {
+	return -static_cast<int>(IsActionPressed(negativeAction)) + static_cast<int>(IsActionPressed(positiveAction));
+}
+Vector2 Input::GetActionWeight2(const char *negativeActionX, const char *positiveActionX, const char *negativeActionY, const char *positiveActionY) {
+	return Vector2(GetActionWeight(negativeActionX, positiveActionX), GetActionWeight(negativeActionY, positiveActionY));
+}
+
 glm::vec2 Input::GetMousePosition() {
 	return state.cursorPos;
 }

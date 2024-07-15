@@ -16,6 +16,7 @@ class Sprite2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
+	void UpdateEditor() override;
 
 	inline RID &GetTexture() { return _texture; }
 	inline Color &Modulate() { return _modulate; }

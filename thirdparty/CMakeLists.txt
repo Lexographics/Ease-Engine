@@ -35,6 +35,8 @@ set(SOWA_THIRDPARTY_INCLUDES
 
     "${CMAKE_CURRENT_SOURCE_DIR}/lua"
     "${CMAKE_CURRENT_SOURCE_DIR}/LuaBridge3/Distribution"
+    "${CMAKE_CURRENT_SOURCE_DIR}/openal-soft/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libsndfile/include"
 )
 
 set(SOWA_THIRDPARTY_SOURCES
@@ -100,6 +102,8 @@ set(BUILD_SANDBOX OFF)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.8.0" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.2.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/openal-soft" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/libsndfile" EXCLUDE_FROM_ALL)
 
 
 set(SOWA_THIRDPARTY_INCLUDES ${SOWA_THIRDPARTY_INCLUDES} PARENT_SCOPE)

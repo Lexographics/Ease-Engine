@@ -1,9 +1,11 @@
 #include "sprite2d.hpp"
 
-#include "math/matrix.hpp"
+#include "imgui.h"
 
 #include "core/application.hpp"
 #include "core/debug.hpp"
+#include "editor/gui.hpp"
+#include "math/matrix.hpp"
 #include "resource/image_texture.hpp"
 #include "visual/renderer.hpp"
 
@@ -39,7 +41,27 @@ bool Sprite2D::Copy(Node *dst) {
 	return true;
 }
 
+void Sprite2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Texture");
+		ImGui::SameLine();
+		Gui::TexturePicker("##Texture", _texture);
+
+		ImGui::Text("%s", "Modulate");
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##Modulate", &_modulate.r);
+
+		ImGui::Unindent();
+	}
+	Node2D::UpdateEditor();
+}
+
 void Sprite2D::Update() {
+	if (!IsVisible())
+		return;
+
 	ImageTexture *res = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(_texture));
 	if (!res)
 		return;

@@ -9,6 +9,7 @@
 #include <utf8.h>
 
 #include "gl/vertex_array.hpp"
+#include "math/matrix.hpp"
 
 #define MAX_VERTEX(max_quad) (max_quad * 6)
 
@@ -147,6 +148,39 @@ void Renderer2D::PushQuad(glm::mat4 transform, float textureID, glm::vec2 textur
 	PushQuad(vertices);
 }
 
+void Renderer2D::PushQuad(const PushQuadArgs &args) {
+	glm::vec4 points[4] = {
+		{-0.5f * args.textureScale.x, 0.5f * args.textureScale.y, 0.f, 1.f},
+		{-0.5f * args.textureScale.x, -0.5f * args.textureScale.y, 0.f, 1.f},
+		{0.5f * args.textureScale.x, -0.5f * args.textureScale.y, 0.f, 1.f},
+		{0.5f * args.textureScale.x, 0.5f * args.textureScale.y, 0.f, 1.f}};
+
+	glm::vec2 uvs[4] = {
+		{args.uvTopLeft.x, args.uvTopLeft.y},
+		{args.uvTopLeft.x, args.uvBottomRight.y},
+		{args.uvBottomRight.x, args.uvBottomRight.y},
+		{args.uvBottomRight.x, args.uvTopLeft.y}};
+
+	DefaultVertex2D vertices[4];
+	for (int i = 0; i < 4; i++) {
+		points[i] = args.transform * points[i];
+
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = args.z;
+		vertices[i].r = args.color.r;
+		vertices[i].g = args.color.g;
+		vertices[i].b = args.color.b;
+		vertices[i].a = args.color.a;
+		vertices[i].u = uvs[i].x;
+		vertices[i].v = uvs[i].y;
+		vertices[i].t_id = args.textureID;
+		vertices[i].d_id = args.drawID;
+	}
+
+	PushQuad(vertices);
+}
+
 void Renderer2D::End() {
 	if (_vertices.size() == 0)
 		return;
@@ -233,6 +267,21 @@ void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &
 		PushQuad(vertices);
 		x += (ch.advance >> 6);
 	}
+}
+
+void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, Color color /*= Color{}*/) {
+	float rot = atan2(-p1.y - -p2.y, p1.x - p2.x) * 180 / M_PI;
+
+	glm::vec2 sub = {p2.x - p1.x, -p2.y - -p1.y};
+	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
+
+	auto mat = Matrix::CalculateTransform({p1.x, p1.y}, rot, {len, thickness}, {-len / 2.f, 0.f});
+
+	PushQuadArgs args;
+	args.transform = mat;
+	args.color = color;
+	args.textureID = _blankTexture->ID();
+	PushQuad(args);
 }
 
 void Renderer2D::SetProjectionMatrix(const glm::mat4 &proj) {

@@ -19,6 +19,7 @@ class Text2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
+	void UpdateEditor() override;
 
 	inline RID &GetFont() { return _font; }
 	inline std::string &Text() { return _text; }

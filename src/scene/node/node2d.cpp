@@ -2,6 +2,8 @@
 
 #include "math/matrix.hpp"
 
+#include "imgui.h"
+
 bool Node2D::Serialize(Document &doc) {
 	if (!Node::Serialize(doc))
 		return false;
@@ -9,6 +11,8 @@ bool Node2D::Serialize(Document &doc) {
 	doc.SetVec2("Position", Position());
 	doc.SetFloat("Rotation", Rotation());
 	doc.SetVec2("Scale", Scale());
+	doc.Set("ZIndex", ZIndex());
+	doc.Set("Visible", _visible);
 
 	return true;
 }
@@ -20,6 +24,8 @@ bool Node2D::Deserialize(const Document &doc) {
 	Position() = doc.GetVec2("Position", Position());
 	Rotation() = doc.GetFloat("Rotation", Rotation());
 	Scale() = doc.GetVec2("Scale", Scale());
+	ZIndex() = doc.Get("ZIndex", ZIndex());
+	_visible = doc.Get("Visible", _visible);
 
 	return true;
 }
@@ -34,16 +40,48 @@ bool Node2D::Copy(Node *dst) {
 	dstNode->Rotation() = Rotation();
 	dstNode->Scale() = Scale();
 	dstNode->ZIndex() = ZIndex();
+	dstNode->_visible = _visible;
 
 	return true;
 }
 
-glm::mat4 Node2D::GetTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale, GetParentTransform());
+void Node2D::UpdateEditor() {
+	if (ImGui::CollapsingHeader("Node2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Position");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Position", &_position.x, 1.f);
+
+		ImGui::Text("%s", "Rotation");
+		ImGui::SameLine();
+		float rad = glm::radians(_rotation);
+		ImGui::SliderAngle("##Rotation", &rad);
+		_rotation = glm::degrees(rad);
+
+		ImGui::Text("%s", "Scale");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Scale", &_scale.x, 0.005f);
+
+		ImGui::Text("%s", "Z Index");
+		ImGui::SameLine();
+		ImGui::InputInt("##ZIndex", &_zIndex);
+
+		ImGui::Text("%s", "Visible");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Visible", &_visible);
+
+		ImGui::Unindent();
+	}
+	Node::UpdateEditor();
 }
 
-glm::mat4 Node2D::GetLocalTransform() {
-	return Matrix::CalculateTransform(_position, _rotation, _scale);
+glm::mat4 Node2D::GetTransform(const Vector2 &offset) {
+	return Matrix::CalculateTransform(_position, _rotation, _scale, offset, GetParentTransform());
+}
+
+glm::mat4 Node2D::GetLocalTransform(const Vector2 &offset) {
+	return Matrix::CalculateTransform(_position, _rotation, _scale, offset);
 }
 
 glm::mat4 Node2D::GetParentTransform() {
@@ -60,4 +98,22 @@ int Node2D::GetZIndex() {
 	}
 
 	return _zIndex;
+}
+
+bool Node2D::IsVisible() {
+	if (Node2D *parent = dynamic_cast<Node2D *>(GetParent()); nullptr != parent) {
+		if (!parent->_visible) {
+			return false;
+		}
+
+		return parent->IsVisible() && _visible;
+	}
+
+	return _visible;
+}
+
+Vector2 Node2D::GetGlobalPosition() {
+	Vector2 pos;
+	Matrix::DecomposeTransform(GetTransform(), &pos, nullptr, nullptr);
+	return pos;
 }

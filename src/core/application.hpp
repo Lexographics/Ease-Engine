@@ -2,6 +2,9 @@
 #define APPLICATION_HPP
 #pragma once
 
+#include <chrono>
+#include <list>
+
 #include "eventpp/callbacklist.h"
 
 #include "sowa.hpp"
@@ -12,11 +15,14 @@
 
 #include "filesystem/filesystem.hpp"
 
+#include "core/timer.hpp"
 #include "data/project_settings.hpp"
+#include "utils/store.hpp"
 
 #include "scene/node_db.hpp"
 #include "scene/scene.hpp"
 
+#include "servers/audio_server.hpp"
 #include "servers/script_server.hpp"
 
 #include "resource/font.hpp"
@@ -46,10 +52,18 @@ class Application {
 	inline Viewport &GetMainViewport() { return _mainViewport; }
 	inline Editor &GetEditor() { return _editor; }
 	inline ScriptServer &GetScriptServer() { return _scriptServer; }
+	inline AudioServer &GetAudioServer() { return _audioServer; }
+	inline ProjectSettings &GetProjectSettings() { return _projectSettings; }
 
 	Ref<Scene> NewScene();
 	Ref<Scene> GetCurrentScene();
 	void SetCurrentScene(Ref<Scene> scene);
+
+	float Delta() { return _delta; }
+	inline StringStore &GetGlobalStore() { return _globalStore; }
+
+	inline std::list<Timer> &GetTimers() { return _timers; }
+	inline Timer *NewTimer(float timeout, bool autoStart = false) { return &_timers.emplace_back(timeout, autoStart); }
 
   public:
 	inline void OnSceneChanged(const std::function<void()> fn) {
@@ -72,6 +86,7 @@ class Application {
 	Ref<Scene> _currentScene;
 	Ref<Scene> _backgroundScene;
 	ScriptServer _scriptServer;
+	AudioServer _audioServer;
 
 	Renderer _renderer;
 	ResourceRegistry _resourceRegistry;
@@ -81,6 +96,13 @@ class Application {
 	Viewport _mainViewport;
 
 	Editor _editor;
+	std::chrono::high_resolution_clock::time_point _lastUpdate;
+	float _delta = 0.f;
+
+	StringStore _globalStore;
+	StringStore _copyGlobalStore;
+
+	std::list<Timer> _timers;
 };
 
 Application &App();

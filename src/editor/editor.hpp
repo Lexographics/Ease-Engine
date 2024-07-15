@@ -9,38 +9,13 @@
 
 #include "sowa.hpp"
 
+#include "core/filesystem/filesystem.hpp"
 #include "scene/node.hpp"
 #include "scene/node/camera2d.hpp"
 #include "scene/scene.hpp"
 
 struct EditorSettings {
 	bool coloredLogMessages = true;
-};
-
-enum class EditorNodePropType {
-	None = 0,
-	Int32,
-	Float,
-	Vec2,
-	RID,
-	Color,
-	String,
-	Bool,
-};
-
-struct EditorNodeProp {
-	std::string propName = "";
-	EditorNodePropType propType = EditorNodePropType::None;
-	std::function<void *(Node *)> getFunction;
-
-	EditorNodeProp() = default;
-	EditorNodeProp(
-		const std::string &propName,
-		EditorNodePropType propType,
-		std::function<void *(Node *)> getFunction)
-		: propName(propName),
-		  propType(propType),
-		  getFunction(getFunction) {}
 };
 
 class Editor {
@@ -53,15 +28,16 @@ class Editor {
 
 	inline EditorSettings &GetSettings() { return _settings; }
 
-	inline void RegisterNodeProp(NodeTypeID nodeType, EditorNodeProp prop) { _nodeProps[nodeType].push_back(prop); }
-
 	glm::mat4 GetCamera2DMatrix();
+
+	inline void SetCurrentAnimation(RID animation) {
+		_currentAnimation = animation;
+		_currentAnimName = "";
+	}
 
   private:
 	EditorSettings _settings;
 	NodeID _selectedNodeID = 0;
-
-	std::unordered_map<NodeTypeID, std::vector<EditorNodeProp>> _nodeProps;
 
 	// TODO: Editor cameras should be stored per scene
 	Camera2D _camera2d;
@@ -70,9 +46,14 @@ class Editor {
 
 	std::vector<Ref<Scene>> _scenes;
 	// [extension] = event
-	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileClickEvent;
+	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileLeftClickEvent;
+	std::unordered_map<std::string, std::function<void(std::filesystem::path)>> _fileContextMenu;
+	FileEntry _currentRClickPath;
 
 	bool _ignoreOnSceneChanged = false;
+
+	RID _currentAnimation = 0;
+	std::string _currentAnimName = "";
 };
 
 #endif // EDITOR_HPP

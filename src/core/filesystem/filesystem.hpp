@@ -47,7 +47,7 @@ struct FileEntry {
 	std::filesystem::path path = "";
 	bool is_directory = false;
 
-	bool operator<(const FileEntry &other) {
+	bool operator<(const FileEntry &other) const {
 		return path.string() < other.path.string();
 	}
 };

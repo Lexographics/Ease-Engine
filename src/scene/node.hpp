@@ -19,19 +19,41 @@ class Node {
 
 	virtual void Start() {}
 	virtual void Update() {}
+	virtual void Exit() {}
 
 	virtual bool Serialize(Document &doc);
 	virtual bool Deserialize(const Document &doc);
 
 	virtual bool Copy(Node *dst);
+	virtual void UpdateEditor();
 
 	//
 	inline NodeTypeID TypeID() const { return _typeid; }
 	inline NodeID ID() const { return _id; }
+	inline std::string GetID() const { return std::to_string(_id); }
 
 	inline const std::string &Name() const { return _name; }
 	inline const std::string &GetName() const { return _name; }
 	inline void Rename(const std::string &name) { _name = name; }
+	inline const std::vector<std::string> &Groups() const { return _groups; }
+	inline bool IsInGroup(const std::string &group) {
+		return std::find(_groups.begin(), _groups.end(), group) != _groups.end();
+	}
+	inline void AddGroup(const std::string &group) {
+		if (IsInGroup(group))
+			return;
+
+		_groups.push_back(group);
+	}
+	inline void RemoveGroup(const std::string &group) {
+		for (size_t i = 0; i < _groups.size();) {
+			if (_groups[i] == group) {
+				_groups.erase(_groups.begin() + i);
+				return;
+			}
+			i++;
+		}
+	}
 
 	inline std::vector<Node *> GetChildren() { return _children; }
 	inline Node *GetParent() { return _parent; }
@@ -45,7 +67,8 @@ class Node {
 
 	Node *GetNode(const std::string nodePath, bool recursive = true);
 
-	void PrintHierarchy(int indent = 0);
+	// If no scene is given, duplicates in current scene
+	Node *Duplicate(Scene *scene = nullptr);
 
   private:
 	// Internal hierarchy functions that does not modify other than the node passed
@@ -58,6 +81,7 @@ class Node {
 	NodeID _id = 0;
 
 	std::string _name = "";
+	std::vector<std::string> _groups;
 
 	Node *_parent = nullptr;
 	std::vector<Node *> _children;

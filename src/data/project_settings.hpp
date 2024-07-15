@@ -3,10 +3,12 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 class ProjectSettings {
   public:
 	void Load();
+	bool Save();
 
   public:
 	std::string name = "";

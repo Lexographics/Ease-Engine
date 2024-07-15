@@ -5,6 +5,8 @@
 #include "core/debug.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "core/application.hpp"
+#include "resource/sprite_sheet_animation.hpp"
 #include "scene/node/camera2d.hpp"
 
 Scene::~Scene() {
@@ -12,6 +14,10 @@ Scene::~Scene() {
 }
 
 void Scene::Start() {
+	for (Node *node : _nodeIter) {
+		node->Start();
+	}
+
 	for (auto &script : _scripts) {
 		App().GetScriptServer().LoadScript(script.c_str());
 	}
@@ -28,6 +34,9 @@ void Scene::Update() {
 	}
 }
 void Scene::Shutdown() {
+	// for (Node *node : _nodeIter) {
+	// 	node->Exit();
+	// }
 }
 
 Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
@@ -119,31 +128,12 @@ bool Scene::SaveToFile(const char *path) {
 		if (!res || rid == 0)
 			continue;
 
-		YAML::Node resNode;
+		// YAML::Node resNode;
+		Document resNode;
+		resNode.Set("Type", App().GetResourceRegistry().GetTypeName(res->ResourceType()));
+		res->SaveResource(resNode);
 
-		if (res->ResourceType() == typeid(ImageTexture).hash_code()) {
-			ImageTexture *texture = dynamic_cast<ImageTexture *>(res);
-			if (!texture) {
-				Debug::Error("Invalid resource: {}, expected ImageTexture", res->GetRID());
-				continue;
-			}
-
-			resNode["Type"] = "ImageTexture";
-			resNode["Path"] = texture->Filepath();
-		} else if (res->ResourceType() == typeid(Font).hash_code()) {
-			Font *font = dynamic_cast<Font *>(res);
-			if (!font) {
-				Debug::Error("Invalid resource: {}, expected Font", res->GetRID());
-				continue;
-			}
-
-			resNode["Type"] = "Font";
-			resNode["Path"] = font->Filepath();
-		} else {
-			Debug::Error("Unknown resource type for resource: {}", res->GetRID());
-			continue;
-		}
-		resources[rid] = resNode;
+		resources[rid] = resNode.GetYAMLNode();
 	}
 	out["Resources"] = resources;
 
@@ -202,27 +192,13 @@ bool Scene::LoadFromFile(const char *path) {
 		RID rid = it->first.as<RID>(0);
 		YAML::Node resData = it->second;
 		std::string resType = resData["Type"].as<std::string>("");
-		if (resType == "ImageTexture") {
-			std::string path = resData["Path"].as<std::string>("");
-			if (path == "") {
-				Debug::Warn("Blank texture path. skipping");
-				continue;
-			}
 
-			ImageTexture *tex = new ImageTexture;
-			tex->Load(path.c_str());
-			App().GetResourceRegistry().AddResource(tex, rid);
-			Debug::Info("Loaded texture with id: {}", rid);
-		} else if (resType == "Font") {
-			std::string path = resData["Path"].as<std::string>("");
-			if (path == "") {
-				Debug::Warn("Blank font path. skipping");
-				continue;
-			}
-
-			Font *font = new Font;
-			font->Load(path.c_str());
-			App().GetResourceRegistry().AddResource(font, rid);
+		Resource *res = App().GetResourceRegistry().CreateResource(resType.c_str());
+		if (res) {
+			App().GetResourceRegistry().AddResource(res, rid);
+			res->LoadResource(resData);
+		} else {
+			Debug::Error("Failed to load resource: {}", rid);
 		}
 	}
 
@@ -260,25 +236,16 @@ bool Scene::LoadFromFile(const char *path) {
 void Scene::Clear() {
 	if (GetRoot())
 		freeNode(GetRoot()->ID());
+
+	_nodes.clear();
+	_nodeIter.clear();
 }
 
 // static
 void Scene::Copy(Scene *src, Scene *dst) {
 	dst->Clear();
 
-	std::function<Node *(Node * src)> copyNode;
-	copyNode = [&](Node *src) -> Node * {
-		Node *node = dst->Create(src->TypeID(), src->Name(), src->ID());
-		src->Copy(node);
-
-		for (Node *child : src->GetChildren()) {
-			node->AddChild(copyNode(child));
-		}
-
-		return node;
-	};
-
-	dst->SetRoot(copyNode(src->GetRoot()));
+	dst->SetRoot(src->GetRoot()->Duplicate(dst));
 	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
 	dst->_scripts = src->_scripts;
 	dst->_scenePath = src->_scenePath;

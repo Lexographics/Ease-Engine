@@ -3,17 +3,20 @@
 #include <LuaBridge/LuaBridge.h>
 #include <fmt/args.h>
 
+#include "core/application.hpp"
 #include "core/debug.hpp"
+#include "core/timer.hpp"
+#include "math/math.hpp"
+#include "utils/store.hpp"
 
 #include "scene/node.hpp"
+#include "scene/node/animatedsprite2d.hpp"
+#include "scene/node/audiostreamplayer.hpp"
 #include "scene/node/node2d.hpp"
+#include "scene/node/progress_bar.hpp"
 #include "scene/node/sprite2d.hpp"
 #include "scene/node/text2d.hpp"
 #include "scene/scene.hpp"
-
-static Scene *GetScene() {
-	return App().GetCurrentScene().get();
-}
 
 static void AssignNodeMetatable(lua_State *L, Node *node) {
 	// lua_pushlightuserdata(L, node);
@@ -24,6 +27,9 @@ static void AssignNodeMetatable(lua_State *L, Node *node) {
 
 static luabridge::LuaRef Lua_GetRoot(Scene *scene, lua_State *L) {
 	Node *root = scene->GetRoot();
+	if (!root) {
+		return luabridge::LuaRef(L, nullptr);
+	}
 
 	auto ref = luabridge::LuaRef(L, root);
 	ref.push(L);
@@ -34,6 +40,9 @@ static luabridge::LuaRef Lua_GetRoot(Scene *scene, lua_State *L) {
 
 static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, bool recursive, lua_State *L) {
 	Node *n = node->GetNode(path, recursive);
+	if (!n) {
+		return luabridge::LuaRef(L, nullptr);
+	}
 
 	auto ref = luabridge::LuaRef(L, n);
 	ref.push(L);
@@ -44,6 +53,29 @@ static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, bool recursiv
 
 static luabridge::LuaRef Lua_GetNode(Node *node, std::string path, lua_State *L) {
 	return Lua_GetNode(node, path, true, L);
+}
+
+static luabridge::LuaRef Lua_Duplicate(Node *node, lua_State *L) {
+	Node *dup = node->Duplicate(nullptr);
+
+	auto ref = luabridge::LuaRef(L, dup);
+	ref.push(L);
+	AssignNodeMetatable(L, dup);
+
+	return ref;
+}
+
+static luabridge::LuaRef Lua_GetChild(Node *node, size_t index, lua_State *L) {
+	Node *child = node->GetChild(index);
+	if (!child) {
+		return luabridge::LuaRef(L, nullptr);
+	}
+
+	auto ref = luabridge::LuaRef(L, child);
+	ref.push(L);
+	AssignNodeMetatable(L, child);
+
+	return ref;
 }
 
 static int Lua_DebugPrint(lua_State *L, Debug::LogSeverity severity) {
@@ -88,8 +120,31 @@ static int Lua_DebugError(lua_State *L) {
 	return Lua_DebugPrint(L, Debug::LogSeverity::Error);
 }
 
-template <>
-struct luabridge::Stack<Key> : luabridge::Enum<Key> {};
+int ModuleLoader(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	return App().GetScriptServer().PushModule(path);
+}
+
+int ScriptServer::PushModule(const char *path) {
+	Ref<FileData> file = App().FS().Load(path);
+	if (!file) {
+		Debug::Error("Failed to find module: {}", path);
+		lua_pushboolean(state, false);
+		return 1;
+	}
+
+	std::string mod{reinterpret_cast<char *>(file->Buffer().data()), file->Buffer().size()};
+
+	if (luaL_loadbuffer(state, mod.c_str(), mod.size(), path)) {
+		Debug::Error("Failed to run module: {}", path);
+		lua_pop(state, 1);
+
+		lua_pushboolean(state, false);
+		return 1;
+	}
+
+	return 1;
+}
 
 void ScriptServer::Init() {
 	using namespace luabridge;
@@ -100,6 +155,9 @@ void ScriptServer::Init() {
 
 	luaL_openlibs(state);
 
+	lua_register(state, "module_loader", ModuleLoader);
+	luaL_dostring(state, "package.searchers = { module_loader }");
+
 	getGlobalNamespace(state)
 		.beginNamespace("Debug")
 		.addFunction("Log", Lua_DebugLog)
@@ -109,9 +167,50 @@ void ScriptServer::Init() {
 		.endNamespace();
 
 	getGlobalNamespace(state)
+		.beginClass<Timer>("Timer")
+		.addFunction("Start", &Timer::Start)
+		.addFunction("Pause", &Timer::Pause)
+		.addFunction("Stop", &Timer::Stop)
+		.addFunction("OnTimeout", +[](Timer *timer, luabridge::LuaRef func, lua_State *L) {
+																								if (!func.isCallable()) {
+																									lua_pushstring(L, "OnTimeout argument must be a function");
+																									lua_error(L);
+																									return;
+																								};
+																								
+																							 timer->OnTimeout([func]() {
+																								func.call();
+																								}); })
+		.endClass()
+		.addFunction("NewTimer", +[](float timeout) { return App().NewTimer(timeout); }, +[](float timeout, bool autoStart) { return App().NewTimer(timeout, autoStart); })
+
+		.beginNamespace("Time")
+		.addProperty("delta", +[]() { return App().Delta(); })
+		.endNamespace()
+
 		.beginNamespace("Key")
+		.addVariable("Unknown", Key::Unknown)
 		.addVariable("W", Key::W)
+		.addVariable("A", Key::A)
+		.addVariable("S", Key::S)
+		.addVariable("D", Key::D)
+		.addVariable("E", Key::E)
 		.addVariable("Space", Key::Space)
+		.addVariable("Enter", Key::Enter)
+		.endNamespace()
+
+		.beginNamespace("Math")
+		.addFunction("Clamp", Math::Clamp<float>)
+		.addFunction("Lerp", Math::Lerp<float>, Math::Lerp<Vector2>)
+		.addFunction("Atan2", Math::Atan2)
+		.endNamespace()
+
+		.beginNamespace("Utils")
+		.addFunction("Rand", Utils::Rand)
+		.addFunction("RandFloat", Utils::RandFloat)
+		.addFunction("Randomize", Utils::Randomize)
+		.addFunction("RandRange", Utils::RandRange)
+		.addFunction("RandRangeFloat", Utils::RandRangeFloat)
 		.endNamespace();
 
 	getGlobalNamespace(state)
@@ -122,29 +221,73 @@ void ScriptServer::Init() {
 		.addFunction("IsKeyDown", +[](i32 key) { return Input::IsKeyDown((Input::Key)key); })
 		.addFunction("IsKeyJustPressed", +[](i32 key) { return Input::IsKeyJustPressed((Input::Key)key); })
 		.addFunction("IsKeyJustReleased", +[](i32 key) { return Input::IsKeyJustReleased((Input::Key)key); })
+		.addFunction("GetActionWeight", Input::GetActionWeight)
+		.addFunction("GetActionWeight2", Input::GetActionWeight2)
 		.endNamespace();
 
 	getGlobalNamespace(state)
-		.addFunction("GetScene", GetScene)
+		.addFunction("GetScene", +[]() { return App().GetCurrentScene().get(); })
+		.addFunction("GlobalStore", +[]() { return App().GetGlobalStore(); })
 
-		.beginClass<glm::vec2>("Vector2")
+		.beginClass<StringStore>("StringStore")
+		.addFunction("Clear", &StringStore::Clear)
+		.addFunction("Set", &StringStore::Set)
+		.addFunction("Get", &StringStore::Get)
+		.addFunction("Has", &StringStore::Has)
+		.addFunction("Remove", &StringStore::Remove)
+		.endClass()
+
+		.beginClass<Vector2>("Vector2")
 		.addConstructor<void(), void(float), void(float, float)>()
-		.addProperty("x", &glm::vec2::x)
-		.addProperty("y", &glm::vec2::y)
-		.addFunction("__tostring", [](glm::vec2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
+		.addProperty("x", &Vector2::x)
+		.addProperty("y", &Vector2::y)
+		.addFunction("Length", &Vector2::Length)
+		.addFunction("LengthSquared", &Vector2::LengthSquared)
+		.addFunction("DistanceTo", &Vector2::DistanceTo)
+		.addFunction("Normalize", &Vector2::Normalize)
+		.addFunction("Normalized", &Vector2::Normalized)
+		.addFunction("__add", &Vector2::operator+)
+		.addFunction("__sub", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator-))
+		.addFunction("__mul", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator*), static_cast<Vector2 (Vector2::*)(float) const>(&Vector2::operator*))
+		.addFunction("__div", static_cast<Vector2 (Vector2::*)(const Vector2 &) const>(&Vector2::operator/), static_cast<Vector2 (Vector2::*)(float) const>(&Vector2::operator/))
+		.addFunction("__unm", static_cast<Vector2 (Vector2::*)() const>(&Vector2::operator-))
+		.addFunction("__eq", &Vector2::operator==)
+		.addFunction("__tostring", +[](Vector2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
+		.endClass()
+
+		.beginClass<Rect>("Rect")
+		.addConstructor<void(), void(float, float), void(float, float, float, float)>()
+		.addProperty("x", &Rect::x)
+		.addProperty("y", &Rect::y)
+		.addProperty("w", &Rect::w)
+		.addProperty("h", &Rect::h)
+		.addFunction("Left", &Rect::Left)
+		.addFunction("Right", &Rect::Right)
+		.addFunction("Bottom", &Rect::Bottom)
+		.addFunction("Top", &Rect::Top)
 		.endClass()
 
 		.beginClass<Node>("Node")
-		.addFunction("GetNode",
-					 luabridge::overload<Node *, std::string, bool, lua_State *>(&Lua_GetNode),
-					 luabridge::overload<Node *, std::string, lua_State *>(&Lua_GetNode))
+		.addFunction("GetNode", luabridge::overload<Node *, std::string, bool, lua_State *>(&Lua_GetNode), luabridge::overload<Node *, std::string, lua_State *>(&Lua_GetNode))
+		.addFunction("AddChild", &Node::AddChild)
+		.addFunction("GetChildCount", &Node::GetChildCount)
+		.addFunction("GetChild", &Lua_GetChild)
+		.addFunction("Free", &Node::Free)
+		.addFunction("Duplicate", &Lua_Duplicate)
+		.addFunction("IsInGroup", &Node::IsInGroup)
+		.addFunction("AddGroup", &Node::AddGroup)
+		.addFunction("RemoveGroup", &Node::RemoveGroup)
+		.addFunction("GetID", &Node::GetID)
 		.addProperty("name", &Node::GetName, &Node::Rename)
 		.endClass()
 
 		.deriveClass<Node2D, Node>("Node2D")
+		.addFunction("GetGlobalPosition", &Node2D::GetGlobalPosition)
 		.addProperty("position", &Node2D::_position)
 		.addProperty("rotation", &Node2D::_rotation)
 		.addProperty("scale", &Node2D::_scale)
+		.addProperty("z_index", &Node2D::_zIndex)
+		.addProperty("visible", &Node2D::_visible)
 		.endClass()
 
 		.deriveClass<Sprite2D, Node2D>("Sprite2D")
@@ -159,6 +302,39 @@ void ScriptServer::Init() {
 		.endClass()
 
 		.deriveClass<Camera2D, Node2D>("Camera2D")
+		.addProperty("offset", &Camera2D::_offset)
+		.addProperty("rotatable", &Camera2D::_rotatable)
+		.endClass()
+
+		.deriveClass<AnimatedSprite2D, Node2D>("AnimatedSprite2D")
+		.addProperty("animation_scale", &AnimatedSprite2D::_animationScale)
+		.addProperty("playing", &AnimatedSprite2D::_playing)
+		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation, +[](AnimatedSprite2D *node, const std::string &name) { node->SetCurrentAnimation(name, true); })
+		.addFunction("GetCurrentAnimation", &AnimatedSprite2D::GetCurrentAnimation)
+		.addFunction("RestartAnimation", &AnimatedSprite2D::RestartAnimation)
+		.endClass()
+
+		.deriveClass<AudioStreamPlayer, Node>("AudioStreamPlayer")
+		.addFunction("Play", &AudioStreamPlayer::Play)
+		.addFunction("Pause", &AudioStreamPlayer::Pause)
+		.addFunction("Stop", &AudioStreamPlayer::Stop)
+		.addFunction("IsPlaying", &AudioStreamPlayer::IsPlaying)
+		.addFunction("IsPaused", &AudioStreamPlayer::IsPaused)
+		.addProperty("stream", &AudioStreamPlayer::_stream)
+		.addProperty("autoplay", &AudioStreamPlayer::_autoplay)
+		.addProperty("loop", &AudioStreamPlayer::_loop)
+		.addProperty("pitch", &AudioStreamPlayer::_pitch)
+		.addProperty("gain", &AudioStreamPlayer::_gain)
+		.endClass()
+
+		.deriveClass<ProgressBar, Node2D>("ProgressBar")
+		.addProperty("min_value", &ProgressBar::_minValue)
+		.addProperty("max_value", &ProgressBar::_maxValue)
+		.addProperty("value", &ProgressBar::_value)
+		.addProperty("size", &ProgressBar::_size)
+		.addProperty("padding", &ProgressBar::_padding)
+		.addProperty("foreground_color", &ProgressBar::_foregroundColor)
+		.addProperty("background_color", &ProgressBar::_backgroundColor)
 		.endClass()
 
 		.beginClass<Scene>("Scene")
@@ -193,7 +369,7 @@ void ScriptServer::LoadScript(const char *path) {
 
 	std::string str{reinterpret_cast<char *>(file->Data()), file->Size()};
 	if (luaL_dostring(state, str.c_str()) != LUA_OK) {
-		Debug::Error("Lua update error: {}", lua_tostring(state, -1));
+		Debug::Error("Lua load error: {}", lua_tostring(state, -1));
 	}
 
 	lua_getglobal(state, "Start");

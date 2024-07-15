@@ -6,8 +6,14 @@
 
 <img src="https://raw.githubusercontent.com/sowaengine/sowa/develop/.res/icon-full.png" alt="Sowa Engine Logo"><br><br>
 
+# Sowa Engine
+[Sowa Engine](https://sowaengine.com) is a 2d game engine
+<br>
 
-**Sowa Engine** is a 2D Game/Rendering Engine
+You can see it in action [here](https://www.youtube.com/watch?v=XVIomV2WBQ0)
+[![Demontsration](https://img.youtube.com/vi/XVIomV2WBQ0/maxresdefault.jpg)](https://www.youtube.com/watch?v=XVIomV2WBQ0)
+
+
 
 
 ## Notes
@@ -15,4 +21,4 @@
    Documentation can be found at https://docs.sowaengine.com
    
 ## Building
-- Building instructions can be found in [Building For Windows](https://docs.sowaengine.com/en/latest/engine_development/building_for_windows.html)
+- Building instructions can be found at [Building For Windows](https://docs.sowaengine.com/en/latest/engine_development/building_for_windows.html)
