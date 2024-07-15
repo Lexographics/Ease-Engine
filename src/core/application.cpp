@@ -2,6 +2,7 @@
 
 #include "input.hpp"
 
+#include "resource/audio_stream.hpp"
 #include "resource/font.hpp"
 #include "resource/image_texture.hpp"
 #include "resource/mesh.hpp"
@@ -16,8 +17,10 @@
 #include <iostream>
 
 #include "scene/node/animatedsprite2d.hpp"
+#include "scene/node/audiostreamplayer.hpp"
 #include "scene/node/camera2d.hpp"
 #include "scene/node/node2d.hpp"
+#include "scene/node/progress_bar.hpp"
 #include "scene/node/sprite2d.hpp"
 #include "scene/node/text2d.hpp"
 
@@ -89,11 +92,14 @@ void Application::Init() {
 	NodeTypeID typeId_Text2D = _nodeDB.NewNodeType<Text2D>("Text2D", typeId_Node2D);
 	NodeTypeID typeId_Camera2D = _nodeDB.NewNodeType<Camera2D>("Camera2D", typeId_Node2D);
 	NodeTypeID typeId_AnimatedSprite2D = _nodeDB.NewNodeType<AnimatedSprite2D>("AnimatedSprite2D", typeId_Node2D);
+	NodeTypeID typeId_ProgressBar = _nodeDB.NewNodeType<ProgressBar>("ProgressBar", typeId_Node2D);
+	NodeTypeID typeId_AudioStreamPlayer = _nodeDB.NewNodeType<AudioStreamPlayer>("AudioStreamPlayer", typeId_Node);
 
 	GetResourceRegistry().AddResourceType<ImageTexture>("ImageTexture");
 	GetResourceRegistry().AddResourceType<Font>("Font");
 	GetResourceRegistry().AddResourceType<SpriteSheetAnimation>("SpriteSheetAnimation");
 	GetResourceRegistry().AddResourceType<Mesh>("Mesh");
+	GetResourceRegistry().AddResourceType<AudioStream>("AudioStream");
 
 	_backgroundScene = NewScene();
 	_currentScene = NewScene();
@@ -111,6 +117,8 @@ void Application::Init() {
 		}
 	});
 
+	_lastUpdate = std::chrono::high_resolution_clock::now();
+
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(
 		[](void *self) {
@@ -125,6 +133,10 @@ void Application::Init() {
 }
 
 void Application::Update() {
+	auto now = std::chrono::high_resolution_clock::now();
+	_delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastUpdate).count() / 1000.0;
+	_lastUpdate = now;
+
 	Input::Poll();
 	if (Input::IsActionJustPressed("ui_exit")) {
 		_window.SetShouldClose();
@@ -132,8 +144,13 @@ void Application::Update() {
 
 	Visual::UseViewport(&_mainViewport);
 
-	if (IsRunning())
+	if (IsRunning()) {
 		_scriptServer.CallUpdate();
+
+		for (auto &timer : _timers) {
+			timer.Update(Delta());
+		}
+	}
 
 	_mainViewport.Clear(0.2f, 0.2f, 0.2f, 1.f, true);
 
@@ -152,24 +169,29 @@ void Application::Update() {
 	}
 	GetRenderer().BeginDraw();
 
-	if (_currentScene)
-		for (Node *node : _currentScene->_nodeIter) {
-			Camera2D *camera = dynamic_cast<Camera2D *>(node);
-			if (!camera)
-				continue;
+	if (!IsRunning()) {
+		if (_currentScene)
+			for (Node *node : _currentScene->_nodeIter) {
+				Camera2D *camera = dynamic_cast<Camera2D *>(node);
+				if (!camera)
+					continue;
 
-			Rect bounds = camera->GetBounds();
-			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y}, {bounds.x + bounds.w, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
-			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y}, {bounds.x + bounds.w, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
-			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y + bounds.h}, {bounds.x, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
-			GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y + bounds.h}, {bounds.x, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
-		}
+				// TODO: GetBounds does not calculate rotation
+				Rect bounds = camera->GetBounds();
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y}, {bounds.x + bounds.w, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y}, {bounds.x + bounds.w, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y + bounds.h}, {bounds.x, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y + bounds.h}, {bounds.x, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
+			}
+	}
 
 	if (_currentScene)
 		_currentScene->Update();
 
-	GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 4.f, Color::RGB(200, 120, 100, 170));
-	GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 4.f, Color::RGB(120, 255, 100, 170));
+	if (!IsRunning()) {
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 4.f, Color::RGB(200, 120, 100, 170));
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 4.f, Color::RGB(120, 255, 100, 170));
+	}
 
 	GetRenderer().EndDraw();
 
@@ -199,6 +221,7 @@ void Application::Start() {
 		return;
 	_isRunning = true;
 	Scene::Copy(_currentScene.get(), _backgroundScene.get());
+	_copyGlobalStore = _globalStore;
 
 	_scriptServer.Init();
 	_currentScene->Start();
@@ -210,7 +233,11 @@ void Application::Stop() {
 		return;
 	_isRunning = false;
 
+	_currentScene->Shutdown();
+	_timers.clear();
+
 	Scene::Copy(_backgroundScene.get(), _currentScene.get());
+	_globalStore = _copyGlobalStore;
 }
 
 Ref<Scene> Application::NewScene() {
@@ -225,6 +252,13 @@ Ref<Scene> Application::GetCurrentScene() {
 }
 
 void Application::SetCurrentScene(Ref<Scene> scene) {
+	if (_currentScene && IsRunning()) {
+		_currentScene->Shutdown();
+		_timers.clear();
+	}
 	_currentScene = scene;
+	if (IsRunning()) {
+		_currentScene->Start();
+	}
 	_onSceneChanged();
 }

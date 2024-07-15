@@ -3,19 +3,20 @@
 #include <LuaBridge/LuaBridge.h>
 #include <fmt/args.h>
 
+#include "core/application.hpp"
 #include "core/debug.hpp"
+#include "core/timer.hpp"
 #include "math/math.hpp"
+#include "utils/store.hpp"
 
 #include "scene/node.hpp"
 #include "scene/node/animatedsprite2d.hpp"
+#include "scene/node/audiostreamplayer.hpp"
 #include "scene/node/node2d.hpp"
+#include "scene/node/progress_bar.hpp"
 #include "scene/node/sprite2d.hpp"
 #include "scene/node/text2d.hpp"
 #include "scene/scene.hpp"
-
-static Scene *GetScene() {
-	return App().GetCurrentScene().get();
-}
 
 static void AssignNodeMetatable(lua_State *L, Node *node) {
 	// lua_pushlightuserdata(L, node);
@@ -166,18 +167,50 @@ void ScriptServer::Init() {
 		.endNamespace();
 
 	getGlobalNamespace(state)
+		.beginClass<Timer>("Timer")
+		.addFunction("Start", &Timer::Start)
+		.addFunction("Pause", &Timer::Pause)
+		.addFunction("Stop", &Timer::Stop)
+		.addFunction("OnTimeout", +[](Timer *timer, luabridge::LuaRef func, lua_State *L) {
+																								if (!func.isCallable()) {
+																									lua_pushstring(L, "OnTimeout argument must be a function");
+																									lua_error(L);
+																									return;
+																								};
+																								
+																							 timer->OnTimeout([func]() {
+																								func.call();
+																								}); })
+		.endClass()
+		.addFunction("NewTimer", +[](float timeout) { return App().NewTimer(timeout); }, +[](float timeout, bool autoStart) { return App().NewTimer(timeout, autoStart); })
+
+		.beginNamespace("Time")
+		.addProperty("delta", +[]() { return App().Delta(); })
+		.endNamespace()
+
 		.beginNamespace("Key")
 		.addVariable("Unknown", Key::Unknown)
 		.addVariable("W", Key::W)
 		.addVariable("A", Key::A)
 		.addVariable("S", Key::S)
 		.addVariable("D", Key::D)
+		.addVariable("E", Key::E)
 		.addVariable("Space", Key::Space)
 		.addVariable("Enter", Key::Enter)
 		.endNamespace()
 
 		.beginNamespace("Math")
 		.addFunction("Clamp", Math::Clamp<float>)
+		.addFunction("Lerp", Math::Lerp<float>, Math::Lerp<Vector2>)
+		.addFunction("Atan2", Math::Atan2)
+		.endNamespace()
+
+		.beginNamespace("Utils")
+		.addFunction("Rand", Utils::Rand)
+		.addFunction("RandFloat", Utils::RandFloat)
+		.addFunction("Randomize", Utils::Randomize)
+		.addFunction("RandRange", Utils::RandRange)
+		.addFunction("RandRangeFloat", Utils::RandRangeFloat)
 		.endNamespace();
 
 	getGlobalNamespace(state)
@@ -193,7 +226,16 @@ void ScriptServer::Init() {
 		.endNamespace();
 
 	getGlobalNamespace(state)
-		.addFunction("GetScene", GetScene)
+		.addFunction("GetScene", +[]() { return App().GetCurrentScene().get(); })
+		.addFunction("GlobalStore", +[]() { return App().GetGlobalStore(); })
+
+		.beginClass<StringStore>("StringStore")
+		.addFunction("Clear", &StringStore::Clear)
+		.addFunction("Set", &StringStore::Set)
+		.addFunction("Get", &StringStore::Get)
+		.addFunction("Has", &StringStore::Has)
+		.addFunction("Remove", &StringStore::Remove)
+		.endClass()
 
 		.beginClass<Vector2>("Vector2")
 		.addConstructor<void(), void(float), void(float, float)>()
@@ -232,10 +274,15 @@ void ScriptServer::Init() {
 		.addFunction("GetChild", &Lua_GetChild)
 		.addFunction("Free", &Node::Free)
 		.addFunction("Duplicate", &Lua_Duplicate)
+		.addFunction("IsInGroup", &Node::IsInGroup)
+		.addFunction("AddGroup", &Node::AddGroup)
+		.addFunction("RemoveGroup", &Node::RemoveGroup)
+		.addFunction("GetID", &Node::GetID)
 		.addProperty("name", &Node::GetName, &Node::Rename)
 		.endClass()
 
 		.deriveClass<Node2D, Node>("Node2D")
+		.addFunction("GetGlobalPosition", &Node2D::GetGlobalPosition)
 		.addProperty("position", &Node2D::_position)
 		.addProperty("rotation", &Node2D::_rotation)
 		.addProperty("scale", &Node2D::_scale)
@@ -255,6 +302,8 @@ void ScriptServer::Init() {
 		.endClass()
 
 		.deriveClass<Camera2D, Node2D>("Camera2D")
+		.addProperty("offset", &Camera2D::_offset)
+		.addProperty("rotatable", &Camera2D::_rotatable)
 		.endClass()
 
 		.deriveClass<AnimatedSprite2D, Node2D>("AnimatedSprite2D")
@@ -263,6 +312,29 @@ void ScriptServer::Init() {
 		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation, +[](AnimatedSprite2D *node, const std::string &name) { node->SetCurrentAnimation(name, true); })
 		.addFunction("GetCurrentAnimation", &AnimatedSprite2D::GetCurrentAnimation)
 		.addFunction("RestartAnimation", &AnimatedSprite2D::RestartAnimation)
+		.endClass()
+
+		.deriveClass<AudioStreamPlayer, Node>("AudioStreamPlayer")
+		.addFunction("Play", &AudioStreamPlayer::Play)
+		.addFunction("Pause", &AudioStreamPlayer::Pause)
+		.addFunction("Stop", &AudioStreamPlayer::Stop)
+		.addFunction("IsPlaying", &AudioStreamPlayer::IsPlaying)
+		.addFunction("IsPaused", &AudioStreamPlayer::IsPaused)
+		.addProperty("stream", &AudioStreamPlayer::_stream)
+		.addProperty("autoplay", &AudioStreamPlayer::_autoplay)
+		.addProperty("loop", &AudioStreamPlayer::_loop)
+		.addProperty("pitch", &AudioStreamPlayer::_pitch)
+		.addProperty("gain", &AudioStreamPlayer::_gain)
+		.endClass()
+
+		.deriveClass<ProgressBar, Node2D>("ProgressBar")
+		.addProperty("min_value", &ProgressBar::_minValue)
+		.addProperty("max_value", &ProgressBar::_maxValue)
+		.addProperty("value", &ProgressBar::_value)
+		.addProperty("size", &ProgressBar::_size)
+		.addProperty("padding", &ProgressBar::_padding)
+		.addProperty("foreground_color", &ProgressBar::_foregroundColor)
+		.addProperty("background_color", &ProgressBar::_backgroundColor)
 		.endClass()
 
 		.beginClass<Scene>("Scene")

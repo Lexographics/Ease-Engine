@@ -17,6 +17,7 @@ struct convert<glm::ivec2> {
 		Node node;
 		node.push_back(rhs.x);
 		node.push_back(rhs.y);
+		node.SetStyle(YAML::EmitterStyle::Flow);
 		return node;
 	}
 

@@ -6,7 +6,6 @@
 
 #include <filesystem>
 
-#include "core/application.hpp"
 #include "data/color.hpp"
 #include "resource/image_texture.hpp"
 #include "scene/node.hpp"
@@ -59,7 +58,7 @@ struct fmt::formatter<Node> {
 
 	template <typename Context>
 	auto format(const Node &value, Context &ctx) const {
-		return format_to(ctx.out(), "Node(Name: \"{}\", Type: {})", value.Name(), App().GetNodeDB().GetNodeTypename(value.TypeID()));
+		return format_to(ctx.out(), "Node(Name: \"{}\")", value.Name());
 	}
 };
 
