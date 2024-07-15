@@ -10,3 +10,9 @@
 [submodule "thirdparty/LuaBridge3"]
 	path = thirdparty/LuaBridge3
 	url = https://github.com/sowaengine/thirdparty-LuaBridge3
+[submodule "thirdparty/libsndfile"]
+	path = thirdparty/libsndfile
+	url = https://github.com/sowaengine/thirdparty-libsndfile
+[submodule "thirdparty/openal-soft"]
+	path = thirdparty/openal-soft
+	url = https://github.com/sowaengine/thirdparty-openal-soft

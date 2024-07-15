@@ -47,17 +47,16 @@ add_executable(sowa ${SOWA_SOURCES})
 target_include_directories(
   sowa
   PUBLIC ${SOWA_INCLUDES}
-  PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
+)
+  
+target_include_directories(
+  sowa
+  SYSTEM
+  PUBLIC ${SOWA_THIRDPARTY_INCLUDES}
+)
 
-target_compile_options(sowa PRIVATE "-Werror")
-# target_link_libraries(
-  # sowa
-  # PUBLIC
-    # thirdparty
-# PRIVATE
-    # glfw
-# )
-target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt )
+# target_compile_options(sowa PRIVATE "-Werror")
+target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt OpenAL sndfile )
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
   target_link_libraries( sowa PRIVATE glfw )
 endif()
@@ -69,7 +68,8 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
       OUTPUT_NAME "index"
       SUFFIX ".html"
       LINK_FLAGS
-      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
+      # " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sASSERTIONS -sALLOW_MEMORY_GROWTH --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
       # "-sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
       )
 endif()
