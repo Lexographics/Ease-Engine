@@ -5,6 +5,7 @@
 #include "core/debug.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "core/application.hpp"
 #include "resource/sprite_sheet_animation.hpp"
 #include "scene/node/camera2d.hpp"
 
@@ -33,6 +34,9 @@ void Scene::Update() {
 	}
 }
 void Scene::Shutdown() {
+	// for (Node *node : _nodeIter) {
+	// 	node->Exit();
+	// }
 }
 
 Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
@@ -190,8 +194,12 @@ bool Scene::LoadFromFile(const char *path) {
 		std::string resType = resData["Type"].as<std::string>("");
 
 		Resource *res = App().GetResourceRegistry().CreateResource(resType.c_str());
-		App().GetResourceRegistry().AddResource(res, rid);
-		res->LoadResource(resData);
+		if (res) {
+			App().GetResourceRegistry().AddResource(res, rid);
+			res->LoadResource(resData);
+		} else {
+			Debug::Error("Failed to load resource: {}", rid);
+		}
 	}
 
 	std::function<Node *(YAML::Node)> loadNode;
@@ -228,6 +236,9 @@ bool Scene::LoadFromFile(const char *path) {
 void Scene::Clear() {
 	if (GetRoot())
 		freeNode(GetRoot()->ID());
+
+	_nodes.clear();
+	_nodeIter.clear();
 }
 
 // static
