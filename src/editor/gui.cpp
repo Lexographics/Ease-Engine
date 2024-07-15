@@ -69,3 +69,35 @@ void Gui::AnimationInput(const char *id, RID &rid) {
 
 	ImGui::PopID();
 }
+
+bool Gui::BeginFooter(const char *label) {
+	ImGuiViewport *viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - ImGui::GetFrameHeight()));
+	ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, ImGui::GetFrameHeight()));
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.17f, 0.50f, 0.70f, 1.f));	 // (45, 128, 178)
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20f, 0.55f, 0.75f, 1.f)); // (51, 140, 191)
+
+	bool opened = ImGui::Begin(label, nullptr,
+							   ImGuiWindowFlags_NoCollapse |
+								   ImGuiWindowFlags_NoDecoration |
+								   ImGuiWindowFlags_NoDocking |
+								   ImGuiWindowFlags_NoMove |
+								   ImGuiWindowFlags_NoResize |
+								   ImGuiWindowFlags_NoSavedSettings |
+								   ImGuiWindowFlags_MenuBar |
+								   ImGuiWindowFlags_NoScrollbar |
+								   ImGuiWindowFlags_NoScrollWithMouse);
+
+	ImGui::PopStyleVar();
+	if (!ImGui::BeginMenuBar())
+		return false;
+	return opened;
+}
+
+void Gui::EndFooter() {
+	ImGui::EndMenuBar();
+	ImGui::End();
+	ImGui::PopStyleColor(2);
+}
