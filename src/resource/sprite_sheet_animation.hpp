@@ -68,6 +68,7 @@ struct convert<SpriteSheet> {
 		node["GridSize"] = rhs.gridSize;
 		node["Speed"] = rhs.speed;
 		node["Frames"] = rhs.frames;
+		node["Frames"].SetStyle(YAML::EmitterStyle::Flow);
 		return node;
 	}
 
