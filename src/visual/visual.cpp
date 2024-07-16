@@ -31,7 +31,7 @@ void Visual::UseViewport(Viewport *viewport) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec2 windowSize = state.window->GetWindowSize();
+	Vector2 windowSize = state.window->GetWindowSize();
 
 	float windowRatio = (float)windowSize.x / windowSize.y;
 	float videoRatio = (float)1920.f / 1080.f;

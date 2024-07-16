@@ -4,7 +4,7 @@
 
 #include "visual/gl.hpp"
 
-#include <glm/glm.hpp>
+#include "math/vector2.hpp"
 
 #include "core/input.hpp"
 
@@ -21,7 +21,7 @@ class Window {
 
 	void SetShouldClose(bool close = true);
 
-	glm::vec2 GetWindowSize();
+	Vector2 GetWindowSize();
 
   private:
 	friend struct InputState;

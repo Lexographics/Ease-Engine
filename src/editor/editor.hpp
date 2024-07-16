@@ -35,6 +35,8 @@ class Editor {
 		_currentAnimName = "";
 	}
 
+	inline const Rect &GetViewportRect() const { return _viewportRect; }
+
   private:
 	EditorSettings _settings;
 	NodeID _selectedNodeID = 0;
@@ -54,6 +56,8 @@ class Editor {
 
 	RID _currentAnimation = 0;
 	std::string _currentAnimName = "";
+
+	Rect _viewportRect;
 };
 
 #endif // EDITOR_HPP

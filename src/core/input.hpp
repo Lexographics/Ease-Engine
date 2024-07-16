@@ -200,7 +200,8 @@ bool IsActionJustReleased(const char *actionName);
 float GetActionWeight(const char *negativeAction, const char *positiveAction);
 Vector2 GetActionWeight2(const char *negativeActionX, const char *positiveActionX, const char *negativeActionY, const char *positiveActionY);
 
-glm::vec2 GetMousePosition();
+Vector2 GetWindowMousePosition();
+Vector2 GetMousePosition();
 float GetMouseScrollY();
 float GetMouseScrollX();
 

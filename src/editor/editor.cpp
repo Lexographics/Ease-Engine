@@ -173,7 +173,7 @@ void Editor::Update() {
 	ImGuiWindowFlags windowFlags = 0;
 	windowFlags |= ImGuiWindowFlags_NoCollapse;
 
-	glm::vec2 winSize = App().GetWindow().GetWindowSize();
+	Vector2 winSize = App().GetWindow().GetWindowSize();
 	ImGui::SetNextWindowPos(ImVec2(0.f, 0.f), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(winSize.x, winSize.y), ImGuiCond_Always);
 
@@ -848,6 +848,7 @@ void Editor::Update() {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + pos.y);
 
 	ImVec2 startPos = ImGui::GetCursorPos();
+	_viewportRect = Rect(ImGui::GetWindowPos().x + startPos.x, ImGui::GetWindowPos().y + startPos.y + size.y, size.x, size.y);
 	ImGui::Image((ImTextureID) static_cast<u64>(App().GetMainViewport().GetTargetTextureID(0)), size, ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
 
 	if (App().IsRunning()) {

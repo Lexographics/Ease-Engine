@@ -203,6 +203,7 @@ void ScriptServer::Init() {
 		.addFunction("Clamp", Math::Clamp<float>)
 		.addFunction("Lerp", Math::Lerp<float>, Math::Lerp<Vector2>)
 		.addFunction("Atan2", Math::Atan2)
+		.addFunction("Map", Math::Map<float>)
 		.endNamespace()
 
 		.beginNamespace("Utils")
@@ -223,6 +224,8 @@ void ScriptServer::Init() {
 		.addFunction("IsKeyJustReleased", +[](i32 key) { return Input::IsKeyJustReleased((Input::Key)key); })
 		.addFunction("GetActionWeight", Input::GetActionWeight)
 		.addFunction("GetActionWeight2", Input::GetActionWeight2)
+		.addFunction("GetWindowMousePosition", Input::GetWindowMousePosition)
+		.addFunction("GetMousePosition", Input::GetMousePosition)
 		.endNamespace();
 
 	getGlobalNamespace(state)
@@ -253,6 +256,14 @@ void ScriptServer::Init() {
 		.addFunction("__unm", static_cast<Vector2 (Vector2::*)() const>(&Vector2::operator-))
 		.addFunction("__eq", &Vector2::operator==)
 		.addFunction("__tostring", +[](Vector2 &v) { return fmt::format("Vector2({}, {})", v.x, v.y); })
+		.endClass()
+
+		.beginClass<Color>("Color")
+		.addConstructor<void(), void(float, float, float), void(float, float, float, float)>()
+		.addProperty("r", &Color::r)
+		.addProperty("g", &Color::g)
+		.addProperty("b", &Color::b)
+		.addProperty("a", &Color::a)
 		.endClass()
 
 		.beginClass<Rect>("Rect")

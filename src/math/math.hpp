@@ -32,6 +32,11 @@ inline Vector2 Lerp(Vector2 start, Vector2 end, float t) {
 inline float Atan2(float y, float x) {
 	return std::atan2(y, x);
 }
+
+template <typename T>
+T Map(T v, T input_min, T input_max, T output_min, T output_max) {
+	return (v - input_min) * (output_max - output_min) / (input_max - input_min) + output_min;
+}
 } // namespace Math
 
 #endif // MATH_HPP

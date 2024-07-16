@@ -7,6 +7,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core/application.hpp"
+#include "core/debug.hpp"
+
 enum class InputActionState {
 	Up = 0,
 	Down,
@@ -23,8 +26,8 @@ struct InputState {
 
 	eventpp::CallbackList<void(Input::Event e)> inputEvent;
 
-	glm::vec2 cursorPos = glm::vec2(0.f, 0.f);
-	glm::vec2 lastMouseScroll = glm::vec2(0.f, 0.f);
+	Vector2 cursorPos = Vector2(0.f, 0.f);
+	Vector2 lastMouseScroll = Vector2(0.f, 0.f);
 };
 static InputState state;
 
@@ -41,7 +44,7 @@ void Input::Poll() {
 		}
 	}
 
-	state.lastMouseScroll = glm::vec2(0.f, 0.f);
+	state.lastMouseScroll = Vector2(0.f, 0.f);
 
 	state.window->PollEvents();
 }
@@ -96,8 +99,15 @@ Vector2 Input::GetActionWeight2(const char *negativeActionX, const char *positiv
 	return Vector2(GetActionWeight(negativeActionX, positiveActionX), GetActionWeight(negativeActionY, positiveActionY));
 }
 
-glm::vec2 Input::GetMousePosition() {
+Vector2 Input::GetWindowMousePosition() {
 	return state.cursorPos;
+}
+
+Vector2 Input::GetMousePosition() {
+	Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
+	Vector2 pos = GetWindowMousePosition();
+	pos = App().GetEditor().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
+	return pos * Vector2(1, -1);
 }
 
 float Input::GetMouseScrollY() {

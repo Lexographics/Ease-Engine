@@ -69,8 +69,8 @@ void Window::SetShouldClose(bool close /*= true*/) {
 	glfwSetWindowShouldClose(_window, close ? 1 : 0);
 }
 
-glm::vec2 Window::GetWindowSize() {
-	return glm::vec2(_width, _height);
+Vector2 Window::GetWindowSize() {
+	return Vector2(_width, _height);
 }
 
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
