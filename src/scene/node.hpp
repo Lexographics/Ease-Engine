@@ -70,6 +70,8 @@ class Node {
 	// If no scene is given, duplicates in current scene
 	Node *Duplicate(Scene *scene = nullptr);
 
+	bool IsHovered();
+
   private:
 	// Internal hierarchy functions that does not modify other than the node passed
 	void removeChild(Node *child);

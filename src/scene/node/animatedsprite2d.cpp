@@ -50,7 +50,7 @@ void AnimatedSprite2D::Update() {
 		.transform = GetTransform(),
 		.textureID = static_cast<float>(texture->ID()),
 		.z = static_cast<float>(GetZIndex()),
-		.drawID = static_cast<float>(ID()),
+		.drawID = static_cast<uint32_t>(ID()),
 		.color = Color(1.f),
 		.textureScale = glm::vec2(texture->Width() * frameSize.x, texture->Height() * frameSize.y),
 		.uvTopLeft = topLeft,

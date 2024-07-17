@@ -878,6 +878,10 @@ void Editor::Update() {
 		if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
 			_cameraDragging = false;
 		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			_selectedNodeID = App().GetHoveredID();
+		}
 	}
 
 	ImGui::End();

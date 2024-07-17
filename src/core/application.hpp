@@ -65,6 +65,8 @@ class Application {
 	inline std::list<Timer> &GetTimers() { return _timers; }
 	inline Timer *NewTimer(float timeout, bool autoStart = false) { return &_timers.emplace_back(timeout, autoStart); }
 
+	NodeID GetHoveredID() const { return _hoveredID; }
+
   public:
 	inline void OnSceneChanged(const std::function<void()> fn) {
 		_onSceneChanged.append(fn);
@@ -103,6 +105,8 @@ class Application {
 	StringStore _copyGlobalStore;
 
 	std::list<Timer> _timers;
+
+	NodeID _hoveredID = 0;
 };
 
 Application &App();

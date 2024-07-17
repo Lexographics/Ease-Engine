@@ -17,7 +17,7 @@ void Text2D::Update() {
 		res = App().GetDefaultFont();
 	}
 
-	App().GetRenderer().GetRenderer2D("Text").DrawText(_text, *res, GetTransform(), GetZIndex(), Modulate());
+	App().GetRenderer().GetRenderer2D("Text").DrawText(_text, *res, GetTransform(), GetZIndex(), Modulate(), ID());
 }
 
 bool Text2D::Serialize(Document &doc) {
@@ -69,7 +69,9 @@ void Text2D::UpdateEditor() {
 
 		ImGui::Text("%s", "Font");
 		ImGui::SameLine();
-		ImGui::InputInt("##Font", &_font);
+		int font = static_cast<int>(_font);
+		ImGui::InputInt("##Font", &font);
+		_font = static_cast<RID>(font);
 
 		ImGui::Unindent();
 	}

@@ -135,6 +135,10 @@ Node *Node::Duplicate(Scene *scene /*= nullptr*/) {
 	return node;
 }
 
+bool Node::IsHovered() {
+	return ID() == App().GetHoveredID();
+}
+
 void Node::removeChild(Node *child) {
 	_children.erase(std::remove(_children.begin(), _children.end(), child), _children.end());
 }

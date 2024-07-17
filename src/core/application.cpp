@@ -195,6 +195,9 @@ void Application::Update() {
 
 	GetRenderer().EndDraw();
 
+	Vector2 mousePos = Input::GetMousePosition();
+	_hoveredID = static_cast<NodeID>(_mainViewport.ReadAttachmentInt(1, mousePos.x, GetProjectSettings().rendering.viewport.height - mousePos.y));
+
 	Visual::UseViewport(nullptr);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
@@ -209,6 +212,7 @@ void Application::Update() {
 	_editor.End();
 
 	_window.SwapBuffers();
+	Input::Poll();
 }
 
 void Application::Start() {
@@ -258,7 +262,9 @@ void Application::SetCurrentScene(Ref<Scene> scene) {
 	}
 	_currentScene = scene;
 	if (IsRunning()) {
+		_scriptServer.Init();
 		_currentScene->Start();
+		_scriptServer.CallStart();
 	}
 	_onSceneChanged();
 }
