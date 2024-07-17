@@ -34,12 +34,22 @@ class ImageTexture : public Resource {
 	inline int Width() const { return _width; }
 	inline int Height() const { return _height; }
 	inline int Channels() const { return _channels; }
+	inline void *Pixels() const { return _pixels; }
+
+	inline void SetStorePixels(bool store) { _storePixels = store; }
+	inline void SetFlip(bool flip) { _flip = flip; }
 
   private:
 	uint32_t _id = 0;
 	int _width = 0;
 	int _height = 0;
 	int _channels = 0;
+
+	// only stored if
+	void *_pixels = nullptr;
+	bool _storePixels = false;
+
+	bool _flip = false;
 };
 
 #endif // IMAGE_TEXTURE_HPP

@@ -32,7 +32,7 @@ void ImageTexture::Load(const char *path) {
 		return;
 	}
 
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(!_flip);
 	auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc *>(file->Data()), file->Size(), &_width, &_height, &_channels, 4);
 	if (!pixels) {
 		Delete();
@@ -43,7 +43,11 @@ void ImageTexture::Load(const char *path) {
 	_filepath = path;
 	LoadFromData(pixels, _width, _height);
 
-	stbi_image_free(pixels);
+	if (_storePixels) {
+		_pixels = pixels;
+	} else {
+		stbi_image_free(pixels);
+	}
 }
 
 void ImageTexture::LoadFromData(unsigned char *data, int width, int height) {
@@ -66,4 +70,13 @@ void ImageTexture::LoadFromData(unsigned char *data, int width, int height) {
 }
 
 void ImageTexture::Delete() {
+	if (_pixels != nullptr) {
+		stbi_image_free(_pixels);
+		_pixels = nullptr;
+	}
+
+	if (_id != 0) {
+		glDeleteTextures(1, &_id);
+		_id = 0;
+	}
 }
