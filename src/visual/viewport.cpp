@@ -87,8 +87,10 @@ void Viewport::Clear(float r, float g, float b, float a /*= 1.0*/, bool depth /*
 	// TODO: Designed as if all viewports have (1: RGBA, 2: uint) attachments. Needs update after change
 	glClearColor(r, g, b, a);
 
+#ifdef SW_WEB
 	GLenum attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
 	glDrawBuffers(1, attachments);
+#endif
 
 	glClear(
 		depth ? GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
@@ -101,7 +103,9 @@ void Viewport::Clear(float r, float g, float b, float a /*= 1.0*/, bool depth /*
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
 
+#ifdef SW_WEB
 	glDrawBuffers(2, attachments);
+#endif
 }
 
 int Viewport::GetTargetTextureID(int slot) {
@@ -111,9 +115,9 @@ int Viewport::GetTargetTextureID(int slot) {
 	return 0;
 }
 
-int Viewport::ReadAttachmentInt(int slot, int x, int y) {
-	int color = 0;
+uint32_t Viewport::ReadAttachmentInt(int slot, int x, int y) {
+	uint32_t color = 0;
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
-	glReadPixels(x, _height - y, 1, 1, GL_RED_INTEGER, GL_INT, &color);
+	glReadPixels(x, _height - y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &color);
 	return color;
 }

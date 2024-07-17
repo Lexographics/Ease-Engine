@@ -18,6 +18,8 @@ if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glfw-3.3.8" EXCLUDE_FROM_ALL)
 
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.2" EXCLUDE_FROM_ALL)
+
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/openal-soft" EXCLUDE_FROM_ALL)
 endif()
 
 
@@ -102,7 +104,6 @@ set(BUILD_SANDBOX OFF)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.8.0" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.2.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp" EXCLUDE_FROM_ALL)
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/openal-soft" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/libsndfile" EXCLUDE_FROM_ALL)
 
 

@@ -32,7 +32,7 @@ void Renderer2D::Init(const char *vertexPath, const char *fragmentPath) {
 	_vao.SetAttribute(0, AttributeType::Vec3);
 	_vao.SetAttribute(1, AttributeType::Vec2);
 	_vao.SetAttribute(2, AttributeType::Vec4);
-	_vao.SetAttribute(3, AttributeType::Float);
+	_vao.SetAttribute(3, AttributeType::Uint32);
 	_vao.SetAttribute(4, AttributeType::Float);
 	_vao.UploadAttributes();
 	_vao.Unbind();
@@ -79,7 +79,7 @@ void Renderer2D::PushQuad(DefaultVertex2D vertices[4]) {
 	}
 }
 
-void Renderer2D::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID) {
+void Renderer2D::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, uint32_t drawID, float textureID) {
 	/*
 		{ 0.0f, 1.0f,  0.f, 1.f}
 		{ 0.0f, 0.0f,  0.f, 1.f}
@@ -116,7 +116,7 @@ void Renderer2D::PushQuad(float x, float y, float z, float w, float h, float r, 
 	PushQuad(vertices);
 }
 
-void Renderer2D::PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale, float zIndex, Color color, float drawID) {
+void Renderer2D::PushQuad(glm::mat4 transform, float textureID, glm::vec2 textureScale, float zIndex, Color color, uint32_t drawID) {
 	glm::vec4 points[4] = {
 		{-0.5f * textureScale.x, 0.5f * textureScale.y, 0.f, 1.f},
 		{-0.5f * textureScale.x, -0.5f * textureScale.y, 0.f, 1.f},
@@ -212,7 +212,7 @@ void Renderer2D::End() {
 	Reset();
 }
 
-void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &transform, float z, Color color) {
+void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &transform, float z, Color color, uint32_t id) {
 	float x = 0;
 	float y = 0;
 
@@ -259,7 +259,7 @@ void Renderer2D::DrawText(const std::string &text, Font &font, const glm::mat4 &
 			vertices[i].b = color.b;
 			vertices[i].a = color.a;
 			vertices[i].t_id = ch.textureID;
-			vertices[i].d_id = 1.f;
+			vertices[i].d_id = id;
 			vertices[i].u = uvs[i].x;
 			vertices[i].v = uvs[i].y;
 		}

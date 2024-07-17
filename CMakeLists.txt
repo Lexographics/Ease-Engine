@@ -56,9 +56,9 @@ target_include_directories(
 )
 
 # target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt OpenAL sndfile )
+target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt sndfile )
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
-  target_link_libraries( sowa PRIVATE glfw )
+  target_link_libraries( sowa PRIVATE glfw OpenAL )
 endif()
 
 

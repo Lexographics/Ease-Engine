@@ -2,6 +2,7 @@
 #define MATH_HPP
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 
 #include "matrix.hpp"

@@ -11,30 +11,34 @@ enum class AttributeType {
 	Vec2,
 	Vec3,
 	Vec4,
+	Uint32,
 };
 
 inline GLenum AttributeType_GLenum(AttributeType type) {
-	return type == AttributeType::Float	 ? GL_FLOAT
-		   : type == AttributeType::Vec2 ? GL_FLOAT
-		   : type == AttributeType::Vec3 ? GL_FLOAT
-		   : type == AttributeType::Vec4 ? GL_FLOAT
-										 : GL_NONE;
+	return type == AttributeType::Float	   ? GL_FLOAT
+		   : type == AttributeType::Vec2   ? GL_FLOAT
+		   : type == AttributeType::Vec3   ? GL_FLOAT
+		   : type == AttributeType::Vec4   ? GL_FLOAT
+		   : type == AttributeType::Uint32 ? GL_UNSIGNED_INT
+										   : GL_NONE;
 }
 
 inline int AttributeType_ComponentCount(AttributeType type) {
-	return type == AttributeType::Float	 ? 1
-		   : type == AttributeType::Vec2 ? 2
-		   : type == AttributeType::Vec3 ? 3
-		   : type == AttributeType::Vec4 ? 4
-										 : 0;
+	return type == AttributeType::Float	   ? 1
+		   : type == AttributeType::Vec2   ? 2
+		   : type == AttributeType::Vec3   ? 3
+		   : type == AttributeType::Vec4   ? 4
+		   : type == AttributeType::Uint32 ? 1
+										   : 0;
 }
 
 inline int AttributeType_Size(AttributeType type) {
-	return type == AttributeType::Float	 ? sizeof(GLfloat)
-		   : type == AttributeType::Vec2 ? sizeof(GLfloat) * 2
-		   : type == AttributeType::Vec3 ? sizeof(GLfloat) * 3
-		   : type == AttributeType::Vec4 ? sizeof(GLfloat) * 4
-										 : 0;
+	return type == AttributeType::Float	   ? sizeof(GLfloat)
+		   : type == AttributeType::Vec2   ? sizeof(GLfloat) * 2
+		   : type == AttributeType::Vec3   ? sizeof(GLfloat) * 3
+		   : type == AttributeType::Vec4   ? sizeof(GLfloat) * 4
+		   : type == AttributeType::Uint32 ? sizeof(GLuint)
+										   : 0;
 }
 
 struct VertexArrayAttribute {

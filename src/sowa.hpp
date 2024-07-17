@@ -18,7 +18,7 @@ using i64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-using NodeID = u64;
+using NodeID = u32;
 using TypeID = u64;
 using NodeTypeID = u64;
 using RID = i32;

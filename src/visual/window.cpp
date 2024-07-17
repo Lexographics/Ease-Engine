@@ -73,6 +73,10 @@ Vector2 Window::GetWindowSize() {
 	return Vector2(_width, _height);
 }
 
+void Window::SetWindowSize(Vector2 size) {
+	glfwSetWindowSize(_window, size.x, size.y);
+}
+
 void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 	WindowAccessor::SetSize(width, height);

@@ -65,6 +65,7 @@ void Editor::Init() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
 	ImGui_ImplGlfw_InitForOpenGL(App().GetWindow()._window, true);
 	// ImGui_ImplOpenGL3_Init("#version 130");
@@ -123,7 +124,7 @@ void Editor::Init() {
 		this->_ignoreOnSceneChanged = false;
 	};
 
-	auto imageContextMenu = [this](std::filesystem::path path) {
+	auto imageContextMenu = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Import to scene")) {
 			ImageTexture *texture = App().GetResourceRegistry().NewResource<ImageTexture>();
 			texture->Load(path.string().c_str());
@@ -134,7 +135,7 @@ void Editor::Init() {
 	_fileContextMenu[".jpg"] = imageContextMenu;
 	_fileContextMenu[".jpeg"] = imageContextMenu;
 
-	auto audioContextMenu = [this](std::filesystem::path path) {
+	auto audioContextMenu = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Import to scene")) {
 			AudioStream *audio = App().GetResourceRegistry().NewResource<AudioStream>();
 			audio->Load(path.string().c_str());
@@ -144,14 +145,14 @@ void Editor::Init() {
 	_fileContextMenu[".wav"] = audioContextMenu;
 	_fileContextMenu[".ogg"] = audioContextMenu;
 
-	_fileContextMenu[".lua"] = [this](std::filesystem::path path) {
+	_fileContextMenu[".lua"] = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Add to scene")) {
 			App().GetCurrentScene()->_scripts.push_back(path.string());
 		}
 	};
 
 	App().OnSceneChanged([this]() {
-		if (this->_ignoreOnSceneChanged || App().GetCurrentScene() == nullptr)
+		if (this->_ignoreOnSceneChanged || App().GetCurrentScene() == nullptr || App().IsRunning())
 			return;
 
 		for (size_t i = 0; i < this->_scenes.size(); i++) {
@@ -666,17 +667,19 @@ void Editor::Update() {
 	if (ImGui::CollapsingHeader("Editor", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
-		for (size_t i = 0; i < _scenes.size(); i++) {
-			ImGui::PushID((void *)_scenes[i].get());
+		if (!App().IsRunning()) {
+			for (size_t i = 0; i < _scenes.size(); i++) {
+				ImGui::PushID((void *)_scenes[i].get());
 
-			ImGui::Text("%s", _scenes[i]->GetFilepath().c_str());
-			ImGui::SameLine();
+				ImGui::Text("%s", _scenes[i]->GetFilepath().c_str());
+				ImGui::SameLine();
 
-			if (ImGui::Button("Open")) {
-				App().SetCurrentScene(_scenes[i]);
+				if (ImGui::Button("Open")) {
+					App().SetCurrentScene(_scenes[i]);
+				}
+
+				ImGui::PopID();
 			}
-
-			ImGui::PopID();
 		}
 
 		ImGui::Unindent();
@@ -893,6 +896,10 @@ void Editor::End() {
 
 glm::mat4 Editor::GetCamera2DMatrix() {
 	return _camera2d.GetMatrix();
+}
+
+bool Editor::HasFocus() {
+	return ImGui::GetIO().WantTextInput;
 }
 
 void SetStyle(ImGuiStyle &style) {

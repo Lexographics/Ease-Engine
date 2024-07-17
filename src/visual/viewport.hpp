@@ -32,7 +32,7 @@ class Viewport {
 	void Clear(float r, float g, float b, float a = 1.0, bool depth = false);
 	int GetTargetTextureID(int slot);
 
-	int ReadAttachmentInt(int slot, int x, int y);
+	uint32_t ReadAttachmentInt(int slot, int x, int y);
 
 	inline int Width() { return _width; }
 	inline int Height() { return _height; }

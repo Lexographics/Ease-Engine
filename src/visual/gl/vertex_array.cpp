@@ -46,13 +46,22 @@ void VertexArray::UploadAttributes() {
 
 	uint64_t bytes = 0;
 	for (const VertexArrayAttribute &attribute : _attributes) {
-		glVertexAttribPointer(
-			attribute.slot,
-			AttributeType_ComponentCount(attribute.type),
-			AttributeType_GLenum(attribute.type),
-			false,
-			_attributeSizeInBytes,
-			(const void *)bytes);
+		if (attribute.type == AttributeType::Uint32) {
+			glVertexAttribIPointer(
+				attribute.slot,
+				AttributeType_ComponentCount(attribute.type),
+				AttributeType_GLenum(attribute.type),
+				_attributeSizeInBytes,
+				(const void *)bytes);
+		} else {
+			glVertexAttribPointer(
+				attribute.slot,
+				AttributeType_ComponentCount(attribute.type),
+				AttributeType_GLenum(attribute.type),
+				false,
+				_attributeSizeInBytes,
+				(const void *)bytes);
+		}
 
 		glEnableVertexAttribArray(attribute.slot);
 		bytes += AttributeType_Size(attribute.type);

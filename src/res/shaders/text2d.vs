@@ -4,7 +4,7 @@ precision mediump float;
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec2 aUV;
 layout(location = 2) in vec4 aColor;
-layout(location = 3) in float aDrawID;
+layout(location = 3) in uint aDrawID;
 layout(location = 4) in float aTexture;
 
 uniform mat4 uProj;
@@ -12,7 +12,7 @@ uniform mat4 uView;
 
 out vec4 vColor;
 out vec2 vUV;
-out float vDrawID;
+flat out uint vDrawID;
 out float vTexture;
 
 void main() {

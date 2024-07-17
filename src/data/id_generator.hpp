@@ -9,8 +9,8 @@
 
 class UUIDGenerator {
   public:
-	inline u64 Next() {
-		return gen.U64();
+	inline u32 Next() {
+		return gen.U32();
 	}
 
 	inline i32 NextI32() {

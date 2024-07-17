@@ -36,6 +36,7 @@ class Editor {
 	}
 
 	inline const Rect &GetViewportRect() const { return _viewportRect; }
+	bool HasFocus();
 
   private:
 	EditorSettings _settings;

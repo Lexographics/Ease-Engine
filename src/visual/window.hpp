@@ -22,11 +22,13 @@ class Window {
 	void SetShouldClose(bool close = true);
 
 	Vector2 GetWindowSize();
+	void SetWindowSize(Vector2 size);
 
   private:
 	friend struct InputState;
 	friend struct WindowAccessor;
 	friend class Editor;
+	friend class Application;
 	GLFWwindow *_window;
 
 	int _width = 0;

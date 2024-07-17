@@ -7,7 +7,7 @@ layout (location = 1) out uint drawId;
 in vec4 vColor;
 in vec2 vUV;
 in float vTexture;
-in float vDrawID;
+flat in uint vDrawID;
 
 uniform sampler2D uTextures[32];
 
@@ -16,7 +16,7 @@ vec4 getTexture();
 
 void main() {
   color = vec4(1.0, 1.0, 1.0, getTexture().r) * vColor;
-  drawId = uint(vDrawID);
+  drawId = vDrawID;
 
   if(color.a < 0.1f)
     discard;

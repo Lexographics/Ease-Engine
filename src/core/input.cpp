@@ -50,13 +50,19 @@ void Input::Poll() {
 }
 
 bool Input::IsKeyDown(Key key) {
+	if (App().GetEditor().HasFocus())
+		return false;
 	return state.keyStates[(int)key] == InputActionState::Down || state.keyStates[(int)key] == InputActionState::JustPressed;
 }
 
 bool Input::IsKeyJustPressed(Key key) {
+	if (App().GetEditor().HasFocus())
+		return false;
 	return state.keyStates[(int)key] == InputActionState::JustPressed;
 }
 bool Input::IsKeyJustReleased(Key key) {
+	if (App().GetEditor().HasFocus())
+		return false;
 	return state.keyStates[(int)key] == InputActionState::JustReleased;
 }
 
@@ -104,10 +110,20 @@ Vector2 Input::GetWindowMousePosition() {
 }
 
 Vector2 Input::GetMousePosition() {
+	Vector2 windowSize = state.window->GetWindowSize();
 	Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
 	Vector2 pos = GetWindowMousePosition();
-	pos = App().GetEditor().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
-	return pos * Vector2(1, -1);
+	pos.y = windowSize.y - pos.y;
+	pos = Rect(0, 0, windowSize.x, windowSize.y).MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
+	return pos;
+
+	/*
+		if editor
+		Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
+		Vector2 pos = GetWindowMousePosition();
+		pos = App().GetEditor().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
+		return pos * Vector2(1, -1);
+	*/
 }
 
 float Input::GetMouseScrollY() {
