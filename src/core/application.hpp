@@ -59,6 +59,9 @@ class Application {
 	Ref<Scene> GetCurrentScene();
 	void SetCurrentScene(Ref<Scene> scene);
 
+	// Loads scene just before the next frame starts
+	void LoadScene(const std::string &path);
+
 	float Delta() { return _delta; }
 	inline StringStore &GetGlobalStore() { return _globalStore; }
 
@@ -86,6 +89,9 @@ class Application {
 
 	NodeDB _nodeDB;
 	Ref<Scene> _currentScene;
+	bool _sceneWillLoad = false;
+	std::string _sceneToLoad = "";
+
 	Ref<Scene> _backgroundScene;
 	ScriptServer _scriptServer;
 	AudioServer _audioServer;

@@ -137,9 +137,17 @@ void Application::Update() {
 	_delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastUpdate).count() / 1000.0;
 	_lastUpdate = now;
 
-	Input::Poll();
-	if (Input::IsActionJustPressed("ui_exit")) {
-		_window.SetShouldClose();
+	if (_sceneWillLoad) {
+		Ref<Scene> scene = NewScene();
+		if (scene->LoadFromFile(_sceneToLoad.c_str())) {
+			SetCurrentScene(scene);
+		} else {
+			Debug::Error("Failed to load scene: {}", _sceneToLoad);
+		}
+		_sceneToLoad = "";
+		_sceneWillLoad = false;
+
+		_lastUpdate = std::chrono::high_resolution_clock::now();
 	}
 
 	Visual::UseViewport(&_mainViewport);
@@ -267,4 +275,9 @@ void Application::SetCurrentScene(Ref<Scene> scene) {
 		_scriptServer.CallStart();
 	}
 	_onSceneChanged();
+}
+
+void Application::LoadScene(const std::string &path) {
+	_sceneWillLoad = true;
+	_sceneToLoad = path;
 }
