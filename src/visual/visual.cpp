@@ -6,6 +6,8 @@
 #include "viewport.hpp"
 #include "window.hpp"
 
+#include "core/application.hpp"
+
 struct VisualState {
 	bool active = true;
 	Window *window = nullptr;
@@ -25,7 +27,7 @@ bool Visual::Active() {
 	return state.active;
 }
 
-void Visual::UseViewport(Viewport *viewport) {
+void Visual::UseViewport(Viewport *viewport, Rect *calculatedRect) {
 	if (viewport)
 		return viewport->Bind();
 
@@ -34,7 +36,7 @@ void Visual::UseViewport(Viewport *viewport) {
 	Vector2 windowSize = state.window->GetWindowSize();
 
 	float windowRatio = (float)windowSize.x / windowSize.y;
-	float videoRatio = (float)1920.f / 1080.f;
+	float videoRatio = (float)App().GetProjectSettings().rendering.viewport.width / App().GetProjectSettings().rendering.viewport.height;
 
 	if (windowRatio > videoRatio) {
 		float width = windowSize.y * videoRatio;
@@ -43,7 +45,9 @@ void Visual::UseViewport(Viewport *viewport) {
 
 		float x = gap / 2.f;
 		glViewport(x, 0.f, width, height);
-		// _viewportRect = rect(x, 0.f, width, height);
+		if (calculatedRect) {
+			*calculatedRect = Rect(x, 0.f, width, height);
+		}
 
 	} else {
 		float width = windowSize.x;
@@ -52,6 +56,8 @@ void Visual::UseViewport(Viewport *viewport) {
 
 		float y = gap / 2.f;
 		glViewport(0.f, y, width, height);
-		// _viewportRect = rect(0.f, y, width, height);
+		if (calculatedRect) {
+			*calculatedRect = Rect(0.f, y, width, height);
+		}
 	}
 }

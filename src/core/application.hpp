@@ -17,6 +17,7 @@
 
 #include "core/timer.hpp"
 #include "data/project_settings.hpp"
+#include "math/rect.hpp"
 #include "utils/store.hpp"
 
 #include "scene/node_db.hpp"
@@ -50,6 +51,7 @@ class Application {
 	inline Renderer &GetRenderer() { return _renderer; }
 	inline Window &GetWindow() { return _window; }
 	inline Viewport &GetMainViewport() { return _mainViewport; }
+	inline const Rect &GetViewportRect() { return _viewportRect; }
 	inline Editor &GetEditor() { return _editor; }
 	inline ScriptServer &GetScriptServer() { return _scriptServer; }
 	inline AudioServer &GetAudioServer() { return _audioServer; }
@@ -105,6 +107,7 @@ class Application {
 
 	Window _window;
 	Viewport _mainViewport;
+	Rect _viewportRect;
 
 	Editor _editor;
 	std::chrono::high_resolution_clock::time_point _lastUpdate;

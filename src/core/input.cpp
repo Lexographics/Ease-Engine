@@ -115,7 +115,7 @@ Vector2 Input::GetMousePosition() {
 	Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
 	Vector2 pos = GetWindowMousePosition();
 	pos.y = windowSize.y - pos.y;
-	pos = Rect(0, 0, windowSize.x, windowSize.y).MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
+	pos = App().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
 	return pos;
 
 #else
@@ -131,7 +131,7 @@ float Input::GetMouseScrollY() {
 }
 
 float Input::GetMouseScrollX() {
-	return state.lastMouseScroll.y;
+	return state.lastMouseScroll.x;
 }
 
 eventpp::CallbackList<void(Input::Event e)> &Input::InputEvent() {

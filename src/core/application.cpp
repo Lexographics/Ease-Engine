@@ -232,7 +232,7 @@ void Application::Update() {
 	Vector2 mousePos = Input::GetMousePosition();
 	_hoveredID = static_cast<NodeID>(_mainViewport.ReadAttachmentInt(1, mousePos.x, GetProjectSettings().rendering.viewport.height - mousePos.y));
 
-	Visual::UseViewport(nullptr);
+	Visual::UseViewport(nullptr, &_viewportRect);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
