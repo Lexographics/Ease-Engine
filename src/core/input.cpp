@@ -110,6 +110,7 @@ Vector2 Input::GetWindowMousePosition() {
 }
 
 Vector2 Input::GetMousePosition() {
+#ifndef SW_EDITOR
 	Vector2 windowSize = state.window->GetWindowSize();
 	Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
 	Vector2 pos = GetWindowMousePosition();
@@ -117,13 +118,12 @@ Vector2 Input::GetMousePosition() {
 	pos = Rect(0, 0, windowSize.x, windowSize.y).MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
 	return pos;
 
-	/*
-		if editor
-		Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
-		Vector2 pos = GetWindowMousePosition();
-		pos = App().GetEditor().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
-		return pos * Vector2(1, -1);
-	*/
+#else
+	Vector2 videoSize = Vector2(App().GetProjectSettings().rendering.viewport.width, App().GetProjectSettings().rendering.viewport.height);
+	Vector2 pos = GetWindowMousePosition();
+	pos = App().GetEditor().GetViewportRect().MapPoint(pos, Rect(0, 0, videoSize.x, videoSize.y));
+	return pos * Vector2(1, -1);
+#endif
 }
 
 float Input::GetMouseScrollY() {

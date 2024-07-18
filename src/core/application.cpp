@@ -116,6 +116,7 @@ void Application::Init() {
 	_currentScene->LoadFromFile("res://scenes/game.sscn");
 	SetCurrentScene(_currentScene);
 
+#ifdef SW_EDITOR
 	Input::InputEvent().append([this](Input::Event event) {
 		if (event.type == Input::EventType::Key) {
 			if (event.key.key == Key::F5 && event.key.action == GLFW_PRESS) {
@@ -126,10 +127,17 @@ void Application::Init() {
 			}
 		}
 	});
+#endif
 
 	_lastUpdate = std::chrono::high_resolution_clock::now();
 
 	SetCursor("res://sprites/cursor_none.png");
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+#ifndef SW_EDITOR
+	Start();
+#endif
 
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(
@@ -233,9 +241,11 @@ void Application::Update() {
 	GetRenderer().DrawFullscreen(_mainViewport.GetTargetTextureID(0));
 	glEnable(GL_DEPTH_TEST);
 
+#ifdef SW_EDITOR
 	_editor.Begin();
 	_editor.Update();
 	_editor.End();
+#endif
 
 	_window.SwapBuffers();
 	Input::Poll();
