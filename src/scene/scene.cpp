@@ -124,11 +124,11 @@ bool Scene::SaveToFile(const char *path) {
 	out["Scene"] = scene;
 
 	YAML::Node resources;
-	for (auto &[rid, res] : App().GetResourceRegistry().GetResources()) {
+	for (const auto &rid : GetResourceLocker().GetResources()) {
+		Resource *res = App().GetResourceRegistry().GetResource(rid);
 		if (!res || rid == 0)
 			continue;
 
-		// YAML::Node resNode;
 		Document resNode;
 		resNode.Set("Type", App().GetResourceRegistry().GetTypeName(res->ResourceType()));
 		res->SaveResource(resNode);
@@ -193,9 +193,8 @@ bool Scene::LoadFromFile(const char *path) {
 		YAML::Node resData = it->second;
 		std::string resType = resData["Type"].as<std::string>("");
 
-		Resource *res = App().GetResourceRegistry().CreateResource(resType.c_str());
+		Resource *res = GetResourceLocker().CreateResource(resType.c_str(), rid);
 		if (res) {
-			App().GetResourceRegistry().AddResource(res, rid);
 			res->LoadResource(resData);
 		} else {
 			Debug::Error("Failed to load resource: {}", rid);
@@ -239,6 +238,7 @@ void Scene::Clear() {
 
 	_nodes.clear();
 	_nodeIter.clear();
+	_resourceLocker.Clear();
 }
 
 // static
@@ -249,6 +249,7 @@ void Scene::Copy(Scene *src, Scene *dst) {
 	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
 	dst->_scripts = src->_scripts;
 	dst->_scenePath = src->_scenePath;
+	dst->_resourceLocker = src->_resourceLocker;
 }
 
 void Scene::freeNode(NodeID id) {

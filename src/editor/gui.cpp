@@ -53,7 +53,6 @@ void Gui::AnimationInput(const char *id, RID &rid) {
 	if (rid == 0) {
 		if (ImGui::Button("Create")) {
 			Resource *res = App().GetResourceRegistry().CreateResource("SpriteSheetAnimation");
-			App().GetResourceRegistry().AddResource(res, 0);
 			rid = res->GetRID();
 		}
 	} else {

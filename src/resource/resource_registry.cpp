@@ -18,7 +18,7 @@ void ResourceRegistry::AddResource(Resource *res, RID rid) {
 
 	if (res->GetRID() == 0) {
 		static UUIDGenerator gen;
-		res->_rid = gen.NextI32();
+		res->_rid = gen.Next();
 	}
 
 	_resources[res->GetRID()] = res;

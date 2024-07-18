@@ -34,21 +34,23 @@ class ResourceRegistry {
 		_typeIds[typeid(T).hash_code()] = std::string(name);
 	}
 
-	Resource *CreateResource(TypeID type) {
+	Resource *CreateResource(TypeID type, RID rid = 0) {
 		auto fn = _allocators[type].createFunc;
 		if (fn) {
-			return fn();
+			Resource *res = fn();
+			AddResource(res, rid);
+			return res;
 		}
 		return nullptr;
 	}
 
-	Resource *CreateResource(const char *typeName) {
-		return CreateResource(_typenames[std::string(typeName)]);
+	Resource *CreateResource(const char *typeName, RID rid = 0) {
+		return CreateResource(_typenames[std::string(typeName)], rid);
 	}
 
 	template <typename T>
-	T *NewResource() {
-		return dynamic_cast<T *>(CreateResource(typeid(T).hash_code()));
+	T *NewResource(RID rid = 0) {
+		return dynamic_cast<T *>(CreateResource(typeid(T).hash_code(), rid));
 	}
 
 	std::string GetTypeName(TypeID id) {

@@ -126,9 +126,8 @@ void Editor::Init() {
 
 	auto imageContextMenu = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Import to scene")) {
-			ImageTexture *texture = App().GetResourceRegistry().NewResource<ImageTexture>();
+			ImageTexture *texture = dynamic_cast<ImageTexture *>(App().GetCurrentScene()->GetResourceLocker().CreateResource("ImageTexture"));
 			texture->Load(path.string().c_str());
-			App().GetResourceRegistry().AddResource(texture);
 		}
 	};
 	_fileContextMenu[".png"] = imageContextMenu;
@@ -137,9 +136,8 @@ void Editor::Init() {
 
 	auto audioContextMenu = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Import to scene")) {
-			AudioStream *audio = App().GetResourceRegistry().NewResource<AudioStream>();
+			AudioStream *audio = dynamic_cast<AudioStream *>(App().GetCurrentScene()->GetResourceLocker().CreateResource("AudioStream"));
 			audio->Load(path.string().c_str());
-			App().GetResourceRegistry().AddResource(audio);
 		}
 	};
 	_fileContextMenu[".wav"] = audioContextMenu;

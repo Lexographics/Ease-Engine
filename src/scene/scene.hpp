@@ -13,6 +13,7 @@
 #include "node_db.hpp"
 
 #include "data/id_generator.hpp"
+#include "resource/resource_locker.hpp"
 
 class Scene {
   public:
@@ -46,6 +47,8 @@ class Scene {
 	void Clear();
 	static void Copy(Scene *src, Scene *dst);
 
+	inline ResourceLocker &GetResourceLocker() { return _resourceLocker; }
+
   private:
 	void freeNode(NodeID id);
 
@@ -64,6 +67,8 @@ class Scene {
 	NodeDB *_nodeDB = nullptr;
 
 	std::filesystem::path _scenePath = "";
+
+	ResourceLocker _resourceLocker;
 };
 
 #endif // SCENE_HPP

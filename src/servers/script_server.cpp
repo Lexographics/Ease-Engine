@@ -183,6 +183,7 @@ void ScriptServer::Init() {
 																								}); })
 		.endClass()
 		.addFunction("NewTimer", +[](float timeout) { return App().NewTimer(timeout); }, +[](float timeout, bool autoStart) { return App().NewTimer(timeout, autoStart); })
+		.addFunction("LoadScene", +[](const std::string &path) { App().LoadScene(path); })
 
 		.beginNamespace("Time")
 		.addProperty("delta", +[]() { return App().Delta(); })
@@ -197,6 +198,10 @@ void ScriptServer::Init() {
 		.addVariable("E", Key::E)
 		.addVariable("Space", Key::Space)
 		.addVariable("Enter", Key::Enter)
+		.addVariable("Escape", Key::Escape)
+		.addVariable("MouseLeft", Key::MouseLeft)
+		.addVariable("MouseMiddle", Key::MouseMiddle)
+		.addVariable("MouseRight", Key::MouseRight)
 		.endNamespace()
 
 		.beginNamespace("Math")
@@ -289,6 +294,7 @@ void ScriptServer::Init() {
 		.addFunction("AddGroup", &Node::AddGroup)
 		.addFunction("RemoveGroup", &Node::RemoveGroup)
 		.addFunction("GetID", &Node::GetID)
+		.addFunction("IsHovered", &Node::IsHovered)
 		.addProperty("name", &Node::GetName, &Node::Rename)
 		.endClass()
 
