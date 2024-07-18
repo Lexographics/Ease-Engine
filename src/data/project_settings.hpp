@@ -11,8 +11,11 @@ class ProjectSettings {
 	bool Save();
 
   public:
-	std::string name = "";
-	std::string author = "";
+	struct {
+		std::string name = "";
+		std::string author = "";
+		std::string mainScene = "";
+	} application;
 
 	struct {
 		struct {

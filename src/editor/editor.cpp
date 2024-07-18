@@ -149,6 +149,12 @@ void Editor::Init() {
 		}
 	};
 
+	_fileContextMenu[".sscn"] = [](std::filesystem::path path) {
+		if (ImGui::MenuItem("Set project default scene")) {
+			App().GetProjectSettings().application.mainScene = path;
+		}
+	};
+
 	App().OnSceneChanged([this]() {
 		if (this->_ignoreOnSceneChanged || App().GetCurrentScene() == nullptr || App().IsRunning())
 			return;

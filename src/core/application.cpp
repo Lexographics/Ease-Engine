@@ -63,7 +63,7 @@ void Application::Init() {
 		get_window_height(),
 #endif
 
-		_projectSettings.name.c_str());
+		_projectSettings.application.name.c_str());
 
 	Input::InitState(&_window);
 	Visual::InitState(&_window);
@@ -71,7 +71,9 @@ void Application::Init() {
 	_renderer.RegisterRenderer2D("2D", "data://sprite2d.vs", "data://sprite2d.fs");
 	_renderer.RegisterRenderer2D("Text", "data://text2d.vs", "data://text2d.fs");
 
+#ifdef SW_EDITOR
 	_editor.Init();
+#endif
 
 	Input::SetActionKeys("ui_accept", {Key::Enter});
 	Input::SetActionKeys("ui_exit", {Key::Escape});
@@ -113,7 +115,7 @@ void Application::Init() {
 
 	_backgroundScene = NewScene();
 	_currentScene = NewScene();
-	_currentScene->LoadFromFile("res://scenes/game.sscn");
+	_currentScene->LoadFromFile(_projectSettings.application.mainScene.c_str());
 	SetCurrentScene(_currentScene);
 
 #ifdef SW_EDITOR
