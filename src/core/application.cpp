@@ -119,6 +119,8 @@ void Application::Init() {
 
 	_lastUpdate = std::chrono::high_resolution_clock::now();
 
+	SetCursor("res://sprites/cursor_none.png");
+
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(
 		[](void *self) {
@@ -280,4 +282,27 @@ void Application::SetCurrentScene(Ref<Scene> scene) {
 void Application::LoadScene(const std::string &path) {
 	_sceneWillLoad = true;
 	_sceneToLoad = path;
+}
+
+void Application::SetCursor(const std::string &texturePath) {
+	// TODO: Implement on web
+#ifndef SW_WEB
+	ImageTexture texture;
+	texture.SetStorePixels(true);
+	texture.SetFlip(true);
+	texture.Load(texturePath.c_str());
+
+	GLFWimage image;
+	image.width = texture.Width();
+	image.height = texture.Height();
+	image.pixels = (unsigned char *)texture.Pixels();
+
+	GLFWcursor *cursor = glfwCreateCursor(&image, 10, 6);
+	if (!cursor) {
+		Debug::Error("Failed to load cursor: {}", texturePath);
+		return;
+	}
+
+	glfwSetCursor(GetWindow()._window, cursor);
+#endif
 }

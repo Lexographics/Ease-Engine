@@ -69,6 +69,7 @@ class Application {
 	inline Timer *NewTimer(float timeout, bool autoStart = false) { return &_timers.emplace_back(timeout, autoStart); }
 
 	NodeID GetHoveredID() const { return _hoveredID; }
+	void SetCursor(const std::string &texturePath);
 
   public:
 	inline void OnSceneChanged(const std::function<void()> fn) {
