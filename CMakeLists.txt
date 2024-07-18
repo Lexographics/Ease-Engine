@@ -69,7 +69,7 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
       SUFFIX ".html"
       LINK_FLAGS
       # " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
-      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sASSERTIONS -sALLOW_MEMORY_GROWTH --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sASSERTIONS -sALLOW_MEMORY_GROWTH -sEXPORTED_FUNCTIONS=_main,_onVisibilityChange,_onWindowResize --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
       # "-sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
       )
 endif()

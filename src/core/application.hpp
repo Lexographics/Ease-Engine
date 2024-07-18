@@ -71,6 +71,8 @@ class Application {
 	NodeID GetHoveredID() const { return _hoveredID; }
 	void SetCursor(const std::string &texturePath);
 
+	void RestartDeltaTime();
+
   public:
 	inline void OnSceneChanged(const std::function<void()> fn) {
 		_onSceneChanged.append(fn);

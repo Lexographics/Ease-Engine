@@ -28,6 +28,10 @@
 
 #include "debug.hpp"
 
+#ifdef SW_WEB
+#include "platform/web/web.hpp"
+#endif
+
 static Application *s_app = nullptr;
 
 Application &App() {
@@ -51,8 +55,14 @@ void Application::Init() {
 	_projectSettings.Load();
 
 	_window.Create(
+#ifndef SW_WEB
 		_projectSettings.rendering.window.width,
 		_projectSettings.rendering.window.height,
+#else
+		get_window_width(),
+		get_window_height(),
+#endif
+
 		_projectSettings.name.c_str());
 
 	Input::InitState(&_window);
@@ -135,6 +145,12 @@ void Application::Init() {
 }
 
 void Application::Update() {
+#ifdef SW_WEB
+	if (is_page_visible() == 0) {
+		RestartDeltaTime();
+	}
+#endif
+
 	auto now = std::chrono::high_resolution_clock::now();
 	_delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastUpdate).count() / 1000.0;
 	_lastUpdate = now;
@@ -305,4 +321,18 @@ void Application::SetCursor(const std::string &texturePath) {
 
 	glfwSetCursor(GetWindow()._window, cursor);
 #endif
+}
+
+void Application::RestartDeltaTime() {
+	_lastUpdate = std::chrono::high_resolution_clock::now();
+}
+
+extern "C" void onVisibilityChange(int visibilityState) {
+	if (visibilityState == 1) {
+		App().RestartDeltaTime();
+	}
+}
+
+extern "C" void onWindowResize(float width, float height) {
+	App().GetWindow().SetWindowSize(Vector2(width, height));
 }
