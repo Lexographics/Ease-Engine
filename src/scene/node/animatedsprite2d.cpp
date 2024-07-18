@@ -51,7 +51,7 @@ void AnimatedSprite2D::Update() {
 		.textureID = static_cast<float>(texture->ID()),
 		.z = static_cast<float>(GetZIndex()),
 		.drawID = static_cast<uint32_t>(ID()),
-		.color = Color(1.f),
+		.color = _modulate,
 		.textureScale = glm::vec2(texture->Width() * frameSize.x, texture->Height() * frameSize.y),
 		.uvTopLeft = topLeft,
 		.uvBottomRight = glm::vec2(topLeft.x + frameSize.x, topLeft.y - frameSize.y)});
@@ -66,6 +66,7 @@ bool AnimatedSprite2D::Serialize(Document &doc) {
 	doc.Set("CurrentAnimation", _currentAnimation);
 	doc.Set("AnimationScale", _animationScale);
 	doc.Set("Playing", _playing);
+	doc.SetColor("Modulate", _modulate);
 	return true;
 }
 
@@ -78,6 +79,7 @@ bool AnimatedSprite2D::Deserialize(const Document &doc) {
 	_currentAnimation = doc.Get("CurrentAnimation", _currentAnimation);
 	_animationScale = doc.Get("AnimationScale", _animationScale);
 	_playing = doc.Get("Playing", _playing);
+	_modulate = doc.GetColor("Modulate", _modulate);
 	return true;
 }
 
@@ -91,6 +93,7 @@ bool AnimatedSprite2D::Copy(Node *dst) {
 	dstNode->SetCurrentAnimation(_currentAnimation);
 	dstNode->_animationScale = _animationScale;
 	dstNode->_playing = _playing;
+	dstNode->_modulate = _modulate;
 	dstNode->_frameIndex = _frameIndex;
 	dstNode->_animationDelta = _animationDelta;
 	return true;
@@ -130,6 +133,10 @@ void AnimatedSprite2D::UpdateEditor() {
 				RestartAnimation();
 			}
 		}
+
+		ImGui::Text("%s", "Modulate");
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##Modulate", &_modulate.r);
 
 		ImGui::Unindent();
 	}

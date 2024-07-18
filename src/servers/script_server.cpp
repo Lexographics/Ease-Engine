@@ -326,6 +326,7 @@ void ScriptServer::Init() {
 		.deriveClass<AnimatedSprite2D, Node2D>("AnimatedSprite2D")
 		.addProperty("animation_scale", &AnimatedSprite2D::_animationScale)
 		.addProperty("playing", &AnimatedSprite2D::_playing)
+		.addProperty("modulate", &AnimatedSprite2D::_modulate)
 		.addFunction("SetCurrentAnimation", &AnimatedSprite2D::SetCurrentAnimation, +[](AnimatedSprite2D *node, const std::string &name) { node->SetCurrentAnimation(name, true); })
 		.addFunction("GetCurrentAnimation", &AnimatedSprite2D::GetCurrentAnimation)
 		.addFunction("RestartAnimation", &AnimatedSprite2D::RestartAnimation)

@@ -23,17 +23,17 @@ class AnimatedSprite2D : public Node2D {
 	bool Copy(Node *dst) override;
 	void UpdateEditor() override;
 
-	// SpriteSheetAnimation
-	RID _animation;
-
 	const std::string &GetCurrentAnimation();
 	void SetCurrentAnimation(const std::string &name, bool reset = true);
 
 	void RestartAnimation();
 
   public:
-	bool _playing = false;
+	// SpriteSheetAnimation
+	RID _animation;
 	float _animationScale = 1.f;
+	bool _playing = false;
+	Color _modulate;
 
   private:
 	int _frameIndex = 0;

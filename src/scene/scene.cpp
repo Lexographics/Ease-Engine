@@ -34,9 +34,9 @@ void Scene::Update() {
 	}
 }
 void Scene::Shutdown() {
-	// for (Node *node : _nodeIter) {
-	// 	node->Exit();
-	// }
+	for (Node *node : _nodeIter) {
+		node->Exit();
+	}
 }
 
 Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
