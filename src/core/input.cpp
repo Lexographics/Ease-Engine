@@ -50,19 +50,25 @@ void Input::Poll() {
 }
 
 bool Input::IsKeyDown(Key key) {
+#ifdef SW_EDITOR
 	if (App().GetEditor().HasFocus())
 		return false;
+#endif
 	return state.keyStates[(int)key] == InputActionState::Down || state.keyStates[(int)key] == InputActionState::JustPressed;
 }
 
 bool Input::IsKeyJustPressed(Key key) {
+#ifdef SW_EDITOR
 	if (App().GetEditor().HasFocus())
 		return false;
+#endif
 	return state.keyStates[(int)key] == InputActionState::JustPressed;
 }
 bool Input::IsKeyJustReleased(Key key) {
+#ifdef SW_EDITOR
 	if (App().GetEditor().HasFocus())
 		return false;
+#endif
 	return state.keyStates[(int)key] == InputActionState::JustReleased;
 }
 

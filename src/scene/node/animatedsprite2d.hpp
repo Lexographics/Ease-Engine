@@ -11,6 +11,7 @@
 #include "resource/sprite_sheet_animation.hpp"
 
 class AnimatedSprite2D : public Node2D {
+	EDITOR_NODE()
   public:
 	virtual ~AnimatedSprite2D() = default;
 
@@ -21,7 +22,6 @@ class AnimatedSprite2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	const std::string &GetCurrentAnimation();
 	void SetCurrentAnimation(const std::string &name, bool reset = true);

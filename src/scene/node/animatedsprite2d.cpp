@@ -99,7 +99,22 @@ bool AnimatedSprite2D::Copy(Node *dst) {
 	return true;
 }
 
-void AnimatedSprite2D::UpdateEditor() {
+const std::string &AnimatedSprite2D::GetCurrentAnimation() {
+	return _currentAnimation;
+}
+
+void AnimatedSprite2D::SetCurrentAnimation(const std::string &name, bool reset /* = true*/) {
+	_currentAnimation = name;
+	if (reset)
+		RestartAnimation();
+}
+
+void AnimatedSprite2D::RestartAnimation() {
+	_frameIndex = 0;
+	_animationDelta = 0.f;
+}
+
+EDITOR_UPDATE_FUNC(AnimatedSprite2D, {
 	if (ImGui::CollapsingHeader("AnimatedSprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -141,19 +156,4 @@ void AnimatedSprite2D::UpdateEditor() {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-}
-
-const std::string &AnimatedSprite2D::GetCurrentAnimation() {
-	return _currentAnimation;
-}
-
-void AnimatedSprite2D::SetCurrentAnimation(const std::string &name, bool reset /* = true*/) {
-	_currentAnimation = name;
-	if (reset)
-		RestartAnimation();
-}
-
-void AnimatedSprite2D::RestartAnimation() {
-	_frameIndex = 0;
-	_animationDelta = 0.f;
-}
+})

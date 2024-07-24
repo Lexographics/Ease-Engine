@@ -33,49 +33,6 @@ bool Node::Copy(Node *dst) {
 	return true;
 }
 
-void Node::UpdateEditor() {
-	if (ImGui::CollapsingHeader("Node", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Indent();
-
-		if (ImGui::CollapsingHeader("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			for (size_t i = 0; i < _groups.size();) {
-				ImGui::PushID((void *)&_groups[i]);
-
-				ImGui::Text("%s", _groups[i].c_str());
-				ImGui::SameLine();
-				if (ImGui::Button("x", ImVec2(24, 24))) {
-					RemoveGroup(_groups[i]);
-				} else {
-					i++;
-				}
-
-				ImGui::PopID();
-			}
-
-			if (ImGui::Button("+", ImVec2(24, 24))) {
-				ImGui::OpenPopup("Node_Groups_Add");
-			}
-
-			if (ImGui::BeginPopup("Node_Groups_Add")) {
-				std::string buf = "";
-				ImGui::Text("Group");
-				ImGui::SameLine();
-
-				if (ImGui::InputText("##Group", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
-					AddGroup(buf);
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-			ImGui::Unindent();
-		}
-
-		ImGui::Unindent();
-	}
-}
-
 void Node::AddChild(Node *child) {
 	if (child->_parent != nullptr) {
 		child->_parent->removeChild(child);
@@ -142,3 +99,46 @@ bool Node::IsHovered() {
 void Node::removeChild(Node *child) {
 	_children.erase(std::remove(_children.begin(), _children.end(), child), _children.end());
 }
+
+EDITOR_UPDATE_FUNC(Node, {
+	if (ImGui::CollapsingHeader("Node", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		if (ImGui::CollapsingHeader("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Indent();
+			for (size_t i = 0; i < _groups.size();) {
+				ImGui::PushID((void *)&_groups[i]);
+
+				ImGui::Text("%s", _groups[i].c_str());
+				ImGui::SameLine();
+				if (ImGui::Button("x", ImVec2(24, 24))) {
+					RemoveGroup(_groups[i]);
+				} else {
+					i++;
+				}
+
+				ImGui::PopID();
+			}
+
+			if (ImGui::Button("+", ImVec2(24, 24))) {
+				ImGui::OpenPopup("Node_Groups_Add");
+			}
+
+			if (ImGui::BeginPopup("Node_Groups_Add")) {
+				std::string buf = "";
+				ImGui::Text("Group");
+				ImGui::SameLine();
+
+				if (ImGui::InputText("##Group", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
+					AddGroup(buf);
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
+			}
+			ImGui::Unindent();
+		}
+
+		ImGui::Unindent();
+	}
+})

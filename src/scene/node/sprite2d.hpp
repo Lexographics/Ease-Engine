@@ -8,6 +8,7 @@
 #include "node2d.hpp"
 
 class Sprite2D : public Node2D {
+	EDITOR_NODE()
   public:
 	virtual ~Sprite2D() = default;
 
@@ -16,7 +17,6 @@ class Sprite2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	inline RID &GetTexture() { return _texture; }
 	inline Color &Modulate() { return _modulate; }

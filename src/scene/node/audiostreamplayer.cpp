@@ -155,7 +155,13 @@ bool AudioStreamPlayer::Copy(Node *dst) {
 	return true;
 }
 
-void AudioStreamPlayer::UpdateEditor() {
+void AudioStreamPlayer::updateSource() {
+	alSourcef(_sourceID, AL_PITCH, Math::Clamp(_pitch, 0.5f, 2.f));
+	alSourcef(_sourceID, AL_GAIN, _gain);
+	alSourcei(_sourceID, AL_LOOPING, _loop);
+}
+
+EDITOR_UPDATE_FUNC(AudioStreamPlayer, {
 	if (ImGui::CollapsingHeader("AudioStreamPlayer", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -193,10 +199,4 @@ void AudioStreamPlayer::UpdateEditor() {
 	}
 
 	Node::UpdateEditor();
-}
-
-void AudioStreamPlayer::updateSource() {
-	alSourcef(_sourceID, AL_PITCH, Math::Clamp(_pitch, 0.5f, 2.f));
-	alSourcef(_sourceID, AL_GAIN, _gain);
-	alSourcei(_sourceID, AL_LOOPING, _loop);
-}
+})

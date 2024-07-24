@@ -41,7 +41,18 @@ bool Sprite2D::Copy(Node *dst) {
 	return true;
 }
 
-void Sprite2D::UpdateEditor() {
+void Sprite2D::Update() {
+	if (!IsVisible())
+		return;
+
+	ImageTexture *res = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(_texture));
+	if (!res)
+		return;
+
+	App().GetRenderer().GetRenderer2D("2D").PushQuad(GetTransform(), res->ID(), glm::vec2(res->Width(), res->Height()), GetZIndex(), Modulate(), ID());
+}
+
+EDITOR_UPDATE_FUNC(Sprite2D, {
 	if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -56,15 +67,4 @@ void Sprite2D::UpdateEditor() {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-}
-
-void Sprite2D::Update() {
-	if (!IsVisible())
-		return;
-
-	ImageTexture *res = dynamic_cast<ImageTexture *>(App().GetResourceRegistry().GetResource(_texture));
-	if (!res)
-		return;
-
-	App().GetRenderer().GetRenderer2D("2D").PushQuad(GetTransform(), res->ID(), glm::vec2(res->Width(), res->Height()), GetZIndex(), Modulate(), ID());
-}
+})

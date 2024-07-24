@@ -6,6 +6,7 @@
 #include "scene/node.hpp"
 
 class AudioStreamPlayer : public Node {
+	EDITOR_NODE()
   public:
 	virtual ~AudioStreamPlayer();
 	AudioStreamPlayer();
@@ -18,7 +19,6 @@ class AudioStreamPlayer : public Node {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	void Play();
 	void Pause();

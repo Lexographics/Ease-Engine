@@ -12,6 +12,7 @@
 #include "scene/node.hpp"
 #include "scene/node/animatedsprite2d.hpp"
 #include "scene/node/audiostreamplayer.hpp"
+#include "scene/node/camera2d.hpp"
 #include "scene/node/node2d.hpp"
 #include "scene/node/progress_bar.hpp"
 #include "scene/node/sprite2d.hpp"
@@ -235,7 +236,7 @@ void ScriptServer::Init() {
 
 	getGlobalNamespace(state)
 		.addFunction("GetScene", +[]() { return App().GetCurrentScene().get(); })
-		.addFunction("GlobalStore", +[]() { return App().GetGlobalStore(); })
+		.addFunction("GlobalStore", +[]() { return &App().GetGlobalStore(); })
 
 		.beginClass<StringStore>("StringStore")
 		.addFunction("Clear", &StringStore::Clear)

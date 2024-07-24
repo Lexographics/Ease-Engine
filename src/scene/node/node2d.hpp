@@ -8,6 +8,7 @@
 #include "scene/node.hpp"
 
 class Node2D : public Node {
+	EDITOR_NODE()
   public:
 	virtual ~Node2D() = default;
 
@@ -15,7 +16,6 @@ class Node2D : public Node {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	glm::mat4 GetTransform(const Vector2 &offset = Vector2(0.f, 0.f));
 	glm::mat4 GetLocalTransform(const Vector2 &offset = Vector2(0.f, 0.f));

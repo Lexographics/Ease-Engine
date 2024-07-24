@@ -10,6 +10,7 @@
 #include "math/rect.hpp"
 
 class Camera2D : public Node2D {
+	EDITOR_NODE()
   public:
 	virtual ~Camera2D() = default;
 
@@ -17,7 +18,6 @@ class Camera2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	glm::mat4 GetMatrix();
 	static glm::mat4 GetBlankMatrix();

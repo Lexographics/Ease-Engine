@@ -11,6 +11,7 @@
 #include "data/color.hpp"
 
 class Text2D : public Node2D {
+	EDITOR_NODE()
   public:
 	virtual ~Text2D() = default;
 
@@ -19,7 +20,6 @@ class Text2D : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
 	inline RID &GetFont() { return _font; }
 	inline std::string &Text() { return _text; }

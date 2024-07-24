@@ -8,6 +8,7 @@
 #include "node2d.hpp"
 
 class ProgressBar : public Node2D {
+	EDITOR_NODE()
   public:
 	virtual ~ProgressBar() = default;
 
@@ -16,7 +17,6 @@ class ProgressBar : public Node2D {
 	bool Deserialize(const Document &doc) override;
 
 	bool Copy(Node *dst) override;
-	void UpdateEditor() override;
 
   public:
 	float _minValue = 0.f;

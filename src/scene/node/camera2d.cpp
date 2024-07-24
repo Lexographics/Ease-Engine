@@ -30,24 +30,6 @@ bool Camera2D::Copy(Node *dst) {
 	return true;
 }
 
-void Camera2D::UpdateEditor() {
-	if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Indent();
-
-		ImGui::Text("%s", "Offset");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Offset", &_offset.x);
-
-		ImGui::Text("%s", "Rotatable");
-		ImGui::SameLine();
-		ImGui::Checkbox("##Rotatable", &_rotatable);
-
-		ImGui::Unindent();
-	}
-
-	Node2D::UpdateEditor();
-}
-
 glm::mat4 Camera2D::GetMatrix() {
 	glm::mat4 transform;
 	if (!Rotatable()) {
@@ -89,3 +71,21 @@ Rect Camera2D::GetBounds() {
 void Camera2D::MakeCurrent() {
 	App().GetCurrentScene()->SetCurrentCamera2D(this->ID());
 }
+
+EDITOR_UPDATE_FUNC(Camera2D, {
+	if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Offset");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Offset", &_offset.x);
+
+		ImGui::Text("%s", "Rotatable");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Rotatable", &_rotatable);
+
+		ImGui::Unindent();
+	}
+
+	Node2D::UpdateEditor();
+})

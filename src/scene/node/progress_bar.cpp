@@ -58,7 +58,26 @@ bool ProgressBar::Copy(Node *dst) {
 	return true;
 }
 
-void ProgressBar::UpdateEditor() {
+void ProgressBar::Update() {
+	if (!IsVisible())
+		return;
+
+	float value = (_value - _minValue) / (_maxValue - _minValue);
+	float yWidth = _size.x * value;
+
+	glm::mat4 transform = GetTransform();
+	Vector2 position;
+	float rotation;
+	Matrix::DecomposeTransform(transform, &position, &rotation, nullptr);
+
+	auto mat = Matrix::CalculateTransform(position, -rotation, Vector2(1.f, 1.f), Vector2(0.f, 0.f));
+	auto innerMat = glm::translate(mat, glm::vec3((_size.x * 0.5f * value) - _size.x * 0.5f, 0.f, 0.f));
+
+	App().GetRenderer().GetRenderer2D("2D").PushQuad(innerMat, 0.f, glm::vec2(yWidth - _padding * 2, _size.y - _padding * 2), GetZIndex(), _foregroundColor, ID());
+	App().GetRenderer().GetRenderer2D("2D").PushQuad(mat, 0.f, glm::vec2(_size.x, _size.y), GetZIndex(), _backgroundColor, ID());
+}
+
+EDITOR_UPDATE_FUNC(ProgressBar, {
 	if (ImGui::CollapsingHeader("Progress Bar", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -89,23 +108,4 @@ void ProgressBar::UpdateEditor() {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-}
-
-void ProgressBar::Update() {
-	if (!IsVisible())
-		return;
-
-	float value = (_value - _minValue) / (_maxValue - _minValue);
-	float yWidth = _size.x * value;
-
-	glm::mat4 transform = GetTransform();
-	Vector2 position;
-	float rotation;
-	Matrix::DecomposeTransform(transform, &position, &rotation, nullptr);
-
-	auto mat = Matrix::CalculateTransform(position, -rotation, Vector2(1.f, 1.f), Vector2(0.f, 0.f));
-	auto innerMat = glm::translate(mat, glm::vec3((_size.x * 0.5f * value) - _size.x * 0.5f, 0.f, 0.f));
-
-	App().GetRenderer().GetRenderer2D("2D").PushQuad(innerMat, 0.f, glm::vec2(yWidth - _padding * 2, _size.y - _padding * 2), GetZIndex(), _foregroundColor, ID());
-	App().GetRenderer().GetRenderer2D("2D").PushQuad(mat, 0.f, glm::vec2(_size.x, _size.y), GetZIndex(), _backgroundColor, ID());
-}
+})

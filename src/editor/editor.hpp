@@ -2,6 +2,8 @@
 #define EDITOR_HPP
 #pragma once
 
+#ifdef SW_EDITOR
+
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -61,4 +63,5 @@ class Editor {
 	Rect _viewportRect;
 };
 
+#endif // SW_EDITOR
 #endif // EDITOR_HPP

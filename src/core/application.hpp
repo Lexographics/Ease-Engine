@@ -52,10 +52,13 @@ class Application {
 	inline Window &GetWindow() { return _window; }
 	inline Viewport &GetMainViewport() { return _mainViewport; }
 	inline const Rect &GetViewportRect() { return _viewportRect; }
-	inline Editor &GetEditor() { return _editor; }
 	inline ScriptServer &GetScriptServer() { return _scriptServer; }
 	inline AudioServer &GetAudioServer() { return _audioServer; }
 	inline ProjectSettings &GetProjectSettings() { return _projectSettings; }
+
+#ifdef SW_EDITOR
+	inline Editor &GetEditor() { return _editor; }
+#endif
 
 	Ref<Scene> NewScene();
 	Ref<Scene> GetCurrentScene();
@@ -109,7 +112,9 @@ class Application {
 	Viewport _mainViewport;
 	Rect _viewportRect;
 
+#ifdef SW_EDITOR
 	Editor _editor;
+#endif
 	std::chrono::high_resolution_clock::time_point _lastUpdate;
 	float _delta = 0.f;
 

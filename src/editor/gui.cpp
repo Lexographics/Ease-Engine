@@ -1,3 +1,4 @@
+#ifdef SW_EDITOR
 #include "gui.hpp"
 
 #include "imgui.h"
@@ -52,7 +53,7 @@ void Gui::AnimationInput(const char *id, RID &rid) {
 	ImGui::InputInt("##RID", &rid);
 	if (rid == 0) {
 		if (ImGui::Button("Create")) {
-			Resource *res = App().GetResourceRegistry().CreateResource("SpriteSheetAnimation");
+			Resource *res = App().GetCurrentScene()->GetResourceLocker().CreateResource("SpriteSheetAnimation");
 			rid = res->GetRID();
 		}
 	} else {
@@ -100,3 +101,4 @@ void Gui::EndFooter() {
 	ImGui::End();
 	ImGui::PopStyleColor(2);
 }
+#endif // SW_EDITOR

@@ -45,37 +45,6 @@ bool Node2D::Copy(Node *dst) {
 	return true;
 }
 
-void Node2D::UpdateEditor() {
-	if (ImGui::CollapsingHeader("Node2D", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Indent();
-
-		ImGui::Text("%s", "Position");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Position", &_position.x, 1.f);
-
-		ImGui::Text("%s", "Rotation");
-		ImGui::SameLine();
-		float rad = glm::radians(_rotation);
-		ImGui::SliderAngle("##Rotation", &rad);
-		_rotation = glm::degrees(rad);
-
-		ImGui::Text("%s", "Scale");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Scale", &_scale.x, 0.005f);
-
-		ImGui::Text("%s", "Z Index");
-		ImGui::SameLine();
-		ImGui::InputInt("##ZIndex", &_zIndex);
-
-		ImGui::Text("%s", "Visible");
-		ImGui::SameLine();
-		ImGui::Checkbox("##Visible", &_visible);
-
-		ImGui::Unindent();
-	}
-	Node::UpdateEditor();
-}
-
 glm::mat4 Node2D::GetTransform(const Vector2 &offset) {
 	return Matrix::CalculateTransform(_position, _rotation, _scale, offset, GetParentTransform());
 }
@@ -117,3 +86,34 @@ Vector2 Node2D::GetGlobalPosition() {
 	Matrix::DecomposeTransform(GetTransform(), &pos, nullptr, nullptr);
 	return pos;
 }
+
+EDITOR_UPDATE_FUNC(Node2D, {
+	if (ImGui::CollapsingHeader("Node2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Indent();
+
+		ImGui::Text("%s", "Position");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Position", &_position.x, 1.f);
+
+		ImGui::Text("%s", "Rotation");
+		ImGui::SameLine();
+		float rad = glm::radians(_rotation);
+		ImGui::SliderAngle("##Rotation", &rad);
+		_rotation = glm::degrees(rad);
+
+		ImGui::Text("%s", "Scale");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Scale", &_scale.x, 0.005f);
+
+		ImGui::Text("%s", "Z Index");
+		ImGui::SameLine();
+		ImGui::InputInt("##ZIndex", &_zIndex);
+
+		ImGui::Text("%s", "Visible");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Visible", &_visible);
+
+		ImGui::Unindent();
+	}
+	Node::UpdateEditor();
+})

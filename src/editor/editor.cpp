@@ -1,3 +1,4 @@
+#ifdef SW_EDITOR
 #include "editor.hpp"
 
 #include "imgui.h"
@@ -8,7 +9,6 @@
 #include "core/application.hpp"
 #include "core/debug.hpp"
 #include "core/filesystem/filesystem.hpp"
-
 #include "math/matrix.hpp"
 #include "scene/node/camera2d.hpp"
 
@@ -820,9 +820,7 @@ void Editor::Update() {
 
 	ImVec2 pos;
 	ImVec2 size;
-
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
-
 	float windowRatio = (float)windowSize.x / windowSize.y;
 	float videoRatio = (float)1920.f / 1080.f;
 
@@ -999,3 +997,4 @@ void SetStyle(ImGuiStyle &style) {
 	style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
+#endif // SW_EDITOR

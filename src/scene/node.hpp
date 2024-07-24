@@ -14,6 +14,7 @@
 class Scene;
 
 class Node {
+	EDITOR_NODE_BASE()
   public:
 	virtual ~Node() = default;
 
@@ -25,7 +26,6 @@ class Node {
 	virtual bool Deserialize(const Document &doc);
 
 	virtual bool Copy(Node *dst);
-	virtual void UpdateEditor();
 
 	//
 	inline NodeTypeID TypeID() const { return _typeid; }

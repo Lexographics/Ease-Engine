@@ -199,10 +199,13 @@ void Application::Update() {
 	if (IsRunning()) {
 		GetRenderer().GetRenderer2D("2D").SetProjectionMatrix(GetCurrentScene()->GetMatrix2D());
 		GetRenderer().GetRenderer2D("Text").SetProjectionMatrix(GetCurrentScene()->GetMatrix2D());
-	} else {
+	}
+#ifdef SW_EDITOR
+	else {
 		GetRenderer().GetRenderer2D("2D").SetProjectionMatrix(_editor.GetCamera2DMatrix());
 		GetRenderer().GetRenderer2D("Text").SetProjectionMatrix(_editor.GetCamera2DMatrix());
 	}
+#endif
 	GetRenderer().BeginDraw();
 
 	if (!IsRunning()) {
