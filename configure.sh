@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cmake -S . -B build
+cmake -S . -B build -DEDITOR=ON

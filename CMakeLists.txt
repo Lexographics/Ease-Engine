@@ -43,7 +43,7 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
   add_compile_options("-s" "USE_FREETYPE=1")
 endif()
 
-add_executable(sowa ${SOWA_SOURCES})
+add_executable(sowa ${SOWA_SOURCES} "${CMAKE_BINARY_DIR}/git_hash.cpp")
 target_include_directories(
   sowa
   PUBLIC ${SOWA_INCLUDES}
@@ -78,3 +78,13 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
       # "-sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
       )
 endif()
+
+add_custom_command(
+  OUTPUT "git_hash.cpp"
+  PRE_BUILD
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND}
+    -D IN_FILE="${CMAKE_CURRENT_SOURCE_DIR}/src/git_hash.cpp.in"
+    -D OUT_FILE="${CMAKE_BINARY_DIR}/git_hash.cpp"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ConfigureFile.cmake"
+)

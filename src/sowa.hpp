@@ -23,6 +23,9 @@ using TypeID = u64;
 using NodeTypeID = u64;
 using RID = i32;
 
+extern const char *s_gitHash;
+extern const char *s_gitBranch;
+
 template <typename T>
 using Ref = std::shared_ptr<T>;
 
