@@ -9,7 +9,7 @@ in vec2 vUV;
 in float vTexture;
 flat in uint vDrawID;
 
-uniform sampler2D uTextures[32];
+uniform sampler2D uTextures[16];
 
 
 vec4 getTexture();
@@ -58,37 +58,5 @@ vec4 getTexture() {
     return texture(uTextures[14], vUV);
   else if(index == 15)
     return texture(uTextures[15], vUV);
-  else if(index == 16)
-    return texture(uTextures[16], vUV);
-  else if(index == 17)
-    return texture(uTextures[17], vUV);
-  else if(index == 18)
-    return texture(uTextures[18], vUV);
-  else if(index == 19)
-    return texture(uTextures[19], vUV);
-  else if(index == 20)
-    return texture(uTextures[20], vUV);
-  else if(index == 21)
-    return texture(uTextures[21], vUV);
-  else if(index == 22)
-    return texture(uTextures[22], vUV);
-  else if(index == 23)
-    return texture(uTextures[23], vUV);
-  else if(index == 24)
-    return texture(uTextures[24], vUV);
-  else if(index == 25)
-    return texture(uTextures[25], vUV);
-  else if(index == 26)
-    return texture(uTextures[26], vUV);
-  else if(index == 27)
-    return texture(uTextures[27], vUV);
-  else if(index == 28)
-    return texture(uTextures[28], vUV);
-  else if(index == 29)
-    return texture(uTextures[29], vUV);
-  else if(index == 30)
-    return texture(uTextures[30], vUV);
-  else if(index == 31)
-    return texture(uTextures[31], vUV);
   return vec4(1.f, 1.f, 1.f, 1.f);
 }

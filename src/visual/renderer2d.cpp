@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <utf8.h>
 
+#include "core/debug.hpp"
 #include "gl/vertex_array.hpp"
 #include "math/matrix.hpp"
 
@@ -18,6 +19,12 @@
 #define BATCH2D_MAX_TEXTURE 16
 
 void Renderer2D::Init(const char *vertexPath, const char *fragmentPath) {
+	int maxTextureUnits = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+	if (maxTextureUnits < BATCH2D_MAX_TEXTURE) {
+		Debug::Error("Renderer error: GL_MAX_TEXUTRE_IMAGE_UNITS={}, Required={}", maxTextureUnits, BATCH2D_MAX_TEXTURE);
+	}
+
 	_projection = glm::ortho(0.f, 1280.f, 0.f, 720.f, -128.f, 128.f);
 
 	_vao.New();
@@ -74,7 +81,7 @@ void Renderer2D::PushQuad(DefaultVertex2D vertices[4]) {
 	_vertices.push_back(vertices[2]);
 	_vertices.push_back(vertices[3]);
 
-	if (_textures.size() >= BATCH2D_MAX_TEXTURE || _vertices.size() >= BATCH2D_MAX_VERTEX) {
+	if (_textures.size() >= BATCH2D_MAX_TEXTURE - 1 || _vertices.size() >= BATCH2D_MAX_VERTEX) {
 		End();
 	}
 }

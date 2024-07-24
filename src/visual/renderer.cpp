@@ -22,10 +22,6 @@
 #define PI (3.14159265358979323846)
 #endif
 
-#define BATCH2D_MAX_RECT (1000)
-#define BATCH2D_MAX_VERTEX (BATCH2D_MAX_RECT * 6)
-#define BATCH2D_MAX_TEXTURE 16
-
 void Renderer::Init() {
 	ModelBuilder::Quad2D(_fullscreenModel, 2.f);
 
