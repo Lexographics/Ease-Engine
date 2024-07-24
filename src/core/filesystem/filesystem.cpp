@@ -61,12 +61,12 @@ Ref<FileData> FileSystem::Load(const std::filesystem::path &path) {
 	return _fileServers[data.scheme]->Load(data.path);
 }
 
-std::vector<FileEntry> FileSystem::ReadDirectory(const std::filesystem::path &path) {
+std::vector<FileEntry> FileSystem::ReadDirectory(const std::filesystem::path &path, bool recursive) {
 	PathData data = ResolvePath(path);
 	if (!HasFileServer(data.scheme.c_str()) || _fileServers[data.scheme] == nullptr)
 		return std::vector<FileEntry>();
 
-	return _fileServers[data.scheme]->ReadDirectory(data.path);
+	return _fileServers[data.scheme]->ReadDirectory(data.path, recursive);
 }
 
 FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::filesystem::path &path) {
@@ -95,16 +95,25 @@ FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::files
 			return data;
 		}
 
-		std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) {
+		std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive) {
 			std::vector<FileEntry> entries;
 			std::filesystem::path dir = GetPath(path);
 
-			if (std::filesystem::is_directory(dir))
-				for (const auto &dirEntry : std::filesystem::directory_iterator(dir)) {
-					entries.push_back(FileEntry{
-						.path = Utils::Format("{}://{}", _scheme, std::filesystem::relative(dirEntry.path(), _basePath).string()),
-						.is_directory = dirEntry.is_directory()});
+			if (std::filesystem::is_directory(dir)) {
+				if (recursive) {
+					for (const auto &dirEntry : std::filesystem::recursive_directory_iterator(dir)) {
+						entries.push_back(FileEntry{
+							.path = Utils::Format("{}://{}", _scheme, std::filesystem::relative(dirEntry.path(), _basePath).string()),
+							.is_directory = dirEntry.is_directory()});
+					}
+				} else {
+					for (const auto &dirEntry : std::filesystem::directory_iterator(dir)) {
+						entries.push_back(FileEntry{
+							.path = Utils::Format("{}://{}", _scheme, std::filesystem::relative(dirEntry.path(), _basePath).string()),
+							.is_directory = dirEntry.is_directory()});
+					}
 				}
+			}
 
 			std::sort(entries.begin(), entries.end());
 			return entries;

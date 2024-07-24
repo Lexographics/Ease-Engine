@@ -60,7 +60,7 @@ struct PathData {
 class FileServer {
   public:
 	virtual Ref<FileData> Load(const std::filesystem::path &path) = 0;
-	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path) { return std::vector<FileEntry>{}; };
+	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive) { return std::vector<FileEntry>{}; };
 };
 
 class SaveableFileServer {
@@ -86,7 +86,7 @@ class FileSystem {
 	PathData ResolvePath(const std::string &path);
 
 	Ref<FileData> Load(const std::filesystem::path &path);
-	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path);
+	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive = false);
 
 	FileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
 	DataFileServer *NewDataFileServer();
