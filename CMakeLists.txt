@@ -60,7 +60,12 @@ target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt sndf
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
   target_link_libraries( sowa PRIVATE glfw OpenAL )
 endif()
-target_compile_definitions(sowa PRIVATE SW_EDITOR)
+if(EDITOR)
+  message("Building editor")
+  target_compile_definitions(sowa PRIVATE SW_EDITOR)
+else()
+  message("Building application")
+endif()
 
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(sowa
