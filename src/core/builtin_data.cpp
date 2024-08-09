@@ -14,6 +14,7 @@
 
 #include "res/Roboto-Regular.ttf.res.inc"
 #include "res/icon.png.res.inc"
+#include "res/icons.ttf.res.inc"
 #include "res/imgui.ini.res.inc"
 
 void Application::RegisterBuiltinData() {
@@ -23,6 +24,7 @@ void Application::RegisterBuiltinData() {
 	dataFS->AddFile("font.ttf", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_Roboto_Regular_ttf_res_inc_data), src_res_Roboto_Regular_ttf_res_inc_size));
 	dataFS->AddFile("imgui.ini", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_imgui_ini_res_inc_data), src_res_imgui_ini_res_inc_size));
 	dataFS->AddFile("icon.png", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_icon_png_res_inc_data), src_res_icon_png_res_inc_size));
+	dataFS->AddFile("icons.ttf", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_icons_ttf_res_inc_data), src_res_icons_ttf_res_inc_size));
 
 	dataFS->AddFile("sprite2d.vs", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_shaders_sprite2d_vs_res_inc_data), src_res_shaders_sprite2d_vs_res_inc_size));
 	dataFS->AddFile("sprite2d.fs", FileData::NewStatic(reinterpret_cast<std::byte *>(src_res_shaders_sprite2d_fs_res_inc_data), src_res_shaders_sprite2d_fs_res_inc_size));

@@ -49,6 +49,7 @@ std::unique_ptr<ImageTexture> texture;
 std::unique_ptr<Mesh> mesh;
 
 void Application::Init() {
+	Debug::Log("Sowa Engine {}@{}", s_gitHash, s_gitBranch);
 	_fs.RegisterFileServer("res", _fs.NewFolderFileServer("res", "res"));
 	RegisterBuiltinData();
 
@@ -70,6 +71,19 @@ void Application::Init() {
 	_renderer.Init();
 	_renderer.RegisterRenderer2D("2D", "data://sprite2d.vs", "data://sprite2d.fs");
 	_renderer.RegisterRenderer2D("Text", "data://text2d.vs", "data://text2d.fs");
+	{
+		ImageTexture texture;
+		texture.SetFlip(true);
+		texture.SetStorePixels(true);
+		texture.Load("data://icon.png");
+
+		GLFWimage images[1];
+		images[0].width = texture.Width();
+		images[0].height = texture.Height();
+		images[0].pixels = reinterpret_cast<unsigned char *>(texture.Pixels());
+
+		glfwSetWindowIcon(GetWindow()._window, 1, images);
+	}
 
 #ifdef SW_EDITOR
 	_editor.Init();
@@ -122,18 +136,35 @@ void Application::Init() {
 	Input::InputEvent().append([this](Input::Event event) {
 		if (event.type == Input::EventType::Key) {
 			if (event.key.key == Key::F5 && event.key.action == GLFW_PRESS) {
-				if (IsRunning())
+				if (IsRunning()) {
 					Stop();
-				else
+					RestoreScene();
+				} else {
+					StoreScene();
+					GetCurrentScene()->SaveToFile();
+					GetCurrentScene()->LoadFromFile(this->_projectSettings.application.mainScene.c_str());
 					Start();
+				}
+			}
+
+			if (event.key.key == Key::F6 && event.key.action == GLFW_PRESS) {
+				if (IsRunning()) {
+					Stop();
+					RestoreScene();
+				} else {
+					StoreScene();
+					Start();
+				}
 			}
 		}
 	});
 #endif
 
+	_scriptServer.Init();
+
 	_lastUpdate = std::chrono::high_resolution_clock::now();
 
-	SetCursor("res://sprites/cursor_none.png");
+	// SetCursor("res://sprites/cursor_none.png");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -265,10 +296,8 @@ void Application::Start() {
 	if (_isRunning)
 		return;
 	_isRunning = true;
-	Scene::Copy(_currentScene.get(), _backgroundScene.get());
 	_copyGlobalStore = _globalStore;
 
-	_scriptServer.Init();
 	_currentScene->Start();
 	_scriptServer.CallStart();
 }
@@ -281,7 +310,6 @@ void Application::Stop() {
 	_currentScene->Shutdown();
 	_timers.clear();
 
-	Scene::Copy(_backgroundScene.get(), _currentScene.get());
 	_globalStore = _copyGlobalStore;
 }
 
@@ -303,9 +331,7 @@ void Application::SetCurrentScene(Ref<Scene> scene) {
 	}
 	_currentScene = scene;
 	if (IsRunning()) {
-		_scriptServer.Init();
 		_currentScene->Start();
-		_scriptServer.CallStart();
 	}
 	_onSceneChanged();
 }
@@ -340,6 +366,13 @@ void Application::SetCursor(const std::string &texturePath) {
 
 void Application::RestartDeltaTime() {
 	_lastUpdate = std::chrono::high_resolution_clock::now();
+}
+
+void Application::StoreScene() {
+	Scene::Copy(_currentScene.get(), _backgroundScene.get());
+}
+void Application::RestoreScene() {
+	Scene::Copy(_backgroundScene.get(), _currentScene.get());
 }
 
 extern "C" void onVisibilityChange(int visibilityState) {

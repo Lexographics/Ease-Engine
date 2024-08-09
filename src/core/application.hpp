@@ -77,6 +77,8 @@ class Application {
 	void SetCursor(const std::string &texturePath);
 
 	void RestartDeltaTime();
+	void StoreScene();
+	void RestoreScene();
 
   public:
 	inline void OnSceneChanged(const std::function<void()> fn) {
