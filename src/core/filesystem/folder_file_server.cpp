@@ -58,6 +58,49 @@ void FolderFileServer::GetSaveStream(const std::filesystem::path &path, std::ofs
 	out = std::ofstream(GetPath(_fs->ResolvePath(path).path));
 }
 
+bool FolderFileServer::IsDirectory(const std::filesystem::path &path) {
+	try {
+		return std::filesystem::is_directory(GetPath(_fs->ResolvePath(path).path));
+	} catch (...) {
+		return false;
+	}
+}
+
+bool FolderFileServer::Remove(const std::filesystem::path &path) {
+	try {
+		return std::filesystem::remove(GetPath(_fs->ResolvePath(path).path));
+	} catch (...) {
+		return false;
+	}
+}
+
+uintmax_t FolderFileServer::RemoveAll(const std::filesystem::path &path) {
+	try {
+		return std::filesystem::remove_all(GetPath(_fs->ResolvePath(path).path));
+	} catch (...) {
+		return false;
+	}
+}
+
+bool FolderFileServer::Rename(const std::filesystem::path &p, const std::string &name) {
+	try {
+		std::filesystem::path path = GetPath(_fs->ResolvePath(p).path);
+		std::filesystem::rename(path, path.parent_path().concat("/").concat(name));
+		return true;
+	} catch (...) {
+		return false;
+	}
+}
+
+bool FolderFileServer::Create(const std::filesystem::path &path) {
+	try {
+		std::ofstream out(GetPath(_fs->ResolvePath(path).path), std::ios::binary);
+		return out.good();
+	} catch (...) {
+		return false;
+	}
+}
+
 std::filesystem::path FolderFileServer::GetPath(const std::filesystem::path &path) {
 	return _basePath / path;
 }

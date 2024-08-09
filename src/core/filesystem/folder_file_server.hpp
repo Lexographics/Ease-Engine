@@ -19,6 +19,12 @@ class FolderFileServer : public FileServer, public SaveableFileServer {
 	/* Below functions are NOT resolved ( res://file.png ) */
 	void GetSaveStream(const std::filesystem::path &path, std::ofstream &out) override;
 
+	bool IsDirectory(const std::filesystem::path &path);
+	bool Remove(const std::filesystem::path &path);
+	uintmax_t RemoveAll(const std::filesystem::path &path);
+	bool Rename(const std::filesystem::path &path, const std::string &name);
+	bool Create(const std::filesystem::path &path);
+
   private:
 	friend class Editor;
 	std::filesystem::path GetPath(const std::filesystem::path &path);
