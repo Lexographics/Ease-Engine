@@ -5,6 +5,21 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 
+void Node::AddNodeScript(const std::string &path) {
+	if (App().IsRunning()) {
+		// if running, immediately load the script
+		loadScript(path);
+	} else {
+		_scripts.push_back(path);
+	}
+}
+
+void Node::LoadScripts() {
+	for (const auto &script : _scripts) {
+		loadScript(script);
+	}
+}
+
 void Node::RemoveChild(Node *child) {
 	child->_parent = nullptr;
 	removeChild(child);
@@ -15,6 +30,7 @@ bool Node::Serialize(Document &doc) {
 	doc.SetString("Name", Name());
 	doc.SetU64("ID", ID());
 	doc.Set("Groups", _groups);
+	doc.Set("Scripts", _scripts);
 
 	return true;
 }
@@ -23,6 +39,7 @@ bool Node::Deserialize(const Document &doc) {
 	Rename(doc.GetString("Name", Name()));
 	_id = doc.GetU64("ID", ID());
 	_groups = doc.Get("Groups", _groups);
+	_scripts = doc.Get("Scripts", _scripts);
 
 	return true;
 }
@@ -30,6 +47,7 @@ bool Node::Deserialize(const Document &doc) {
 bool Node::Copy(Node *dst) {
 	dst->Rename(Name());
 	dst->_groups = _groups;
+	dst->_scripts = _scripts;
 	return true;
 }
 
@@ -100,9 +118,52 @@ void Node::removeChild(Node *child) {
 	_children.erase(std::remove(_children.begin(), _children.end(), child), _children.end());
 }
 
-EDITOR_UPDATE_FUNC(Node, {
+void Node::loadScript(const std::string &path) {
+	App().GetScriptServer().NewNodeScript(this, _nodeScriptRef, path);
+}
+
+#ifdef SW_EDITOR
+void Node::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Node", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
+
+		if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Indent();
+			for (size_t i = 0; i < _scripts.size();) {
+				ImGui::PushID((void *)&_scripts[i]);
+				ImGui::PushID(i);
+
+				ImGui::Text("%s", _scripts[i].c_str());
+				ImGui::SameLine();
+				if (ImGui::Button("x", ImVec2(24, 24))) {
+					_scripts.erase(_scripts.begin() + i);
+				} else {
+					i++;
+				}
+
+				ImGui::PopID();
+				ImGui::PopID();
+			}
+
+			if (ImGui::Button("+", ImVec2(24, 24))) {
+				ImGui::OpenPopup("Node_Scripts_Add");
+			}
+
+			if (ImGui::BeginPopup("Node_Scripts_Add")) {
+
+				auto files = App().FS().ReadDirectory("res://", true);
+				for (auto &file : files) {
+					if (!file.is_directory && file.path.extension() == ".lua") {
+						if (ImGui::MenuItem(file.path.string().c_str())) {
+							_scripts.push_back(file.path.string());
+						}
+					}
+				}
+
+				ImGui::EndPopup();
+			}
+			ImGui::Unindent();
+		}
 
 		if (ImGui::CollapsingHeader("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Indent();
@@ -141,4 +202,5 @@ EDITOR_UPDATE_FUNC(Node, {
 
 		ImGui::Unindent();
 	}
-})
+}
+#endif

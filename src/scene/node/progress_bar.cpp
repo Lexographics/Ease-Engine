@@ -77,7 +77,8 @@ void ProgressBar::Update() {
 	App().GetRenderer().GetRenderer2D("2D").PushQuad(mat, 0.f, glm::vec2(_size.x, _size.y), GetZIndex(), _backgroundColor, ID());
 }
 
-EDITOR_UPDATE_FUNC(ProgressBar, {
+#ifdef SW_EDITOR
+void ProgressBar::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Progress Bar", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -108,4 +109,5 @@ EDITOR_UPDATE_FUNC(ProgressBar, {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-})
+}
+#endif

@@ -72,7 +72,8 @@ void Camera2D::MakeCurrent() {
 	App().GetCurrentScene()->SetCurrentCamera2D(this->ID());
 }
 
-EDITOR_UPDATE_FUNC(Camera2D, {
+#ifdef SW_EDITOR
+void Camera2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -88,4 +89,5 @@ EDITOR_UPDATE_FUNC(Camera2D, {
 	}
 
 	Node2D::UpdateEditor();
-})
+}
+#endif

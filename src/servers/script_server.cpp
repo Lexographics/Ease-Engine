@@ -19,6 +19,50 @@
 #include "scene/node/text2d.hpp"
 #include "scene/scene.hpp"
 
+static void PrintTable(luabridge::LuaRef ref);
+
+struct NodeScriptData {
+	int tableRef;
+	Node *node;
+};
+
+struct ScriptServerData {
+	void MakeNodeScriptTemplate(const std::string &path, int registryRef) {
+		_nodeScriptTemplates[path] = registryRef;
+	}
+	int GetNodeScriptTemplate(const std::string &name) {
+		if (_nodeScriptTemplates.find(name) == _nodeScriptTemplates.end()) {
+			return -1;
+		}
+
+		return _nodeScriptTemplates[name];
+	}
+	NodeScriptID MakeNodeScript(NodeScriptData data) {
+		static LinearIDGenerator<NodeScriptID> gen;
+		NodeScriptID id = gen.Next();
+
+		_nodeScripts[id] = data;
+		return id;
+	}
+	void DestroyNodeScript(NodeScriptID id, lua_State *L) {
+		if (_nodeScripts.find(id) == _nodeScripts.end())
+			return;
+
+		luaL_unref(L, LUA_REGISTRYINDEX, _nodeScripts[id].tableRef);
+
+		Debug::Log("Destroyed node script: {}", id);
+		_nodeScripts.erase(_nodeScripts.find(id));
+	}
+	const std::unordered_map<NodeScriptID, NodeScriptData> &GetNodeScripts() {
+		return _nodeScripts;
+	}
+
+  private:
+	// path -> LUA_REGISTRYINDEX
+	std::unordered_map<std::string, int> _nodeScriptTemplates;
+	std::unordered_map<NodeScriptID, NodeScriptData> _nodeScripts;
+};
+
 static void AssignNodeMetatable(lua_State *L, Node *node) {
 	// lua_pushlightuserdata(L, node);
 	lua_rawgetp(L, LUA_REGISTRYINDEX, App().GetNodeDB().GetNodeType(node->TypeID()).scriptKey);
@@ -147,12 +191,17 @@ int ScriptServer::PushModule(const char *path) {
 	return 1;
 }
 
+ScriptServer::ScriptServer() {
+	data = std::make_unique<ScriptServerData>();
+}
+
+ScriptServer::~ScriptServer() {
+}
+
 void ScriptServer::Init() {
 	using namespace luabridge;
 
 	state = luaL_newstate();
-	_startFuncs.clear();
-	_updateFuncs.clear();
 
 	luaL_openlibs(state);
 
@@ -168,6 +217,13 @@ void ScriptServer::Init() {
 		.endNamespace();
 
 	getGlobalNamespace(state)
+		.addFunction("NodeScript", +[](const std::string &name, const std::string &extends, lua_State *L) -> luabridge::LuaRef {
+			auto script = luabridge::LuaRef::newTable(L);
+			script["__extends"] = extends;
+			script["__script_name"] = name;
+
+			return script; })
+
 		.beginClass<Timer>("Timer")
 		.addFunction("Start", &Timer::Start)
 		.addFunction("Pause", &Timer::Pause)
@@ -362,48 +418,177 @@ void ScriptServer::Init() {
 }
 
 void ScriptServer::CallStart() {
-	for (auto &fun : _startFuncs) {
-		lua_rawgeti(state, LUA_REGISTRYINDEX, fun);
-		if (lua_pcall(state, 0, 0, 0) != LUA_OK) {
-			Debug::Error("Lua start error: {}", lua_tostring(state, -1));
+	for (auto &[id, refIndex] : data->GetNodeScripts()) {
+		lua_rawgeti(state, LUA_REGISTRYINDEX, refIndex.tableRef);
+		luabridge::LuaRef ref = luabridge::LuaRef::fromStack(state);
+
+		if (ref.isTable()) {
+			auto fn = ref["Start"];
+			if (fn.isFunction()) {
+				fn.push(state);
+				ref.push(state);
+
+				auto node = luabridge::LuaRef(state, refIndex.node);
+				node.push(state);
+				AssignNodeMetatable(state, refIndex.node);
+
+				if (lua_pcall(state, 2, 0, 0) != LUA_OK) {
+					Debug::Error("Lua start error: {}", lua_tostring(state, -1));
+				}
+			}
 		}
 	}
 }
 
 void ScriptServer::CallUpdate() {
-	for (auto &fun : _updateFuncs) {
-		lua_rawgeti(state, LUA_REGISTRYINDEX, fun);
-		if (lua_pcall(state, 0, 0, 0) != LUA_OK) {
-			Debug::Error("Lua update error: {}", lua_tostring(state, -1));
+	for (auto &[id, refIndex] : data->GetNodeScripts()) {
+		lua_rawgeti(state, LUA_REGISTRYINDEX, refIndex.tableRef);
+		luabridge::LuaRef ref = luabridge::LuaRef::fromStack(state);
+
+		if (ref.isTable()) {
+			auto fn = ref["Update"];
+			if (fn.isFunction()) {
+				fn.push(state);
+				ref.push(state);
+
+				auto node = luabridge::LuaRef(state, refIndex.node);
+				node.push(state);
+				AssignNodeMetatable(state, refIndex.node);
+
+				if (lua_pcall(state, 2, 0, 0) != LUA_OK) {
+					Debug::Error("Lua update error: {}", lua_tostring(state, -1));
+				}
+			}
 		}
 	}
 }
 
-void ScriptServer::LoadScript(const char *path) {
+bool ScriptServer::LoadNodeScript(const char *path) {
 	auto file = App().FS().Load(path);
 	if (!file) {
 		Debug::Error("Failed to load script file at '{}'", path);
-		return;
+		return false;
 	}
 
 	std::string str{reinterpret_cast<char *>(file->Data()), file->Size()};
 	if (luaL_dostring(state, str.c_str()) != LUA_OK) {
 		Debug::Error("Lua load error: {}", lua_tostring(state, -1));
+		return false;
 	}
 
-	lua_getglobal(state, "Start");
-	if (lua_isfunction(state, -1)) {
-		_startFuncs.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
+	int refIndex = luaL_ref(state, LUA_REGISTRYINDEX);
+	lua_rawgeti(state, LUA_REGISTRYINDEX, refIndex);
 
-		lua_pushnil(state);
-		lua_setglobal(state, "Start");
+	luabridge::LuaRef luaRef = luabridge::LuaRef::fromStack(state);
+	if (luaRef.isTable()) {
+		Debug::Log("Everything is correct");
+	} else {
+		Debug::Error("Invalid module file. Expected table");
+		return false;
 	}
 
-	lua_getglobal(state, "Update");
-	if (lua_isfunction(state, -1)) {
-		_updateFuncs.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
-
-		lua_pushnil(state);
-		lua_setglobal(state, "Update");
+	if (!luaRef["__script_name"].isString()) {
+		Debug::Error("Script name not found. Use NodeScript(name, extends) or SceneScript(name)");
+		return false;
 	}
+
+	std::string name = luaRef["__script_name"].tostring();
+
+	Debug::Info("Registered Node Script \"{}\" from : {}", name, path);
+	data->MakeNodeScriptTemplate(path, refIndex);
+
+	return true;
 }
+
+void ScriptServer::NewNodeScript(Node *node, NodeScriptRef &ref, const std::string &scriptPath) {
+	int refIndex = data->GetNodeScriptTemplate(scriptPath);
+	Debug::Info("RefIndex is : {}", refIndex);
+	if (refIndex < 0) {
+		LoadNodeScript(scriptPath.c_str());
+
+		refIndex = data->GetNodeScriptTemplate(scriptPath);
+		Debug::Info("RefIndex is : {}", refIndex);
+		if (refIndex < 0) {
+			Debug::Error("1: Invalid node script : {}", scriptPath);
+			return;
+		}
+	}
+
+	lua_rawgeti(state, LUA_REGISTRYINDEX, refIndex);
+	luabridge::LuaRef scriptTemplate = luabridge::LuaRef::fromStack(state);
+	if (!scriptTemplate.isValid() || !scriptTemplate.isTable()) {
+		Debug::Error("2: Invalid node script : {}", scriptPath);
+		return;
+	}
+
+	lua_newtable(state);
+	luabridge::LuaRef scriptInstance = luabridge::LuaRef::fromStack(state);
+	scriptInstance.push(state);
+
+	lua_pushstring(state, "__extends");
+	scriptTemplate["__extends"].push(state);
+	lua_settable(state, -3);
+
+	lua_pushstring(state, "__script_name");
+	scriptTemplate["__script_name"].push(state);
+	lua_settable(state, -3);
+
+	lua_pushstring(state, "Start");
+	scriptTemplate["Start"].push(state);
+	lua_settable(state, -3);
+
+	lua_pushstring(state, "Update");
+	scriptTemplate["Update"].push(state);
+	lua_settable(state, -3);
+
+	int instanceRef = luaL_ref(state, LUA_REGISTRYINDEX);
+
+	NodeScriptID scriptID = data->MakeNodeScript(NodeScriptData{
+		.tableRef = instanceRef,
+		.node = node,
+	});
+
+	ref._scripts.push_back(NodeScriptInstance{
+		.scriptID = scriptID,
+		.path = scriptPath,
+	});
+
+	Debug::Log("Node script is valid: {}", scriptPath);
+}
+
+void ScriptServer::DestroyNodeScript(NodeScriptID id) {
+	data->DestroyNodeScript(id, state);
+}
+
+NodeScriptRef::~NodeScriptRef() {
+	Clear();
+}
+
+void NodeScriptRef::Clear() {
+	for (const NodeScriptInstance &script : _scripts) {
+		App().GetScriptServer().DestroyNodeScript(script.scriptID);
+	}
+	_scripts.clear();
+}
+
+void PrintTable(luabridge::LuaRef ref) {
+	ref.push();
+
+	lua_pushnil(ref.state()); // First key
+	while (lua_next(ref.state(), -2) != 0) {
+
+		if (lua_istable(ref.state(), -1)) {
+			PrintTable(luabridge::LuaRef::fromStack(ref.state(), -1));
+		} else if (lua_isstring(ref.state(), -1)) {
+			Debug::Log("Key={}, Value={}", lua_tostring(ref.state(), -2), lua_tostring(ref.state(), -1));
+		} else if (lua_isnumber(ref.state(), -1)) {
+			Debug::Log("Key={}, Value={}", lua_tostring(ref.state(), -2), lua_tonumber(ref.state(), -1));
+		} else if (lua_isboolean(ref.state(), -1)) {
+			Debug::Log("Key={}, Value={}", lua_tostring(ref.state(), -2), lua_toboolean(ref.state(), -1));
+		} else if (lua_isfunction(ref.state(), -1)) {
+			Debug::Log("Key={}, Value={}", lua_tostring(ref.state(), -2), "function");
+		}
+
+		lua_pop(ref.state(), 1);
+	}
+};

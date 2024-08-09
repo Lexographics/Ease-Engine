@@ -87,7 +87,8 @@ Vector2 Node2D::GetGlobalPosition() {
 	return pos;
 }
 
-EDITOR_UPDATE_FUNC(Node2D, {
+#ifdef SW_EDITOR
+void Node2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Node2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -116,4 +117,5 @@ EDITOR_UPDATE_FUNC(Node2D, {
 		ImGui::Unindent();
 	}
 	Node::UpdateEditor();
-})
+}
+#endif

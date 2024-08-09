@@ -62,7 +62,6 @@ class Scene {
 
 	Node *_root = nullptr;
 	NodeID _currentCamera2D = 0;
-	std::vector<std::string> _scripts;
 
 	NodeDB *_nodeDB = nullptr;
 

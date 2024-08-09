@@ -55,7 +55,8 @@ bool Text2D::Copy(Node *dst) {
 	return true;
 }
 
-EDITOR_UPDATE_FUNC(Text2D, {
+#ifdef SW_EDITOR
+void Text2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Text2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -77,4 +78,5 @@ EDITOR_UPDATE_FUNC(Text2D, {
 	}
 
 	Node2D::UpdateEditor();
-})
+}
+#endif

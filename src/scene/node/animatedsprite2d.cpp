@@ -114,7 +114,8 @@ void AnimatedSprite2D::RestartAnimation() {
 	_animationDelta = 0.f;
 }
 
-EDITOR_UPDATE_FUNC(AnimatedSprite2D, {
+#ifdef SW_EDITOR
+void AnimatedSprite2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("AnimatedSprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -156,4 +157,5 @@ EDITOR_UPDATE_FUNC(AnimatedSprite2D, {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-})
+}
+#endif

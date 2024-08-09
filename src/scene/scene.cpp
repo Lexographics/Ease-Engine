@@ -16,10 +16,7 @@ Scene::~Scene() {
 void Scene::Start() {
 	for (Node *node : _nodeIter) {
 		node->Start();
-	}
-
-	for (auto &script : _scripts) {
-		App().GetScriptServer().LoadScript(script.c_str());
+		node->LoadScripts();
 	}
 }
 
@@ -120,7 +117,6 @@ bool Scene::SaveToFile(const char *path) {
 
 	YAML::Node scene;
 	scene["Camera2D"] = GetCurrentCamera2D();
-	scene["Scripts"] = _scripts;
 	out["Scene"] = scene;
 
 	YAML::Node resources;
@@ -177,11 +173,12 @@ bool Scene::SaveToFile(const char *path) {
 }
 
 bool Scene::LoadFromFile(const char *path) {
+	Clear();
 	_scenePath = path;
 
 	Ref<FileData> data = App().FS().Load(path);
 	if (!data) {
-		Debug::Error("Failed to open file: '{}'", path);
+		Debug::Error("Failed to open scene file: '{}'", path);
 		return false;
 	}
 	std::string str{reinterpret_cast<char *>(data->Data()), data->Size()};
@@ -226,7 +223,6 @@ bool Scene::LoadFromFile(const char *path) {
 	YAML::Node scene = doc["Scene"];
 	if (scene) {
 		SetCurrentCamera2D(scene["Camera2D"].as<NodeID>(GetCurrentCamera2D()));
-		_scripts = scene["Scripts"].as<std::vector<std::string>>(std::vector<std::string>{});
 	}
 
 	return true;
@@ -247,7 +243,6 @@ void Scene::Copy(Scene *src, Scene *dst) {
 
 	dst->SetRoot(src->GetRoot()->Duplicate(dst));
 	dst->SetCurrentCamera2D(src->GetCurrentCamera2D());
-	dst->_scripts = src->_scripts;
 	dst->_scenePath = src->_scenePath;
 	dst->_resourceLocker = src->_resourceLocker;
 }

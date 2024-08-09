@@ -161,7 +161,8 @@ void AudioStreamPlayer::updateSource() {
 	alSourcei(_sourceID, AL_LOOPING, _loop);
 }
 
-EDITOR_UPDATE_FUNC(AudioStreamPlayer, {
+#ifdef SW_EDITOR
+void AudioStreamPlayer::UpdateEditor() {
 	if (ImGui::CollapsingHeader("AudioStreamPlayer", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -199,4 +200,5 @@ EDITOR_UPDATE_FUNC(AudioStreamPlayer, {
 	}
 
 	Node::UpdateEditor();
-})
+}
+#endif

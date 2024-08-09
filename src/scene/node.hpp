@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core/serialize/document.hpp"
+#include "servers/script_server.hpp"
 #include "sowa.hpp"
 #include "utils/utils.hpp"
 
@@ -58,6 +59,9 @@ class Node {
 	inline std::vector<Node *> GetChildren() { return _children; }
 	inline Node *GetParent() { return _parent; }
 
+	void AddNodeScript(const std::string &path);
+	void LoadScripts();
+
 	void RemoveChild(Node *child);
 	void AddChild(Node *child);
 	void Free();
@@ -75,6 +79,7 @@ class Node {
   private:
 	// Internal hierarchy functions that does not modify other than the node passed
 	void removeChild(Node *child);
+	void loadScript(const std::string &path);
 
 	friend class Scene;
 	friend class NodeDB;
@@ -89,6 +94,9 @@ class Node {
 	std::vector<Node *> _children;
 
 	Scene *_pScene = nullptr;
+
+	NodeScriptRef _nodeScriptRef;
+	std::vector<std::string> _scripts;
 };
 
 #endif // NODE_HPP

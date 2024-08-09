@@ -52,7 +52,8 @@ void Sprite2D::Update() {
 	App().GetRenderer().GetRenderer2D("2D").PushQuad(GetTransform(), res->ID(), glm::vec2(res->Width(), res->Height()), GetZIndex(), Modulate(), ID());
 }
 
-EDITOR_UPDATE_FUNC(Sprite2D, {
+#ifdef SW_EDITOR
+void Sprite2D::UpdateEditor() {
 	if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Indent();
 
@@ -67,4 +68,5 @@ EDITOR_UPDATE_FUNC(Sprite2D, {
 		ImGui::Unindent();
 	}
 	Node2D::UpdateEditor();
-})
+}
+#endif
