@@ -69,85 +69,10 @@ std::vector<FileEntry> FileSystem::ReadDirectory(const std::filesystem::path &pa
 	return _fileServers[data.scheme]->ReadDirectory(data.path, recursive);
 }
 
-FileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::filesystem::path &path) {
-	class FolderFileServer : public FileServer, public SaveableFileServer {
-	  public:
-		FolderFileServer(FileSystem *fs, const char *scheme, const std::filesystem::path &path) {
-			_fs = fs;
-			_scheme = scheme;
-			_basePath = path;
-		}
-
-		Ref<FileData> Load(const std::filesystem::path &path) {
-			Ref<FileData> data = FileData::New();
-
-			std::ifstream file{GetPath(path), std::ios::binary};
-			if (!file.good())
-				return nullptr;
-
-			file.seekg(0, std::ios::end);
-			int size = static_cast<int>(file.tellg());
-			file.seekg(0, std::ios::beg);
-
-			data->Buffer().resize(size);
-			file.read(reinterpret_cast<char *>(data->Buffer().data()), static_cast<long>(size));
-
-			return data;
-		}
-
-		std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive) {
-			std::vector<FileEntry> entries;
-			std::filesystem::path dir = GetPath(path);
-
-			if (std::filesystem::is_directory(dir)) {
-				if (recursive) {
-					for (const auto &dirEntry : std::filesystem::recursive_directory_iterator(dir)) {
-						entries.push_back(FileEntry{
-							.path = Utils::Format("{}://{}", _scheme, std::filesystem::relative(dirEntry.path(), _basePath).string()),
-							.is_directory = dirEntry.is_directory()});
-					}
-				} else {
-					for (const auto &dirEntry : std::filesystem::directory_iterator(dir)) {
-						entries.push_back(FileEntry{
-							.path = Utils::Format("{}://{}", _scheme, std::filesystem::relative(dirEntry.path(), _basePath).string()),
-							.is_directory = dirEntry.is_directory()});
-					}
-				}
-			}
-
-			std::sort(entries.begin(), entries.end());
-			return entries;
-		}
-
-		std::filesystem::path GetPath(const std::filesystem::path &path) {
-			return _basePath / path;
-		}
-
-		void GetSaveStream(const std::filesystem::path &path, std::ofstream &out) {
-			out = std::ofstream(GetPath(_fs->ResolvePath(path).path));
-		}
-
-	  private:
-		FileSystem *_fs = nullptr;
-		std::string _scheme = "";
-		std::filesystem::path _basePath = "";
-	};
-
-	return reinterpret_cast<FileServer *>(new FolderFileServer(this, scheme, path));
+FolderFileServer *FileSystem::NewFolderFileServer(const char *scheme, const std::filesystem::path &path) {
+	return new FolderFileServer(this, scheme, path);
 }
 
 DataFileServer *FileSystem::NewDataFileServer() {
 	return new DataFileServer();
-}
-
-DataFileServer &DataFileServer::AddFile(const char *path, Ref<FileData> data) {
-	_files[path] = data;
-	return *this;
-}
-
-Ref<FileData> DataFileServer::Load(const std::filesystem::path &path) {
-	if (_files.find(path.string()) == _files.end())
-		return nullptr;
-
-	return _files[path.string()];
 }

@@ -10,6 +10,10 @@
 
 #include "sowa.hpp"
 
+#include "data_file_server.hpp"
+#include "file_server.hpp"
+#include "folder_file_server.hpp"
+
 struct FileData {
   public:
 	FileData() = default;
@@ -57,27 +61,6 @@ struct PathData {
 	std::string path;
 };
 
-class FileServer {
-  public:
-	virtual Ref<FileData> Load(const std::filesystem::path &path) = 0;
-	virtual std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive) { return std::vector<FileEntry>{}; };
-};
-
-class SaveableFileServer {
-  public:
-	virtual void GetSaveStream(const std::filesystem::path &path, std::ofstream &out) = 0;
-};
-
-class DataFileServer : public FileServer {
-  public:
-	DataFileServer &AddFile(const char *path, Ref<FileData> data);
-
-	Ref<FileData> Load(const std::filesystem::path &path) override;
-
-  private:
-	std::unordered_map<std::string, Ref<FileData>> _files;
-};
-
 class FileSystem {
   public:
 	void RegisterFileServer(const char *scheme, FileServer *server);
@@ -88,7 +71,7 @@ class FileSystem {
 	Ref<FileData> Load(const std::filesystem::path &path);
 	std::vector<FileEntry> ReadDirectory(const std::filesystem::path &path, bool recursive = false);
 
-	FileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
+	FolderFileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
 	DataFileServer *NewDataFileServer();
 
   private:
