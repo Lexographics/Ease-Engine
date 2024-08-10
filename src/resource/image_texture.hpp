@@ -6,6 +6,10 @@
 
 #include "core/resource.hpp"
 
+#ifdef SW_EDITOR
+#include "editor/editor.hpp"
+#endif
+
 class ImageTexture : public Resource {
   public:
 	ImageTexture();
@@ -50,6 +54,10 @@ class ImageTexture : public Resource {
 	bool _storePixels = false;
 
 	bool _flip = false;
+
+#ifdef SW_EDITOR
+	HotReloader::ID _watchID = 0;
+#endif
 };
 
 #endif // IMAGE_TEXTURE_HPP

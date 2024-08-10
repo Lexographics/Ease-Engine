@@ -24,9 +24,12 @@ class FolderFileServer : public FileServer, public SaveableFileServer {
 	uintmax_t RemoveAll(const std::filesystem::path &path);
 	bool Rename(const std::filesystem::path &path, const std::string &name);
 	bool Create(const std::filesystem::path &path);
+	bool Exists(const std::filesystem::path &path);
 
   private:
 	friend class Editor;
+	friend class HotReloader;
+
 	std::filesystem::path GetPath(const std::filesystem::path &path);
 
   private:

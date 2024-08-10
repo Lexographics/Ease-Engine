@@ -101,6 +101,14 @@ bool FolderFileServer::Create(const std::filesystem::path &path) {
 	}
 }
 
+bool FolderFileServer::Exists(const std::filesystem::path &path) {
+	try {
+		return std::filesystem::exists(GetPath(_fs->ResolvePath(path).path));
+	} catch (...) {
+		return false;
+	}
+}
+
 std::filesystem::path FolderFileServer::GetPath(const std::filesystem::path &path) {
 	return _basePath / path;
 }

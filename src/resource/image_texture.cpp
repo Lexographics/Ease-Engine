@@ -8,6 +8,7 @@
 #include "stb_image.h"
 
 #include "core/application.hpp"
+#include "core/debug.hpp"
 
 ImageTexture::ImageTexture() {
 	_resourceType = typeid(ImageTexture).hash_code();
@@ -27,6 +28,8 @@ void ImageTexture::Unbind() {
 }
 
 void ImageTexture::Load(const char *path) {
+	Delete();
+
 	auto file = App().FS().Load(path);
 	if (!file) {
 		return;
@@ -48,6 +51,17 @@ void ImageTexture::Load(const char *path) {
 	} else {
 		stbi_image_free(pixels);
 	}
+
+#ifdef SW_EDITOR
+	if (_watchID == 0) {
+		_watchID = App().GetEditor().GetHotReloader().WatchPath(path, [this](const std::string &path, HotReloader::EventType eventType) {
+			if (eventType == HotReloader::EventType::Updated) {
+				Load(path.c_str());
+				Debug::Log("Reloaded texture: {}", path);
+			}
+		});
+	}
+#endif
 }
 
 void ImageTexture::LoadFromData(unsigned char *data, int width, int height) {
@@ -79,4 +93,11 @@ void ImageTexture::Delete() {
 		glDeleteTextures(1, &_id);
 		_id = 0;
 	}
+
+#ifdef SW_EDITOR
+	if (_watchID != 0) {
+		App().GetEditor().GetHotReloader().RemoveWatcher(_watchID);
+		_watchID = 0;
+	}
+#endif
 }

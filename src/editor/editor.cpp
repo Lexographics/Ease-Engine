@@ -166,6 +166,12 @@ void Editor::Init() {
 		}
 		_scenes.push_back(App().GetCurrentScene());
 	});
+
+	_fs = dynamic_cast<FolderFileServer *>(App().FS().GetFileServer("res"));
+	if (!_fs) {
+		Debug::Error("res:// filesystem not found");
+	}
+	_hotReloader.Init(_fs);
 }
 
 void Editor::Begin() {
@@ -175,6 +181,12 @@ void Editor::Begin() {
 }
 
 void Editor::Update() {
+	static int counter = 0;
+	counter++;
+	if (counter % 300 == 0) {
+		_hotReloader.Update();
+	}
+
 	ImGuiWindowFlags windowFlags = 0;
 	windowFlags |= ImGuiWindowFlags_NoCollapse;
 

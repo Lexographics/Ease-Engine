@@ -12,9 +12,12 @@
 #include "sowa.hpp"
 
 #include "core/filesystem/filesystem.hpp"
+#include "hot_reloader.hpp"
 #include "scene/node.hpp"
 #include "scene/node/camera2d.hpp"
 #include "scene/scene.hpp"
+
+#include "core/filesystem/filesystem.hpp"
 
 struct EditorSettings {
 	bool coloredLogMessages = true;
@@ -40,6 +43,8 @@ class Editor {
 	inline const Rect &GetViewportRect() const { return _viewportRect; }
 	bool HasFocus();
 
+	inline HotReloader &GetHotReloader() { return _hotReloader; }
+
   private:
 	EditorSettings _settings;
 	NodeID _selectedNodeID = 0;
@@ -61,6 +66,9 @@ class Editor {
 	std::string _currentAnimName = "";
 
 	Rect _viewportRect;
+
+	FolderFileServer *_fs;
+	HotReloader _hotReloader;
 };
 
 #endif // SW_EDITOR
