@@ -93,7 +93,7 @@ void Editor::Init() {
 	ImFontConfig config;
 	config.MergeMode = true;
 
-	font = App().FS().Load("res://icons.ttf");
+	font = App().FS().Load("data://icons.ttf");
 	if (font) {
 		io.Fonts->AddFontFromMemoryTTF(font->Data(), font->Size(), 14, &config, iconRange);
 	}
@@ -143,11 +143,15 @@ void Editor::Init() {
 	_fileContextMenu[".wav"] = audioContextMenu;
 	_fileContextMenu[".ogg"] = audioContextMenu;
 
-	_fileContextMenu[".lua"] = [](std::filesystem::path path) {
-		if (ImGui::MenuItem("Add to scene")) {
-			App().GetCurrentScene()->_scripts.push_back(path.string());
-		}
+	_fileLeftClickEvent[".lua"] = [this](std::filesystem::path path) {
 	};
+	/*
+		_fileContextMenu[".lua"] = [](std::filesystem::path path) {
+			if (ImGui::MenuItem("Add to scene")) {
+				App().GetCurrentScene()->_scripts.push_back(path.string());
+			}
+		};
+		*/
 
 	_fileContextMenu[".sscn"] = [](std::filesystem::path path) {
 		if (ImGui::MenuItem("Set project default scene")) {
@@ -424,6 +428,10 @@ void Editor::Update() {
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetFontSize() * 0.1f);
 
 			bool open = ImGui::TreeNodeEx(("##" + entry.path.filename().string()).c_str(), flags);
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				this->_currentRClickPath = entry;
+				openFileContext = true;
+			}
 
 			ImGui::SetWindowFontScale(1.f);
 			ImGui::PopStyleVar();
@@ -435,6 +443,7 @@ void Editor::Update() {
 			ImGui::SetNextItemAllowOverlap();
 			ImGui::Text("%s", entry.path.filename().string().c_str());
 			ImGui::PopStyleVar();
+
 			if (open) {
 				drawDir(Utils::Format("{}/{}", path, entry.path.filename()));
 				ImGui::TreePop();
@@ -452,6 +461,18 @@ void Editor::Update() {
 
 			bool open = ImGui::TreeNodeEx(("##" + entry.path.filename().string()).c_str(), flags | ImGuiTreeNodeFlags_Leaf);
 
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+				auto fn = _fileLeftClickEvent[entry.path.extension().string()];
+				if (fn) {
+					fn(entry.path);
+				}
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				this->_currentRClickPath = entry;
+				openFileContext = true;
+			}
+
 			ImGui::SetWindowFontScale(1.f);
 			ImGui::PopStyleVar();
 
@@ -464,36 +485,76 @@ void Editor::Update() {
 			ImGui::PopStyleVar();
 
 			if (open) {
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-					auto fn = _fileLeftClickEvent[entry.path.extension().string()];
-					if (fn) {
-						fn(entry.path);
-					}
-				}
-
-				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-					this->_currentRClickPath = entry;
-					openFileContext = true;
-				}
-
 				ImGui::TreePop();
 			}
 		}
 	};
 	drawDir("res://");
 
+	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+		_currentRClickPath.path = "res://";
+		_currentRClickPath.is_directory = true;
+		openFileContext = true;
+	}
+
 	if (openFileContext) {
 		ImGui::OpenPopup("##FileRclick");
 	}
 
+	bool openFileRenameContext = false;
+	bool openFileCreateContext = false;
 	if (ImGui::BeginPopup("##FileRclick")) {
-		if (ImGui::MenuItem("Delete")) {
-			Debug::Log("Deleted file");
-		}
-
 		auto fn = _fileContextMenu[_currentRClickPath.path.extension().string()];
 		if (fn) {
 			fn(_currentRClickPath.path);
+		}
+
+		if (_currentRClickPath.path.string() != "res://") {
+			if (ImGui::MenuItem("Delete")) {
+				if (_fs->RemoveAll(_currentRClickPath.path) != 0) {
+					Debug::Log("Deleted file {}", _currentRClickPath.path.string());
+				} else {
+					Debug::Error("Failed to delete file {}", _currentRClickPath.path.string());
+				}
+			}
+
+			if (ImGui::MenuItem("Rename")) {
+				openFileRenameContext = true;
+			}
+		}
+
+		if (_currentRClickPath.is_directory) {
+			if (ImGui::MenuItem("Create File")) {
+				openFileCreateContext = true;
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if (openFileRenameContext) {
+		ImGui::OpenPopup("##FileRename");
+	}
+
+	if (openFileCreateContext) {
+		ImGui::OpenPopup("##FileCreate");
+	}
+
+	if (ImGui::BeginPopup("##FileRename")) {
+		std::string buf = _currentRClickPath.path.filename();
+		if (ImGui::InputText("##NewName", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
+			_fs->Rename(_currentRClickPath.path, buf);
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if (ImGui::BeginPopup("##FileCreate")) {
+		std::string buf = "";
+		if (ImGui::InputText("##NewName", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
+			_fs->Create(_currentRClickPath.path.concat("/").concat(buf));
+			ImGui::CloseCurrentPopup();
 		}
 
 		ImGui::EndPopup();
@@ -684,17 +745,22 @@ void Editor::Update() {
 		ImGui::Indent();
 
 		if (!App().IsRunning()) {
-			for (size_t i = 0; i < _scenes.size(); i++) {
-				ImGui::PushID((void *)_scenes[i].get());
+			static std::string selectedScene = App().GetCurrentScene()->GetFilepath().string();
+			if (ImGui::BeginCombo("Scene", selectedScene.c_str())) {
 
-				ImGui::Text("%s", _scenes[i]->GetFilepath().c_str());
-				ImGui::SameLine();
+				auto dir = App().FS().ReadDirectory("res://", true);
 
-				if (ImGui::Button("Open")) {
-					App().SetCurrentScene(_scenes[i]);
+				for (auto &entry : dir) {
+					if (!entry.is_directory && entry.path.extension() == ".sscn") {
+						bool selected = selectedScene == entry.path.string();
+						if (ImGui::Selectable(entry.path.string().c_str(), &selected)) {
+							selectedScene = entry.path.string();
+							App().GetCurrentScene()->LoadFromFile(entry.path.string().c_str());
+						}
+					}
 				}
 
-				ImGui::PopID();
+				ImGui::EndCombo();
 			}
 		}
 
@@ -715,43 +781,6 @@ void Editor::Update() {
 				}
 			} else
 				ImGui::Text("2D Camera: <NONE>");
-
-			if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::Indent();
-
-				for (size_t i = 0; i < scene->_scripts.size();) {
-					ImGui::PushID((void *)&scene->_scripts[i]);
-
-					ImGui::Text("%s", scene->_scripts[i].c_str());
-					ImGui::SameLine();
-					if (ImGui::Button("x", ImVec2(24, 24))) {
-						scene->_scripts.erase(scene->_scripts.begin() + i);
-					} else {
-						i++;
-					}
-
-					ImGui::PopID();
-				}
-
-				if (ImGui::Button("+##ScriptAdd", ImVec2(24, 24))) {
-					ImGui::OpenPopup("Scene_Scripts_Add");
-				}
-
-				ImGui::Unindent();
-			}
-
-			if (ImGui::BeginPopup("Scene_Scripts_Add")) {
-				std::string buf = "";
-				ImGui::Text("Path");
-				ImGui::SameLine();
-
-				if (ImGui::InputText("##Path", &buf, ImGuiInputTextFlags_EnterReturnsTrue)) {
-					scene->_scripts.push_back(buf);
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
 		}
 
 		ImGui::Unindent();
