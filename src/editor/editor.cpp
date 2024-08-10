@@ -909,9 +909,19 @@ void Editor::Update() {
 
 	if (!App().IsRunning()) {
 		if (ImGui::IsItemHovered()) {
-			_cameraZoom -= (Input::GetMouseScrollY() * 0.1);
-			_cameraZoom = std::clamp(_cameraZoom, 0.1f, 10.f);
+			float scroll = _cameraZoom * (Input::GetMouseScrollY() * 0.1f);
+
+			float zoom = _cameraZoom;
+			_cameraZoom -= scroll;
+			_cameraZoom = std::clamp(_cameraZoom, 0.1f, 100.f);
 			_camera2d.Scale() = Vector2(_cameraZoom, _cameraZoom);
+
+			float delta = zoom - _cameraZoom;
+			Vector2 center = Vector2(
+				App().GetProjectSettings().rendering.viewport.width * 0.5f,
+				App().GetProjectSettings().rendering.viewport.height * 0.5f);
+
+			_camera2d.Position() += (Input::GetMousePosition() - center) * delta * 0.67f;
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {

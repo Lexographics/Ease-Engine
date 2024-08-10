@@ -46,6 +46,8 @@ class Editor {
 	inline HotReloader &GetHotReloader() { return _hotReloader; }
 
   private:
+	friend class Application;
+
 	EditorSettings _settings;
 	NodeID _selectedNodeID = 0;
 

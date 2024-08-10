@@ -239,8 +239,11 @@ void Application::Update() {
 #endif
 	GetRenderer().BeginDraw();
 
+#ifdef SW_EDITOR
 	if (!IsRunning()) {
-		if (_currentScene)
+		if (_currentScene) {
+			float thickness = 4 * GetEditor()._cameraZoom;
+
 			for (Node *node : _currentScene->_nodeIter) {
 				Camera2D *camera = dynamic_cast<Camera2D *>(node);
 				if (!camera)
@@ -248,20 +251,45 @@ void Application::Update() {
 
 				// TODO: GetBounds does not calculate rotation
 				Rect bounds = camera->GetBounds();
-				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y}, {bounds.x + bounds.w, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
-				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y}, {bounds.x + bounds.w, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
-				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y + bounds.h}, {bounds.x, bounds.y + bounds.h}, 4.f, Color::RGB(20, 110, 190, 170));
-				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y + bounds.h}, {bounds.x, bounds.y}, 4.f, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y}, {bounds.x + bounds.w, bounds.y}, thickness, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y}, {bounds.x + bounds.w, bounds.y + bounds.h}, thickness, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x + bounds.w, bounds.y + bounds.h}, {bounds.x, bounds.y + bounds.h}, thickness, Color::RGB(20, 110, 190, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({bounds.x, bounds.y + bounds.h}, {bounds.x, bounds.y}, thickness, Color::RGB(20, 110, 190, 170));
 			}
+
+			Node *selectedNode = GetCurrentScene()->GetNode(GetEditor()._selectedNodeID);
+			if (Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode); selectedNode2D != nullptr) {
+				Vector2 pos = selectedNode2D->GetGlobalPosition();
+				float width = 120 * GetEditor()._cameraZoom / 2;
+				float thickness = 6 * GetEditor()._cameraZoom;
+
+				GetRenderer().GetRenderer2D("2D").DrawLine({pos.x - width, pos.y}, {pos.x + width, pos.y}, thickness, Color::RGB(110, 120, 220, 170));
+				GetRenderer().GetRenderer2D("2D").DrawLine({pos.x, pos.y - width}, {pos.x, pos.y + width}, thickness, Color::RGB(110, 120, 220, 170));
+			}
+		}
 	}
+#endif
 
 	if (_currentScene)
 		_currentScene->Update();
 
+#ifdef SW_EDITOR
 	if (!IsRunning()) {
-		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 4.f, Color::RGB(200, 120, 100, 170));
-		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 4.f, Color::RGB(120, 255, 100, 170));
+		float thickness = 4 * GetEditor()._cameraZoom;
+
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, thickness, Color::RGB(200, 120, 100, 170));
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, thickness, Color::RGB(120, 255, 100, 170));
+
+		Vector2 videoSize = Vector2(
+			App().GetProjectSettings().rendering.viewport.width,
+			App().GetProjectSettings().rendering.viewport.height);
+
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, 0.f}, {videoSize.x, 0.f}, thickness, Color::RGB(20, 130, 220, 140));
+		GetRenderer().GetRenderer2D("2D").DrawLine({videoSize.x, 0.f}, {videoSize.x, videoSize.y}, thickness, Color::RGB(20, 130, 220, 140));
+		GetRenderer().GetRenderer2D("2D").DrawLine({videoSize.x, videoSize.y}, {0.f, videoSize.y}, thickness, Color::RGB(20, 130, 220, 140));
+		GetRenderer().GetRenderer2D("2D").DrawLine({0.f, videoSize.y}, {0.f, 0.f}, thickness, Color::RGB(20, 130, 220, 140));
 	}
+#endif
 
 	GetRenderer().EndDraw();
 
