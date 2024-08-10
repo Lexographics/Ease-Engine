@@ -9,12 +9,20 @@ bool Camera2D::Serialize(Document &doc) {
 	if (!Node2D::Serialize(doc))
 		return false;
 
+	doc.Set("Rotatable", _rotatable);
+	doc.SetVec2("Offset", _offset);
+	doc.SetVec2("CenterPoint", _centerPoint);
+
 	return true;
 }
 
 bool Camera2D::Deserialize(const Document &doc) {
 	if (!Node2D::Deserialize(doc))
 		return false;
+
+	_rotatable = doc.Get("Rotatable", _rotatable);
+	_offset = doc.GetVec2("Offset", _offset);
+	_centerPoint = doc.GetVec2("CenterPoint", _centerPoint);
 
 	return true;
 }
@@ -26,6 +34,8 @@ bool Camera2D::Copy(Node *dst) {
 
 	Camera2D *dstNode = dynamic_cast<Camera2D *>(dst);
 	dstNode->Rotatable() = Rotatable();
+	dstNode->_offset = _offset;
+	dstNode->_centerPoint = _centerPoint;
 
 	return true;
 }
@@ -43,12 +53,23 @@ glm::mat4 Camera2D::GetMatrix() {
 	}
 	transform = glm::inverse(transform);
 
-	return Matrix::CalculateOrtho(-640.f, 640.f, -360.f, 360.f) * transform;
+	Vector2 videoSize = Vector2(
+		App().GetProjectSettings().rendering.viewport.width,
+		App().GetProjectSettings().rendering.viewport.height);
+
+	float left = (-videoSize.x) + (videoSize.x * _centerPoint.x);
+	float bottom = (-videoSize.y) + (videoSize.y * _centerPoint.y);
+
+	return Matrix::CalculateOrtho(left, left + videoSize.x, bottom, bottom + videoSize.y) * transform;
 }
 
 // static
 glm::mat4 Camera2D::GetBlankMatrix() {
-	return Matrix::CalculateOrtho(-640.f, 640.f, -360.f, 360.f);
+	Vector2 videoSize = Vector2(
+		App().GetProjectSettings().rendering.viewport.width,
+		App().GetProjectSettings().rendering.viewport.height);
+
+	return Matrix::CalculateOrtho(0.f, videoSize.x, 0.f, videoSize.y);
 }
 
 Rect Camera2D::GetBounds() {
@@ -59,11 +80,15 @@ Rect Camera2D::GetBounds() {
 	Vector2 scale;
 	Matrix::DecomposeTransform(mat, &position, &rotation, &scale);
 
+	Vector2 videoSize = Vector2(
+		App().GetProjectSettings().rendering.viewport.width,
+		App().GetProjectSettings().rendering.viewport.height);
+
 	Rect rect;
-	rect.x = position.x - (640 * scale.x);
-	rect.y = position.y - (360 * scale.y);
-	rect.w = 1280 * scale.x;
-	rect.h = 720 * scale.y;
+	rect.x = position.x + (-videoSize.x + (videoSize.x * _centerPoint.x * scale.x));
+	rect.y = position.y + (-videoSize.y + (videoSize.y * _centerPoint.y * scale.y));
+	rect.w = videoSize.x * scale.x;
+	rect.h = videoSize.y * scale.y;
 
 	return rect;
 }
@@ -84,6 +109,10 @@ void Camera2D::UpdateEditor() {
 		ImGui::Text("%s", "Rotatable");
 		ImGui::SameLine();
 		ImGui::Checkbox("##Rotatable", &_rotatable);
+
+		ImGui::Text("%s", "Center Point");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Center Point", &_centerPoint.x, 0.01f, 0.f, 1.f);
 
 		ImGui::Unindent();
 	}

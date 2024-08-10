@@ -50,7 +50,6 @@ struct ScriptServerData {
 
 		luaL_unref(L, LUA_REGISTRYINDEX, _nodeScripts[id].tableRef);
 
-		Debug::Log("Destroyed node script: {}", id);
 		_nodeScripts.erase(_nodeScripts.find(id));
 	}
 	const std::unordered_map<NodeScriptID, NodeScriptData> &GetNodeScripts() {
@@ -494,7 +493,7 @@ bool ScriptServer::LoadNodeScript(const char *path) {
 
 	std::string name = luaRef["__script_name"].tostring();
 
-	Debug::Info("Registered Node Script \"{}\" from : {}", name, path);
+	// Debug::Info("Registered Node Script \"{}\" from : {}", name, path);
 	data->MakeNodeScriptTemplate(path, refIndex);
 
 	return true;
@@ -507,7 +506,6 @@ void ScriptServer::NewNodeScript(Node *node, NodeScriptRef &ref, const std::stri
 		LoadNodeScript(scriptPath.c_str());
 
 		refIndex = data->GetNodeScriptTemplate(scriptPath);
-		Debug::Info("RefIndex is : {}", refIndex);
 		if (refIndex < 0) {
 			Debug::Error("1: Invalid node script : {}", scriptPath);
 			return;

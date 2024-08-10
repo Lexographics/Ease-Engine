@@ -31,6 +31,7 @@ class Camera2D : public Node2D {
   public:
 	bool _rotatable = false;
 	Vector2 _offset = Vector2(0.f);
+	Vector2 _centerPoint = Vector2(0.5f);
 };
 
 #endif // CAMERA2D_HPP
