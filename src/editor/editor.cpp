@@ -921,7 +921,7 @@ void Editor::Update() {
 				App().GetProjectSettings().rendering.viewport.width * 0.5f,
 				App().GetProjectSettings().rendering.viewport.height * 0.5f);
 
-			_camera2d.Position() += (Input::GetMousePosition() - center) * delta * 0.67f;
+			_camera2d.Position() += (Input::GetMousePosition() - center) * delta;
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {

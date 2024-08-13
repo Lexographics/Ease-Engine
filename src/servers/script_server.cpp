@@ -202,7 +202,7 @@ void ScriptServer::Init() {
 
 	state = luaL_newstate();
 
-	luaL_openlibs(state);
+	luaopen_base(state);
 
 	lua_register(state, "module_loader", ModuleLoader);
 	luaL_dostring(state, "package.searchers = { module_loader }");
@@ -479,9 +479,7 @@ bool ScriptServer::LoadNodeScript(const char *path) {
 	lua_rawgeti(state, LUA_REGISTRYINDEX, refIndex);
 
 	luabridge::LuaRef luaRef = luabridge::LuaRef::fromStack(state);
-	if (luaRef.isTable()) {
-		Debug::Log("Everything is correct");
-	} else {
+	if (!luaRef.isTable()) {
 		Debug::Error("Invalid module file. Expected table");
 		return false;
 	}
@@ -493,7 +491,6 @@ bool ScriptServer::LoadNodeScript(const char *path) {
 
 	std::string name = luaRef["__script_name"].tostring();
 
-	// Debug::Info("Registered Node Script \"{}\" from : {}", name, path);
 	data->MakeNodeScriptTemplate(path, refIndex);
 
 	return true;
@@ -501,7 +498,6 @@ bool ScriptServer::LoadNodeScript(const char *path) {
 
 void ScriptServer::NewNodeScript(Node *node, NodeScriptRef &ref, const std::string &scriptPath) {
 	int refIndex = data->GetNodeScriptTemplate(scriptPath);
-	Debug::Info("RefIndex is : {}", refIndex);
 	if (refIndex < 0) {
 		LoadNodeScript(scriptPath.c_str());
 
@@ -550,8 +546,6 @@ void ScriptServer::NewNodeScript(Node *node, NodeScriptRef &ref, const std::stri
 		.scriptID = scriptID,
 		.path = scriptPath,
 	});
-
-	Debug::Log("Node script is valid: {}", scriptPath);
 }
 
 void ScriptServer::DestroyNodeScript(NodeScriptID id) {

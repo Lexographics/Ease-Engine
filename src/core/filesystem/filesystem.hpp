@@ -74,6 +74,8 @@ class FileSystem {
 	FolderFileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
 	DataFileServer *NewDataFileServer();
 
+	bool TrySaveFile(const std::string &path, Ref<FileData> file);
+
   private:
 	std::unordered_map<std::string, FileServer *> _fileServers;
 };

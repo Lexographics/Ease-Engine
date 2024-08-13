@@ -22,6 +22,9 @@ void FileSystem::RegisterFileServer(const char *scheme, FileServer *server) {
 }
 
 FileServer *FileSystem::GetFileServer(const char *scheme) {
+	if (_fileServers.find(std::string(scheme)) == _fileServers.end()) {
+		return nullptr;
+	}
 	return _fileServers[scheme];
 }
 
@@ -75,4 +78,30 @@ FolderFileServer *FileSystem::NewFolderFileServer(const char *scheme, const std:
 
 DataFileServer *FileSystem::NewDataFileServer() {
 	return new DataFileServer();
+}
+
+bool FileSystem::TrySaveFile(const std::string &path, Ref<FileData> file) {
+	if (!file) {
+		return false;
+	}
+
+	PathData pathData = ResolvePath(path);
+	FileServer *fs = GetFileServer(pathData.scheme.c_str());
+	if (fs == nullptr) {
+		return false;
+	}
+
+	SaveableFileServer *saveFs = dynamic_cast<SaveableFileServer *>(fs);
+	if (saveFs == nullptr) {
+		return false;
+	}
+
+	std::ofstream out;
+	saveFs->GetSaveStream(path, out);
+	if (!out.good()) {
+		return false;
+	}
+
+	out.write(reinterpret_cast<const char *>(file->Data()), file->Size());
+	return true;
 }
