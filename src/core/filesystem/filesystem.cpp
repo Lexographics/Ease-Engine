@@ -53,6 +53,12 @@ PathData FileSystem::ResolvePath(const std::string &path) {
 	auto index = pathData.path.find_first_not_of('/');
 	if (index != std::string::npos)
 		pathData.path = pathData.path.substr(index);
+
+	auto relative = std::filesystem::relative(pathData.path, "").string();
+	if (relative.size() >= 3 && relative[0] == '.' && relative[1] == '.' && relative[2] == '/') {
+		pathData.path = "";
+	}
+
 	return pathData;
 }
 
@@ -78,6 +84,10 @@ FolderFileServer *FileSystem::NewFolderFileServer(const char *scheme, const std:
 
 DataFileServer *FileSystem::NewDataFileServer() {
 	return new DataFileServer();
+}
+
+ZipFileServer *FileSystem::NewZipFileServer(const char *scheme, const std::filesystem::path &path) {
+	return new ZipFileServer(scheme, path);
 }
 
 bool FileSystem::TrySaveFile(const std::string &path, Ref<FileData> file) {

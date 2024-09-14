@@ -64,8 +64,10 @@ void Viewport::Delete() {
 	}
 
 	for (auto &[slot, target] : _targets) {
-		glDeleteTextures(1, &target.textureID);
-		target.textureID = 0;
+		if (target.textureID != 0) {
+			glDeleteTextures(1, &target.textureID);
+			target.textureID = 0;
+		}
 	}
 }
 

@@ -13,6 +13,7 @@
 #include "data_file_server.hpp"
 #include "file_server.hpp"
 #include "folder_file_server.hpp"
+#include "zip_file_server.hpp"
 
 struct FileData {
   public:
@@ -73,6 +74,7 @@ class FileSystem {
 
 	FolderFileServer *NewFolderFileServer(const char *scheme, const std::filesystem::path &path);
 	DataFileServer *NewDataFileServer();
+	ZipFileServer *NewZipFileServer(const char *scheme, const std::filesystem::path &path);
 
 	bool TrySaveFile(const std::string &path, Ref<FileData> file);
 
