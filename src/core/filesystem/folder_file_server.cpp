@@ -14,18 +14,30 @@ FolderFileServer::FolderFileServer(FileSystem *fs, const char *scheme, const std
 }
 
 Ref<FileData> FolderFileServer::Load(const std::filesystem::path &path) {
-	Ref<FileData> data = FileData::New();
-
-	std::ifstream file{GetPath(path), std::ios::binary};
-	if (!file.good())
+	if (IsDirectory((_scheme + "://").append(path.string()))) {
 		return nullptr;
+	}
+
+	std::ifstream file;
+	try {
+		file.open(GetPath(path), std::ios::binary);
+	} catch (...) {
+		return nullptr;
+	}
+
+	if (!file.good()) {
+		return nullptr;
+	}
 
 	file.seekg(0, std::ios::end);
 	int size = static_cast<int>(file.tellg());
 	file.seekg(0, std::ios::beg);
 
-	data->Buffer().resize(size);
-	file.read(reinterpret_cast<char *>(data->Buffer().data()), static_cast<long>(size));
+	Ref<FileData> data = FileData::New();
+	if (size > 0) {
+		data->Buffer().resize(size);
+		file.read(reinterpret_cast<char *>(data->Buffer().data()), static_cast<long>(size));
+	}
 
 	return data;
 }

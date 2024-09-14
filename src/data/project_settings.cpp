@@ -11,6 +11,7 @@
 void ProjectSettings::Load() {
 	Ref<FileData> file = App().FS().Load("res://project.sowa");
 	if (!file || file->Size() == 0) {
+		Debug::Error("Failed to load project.sowa");
 		return;
 	}
 
