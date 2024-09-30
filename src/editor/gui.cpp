@@ -5,6 +5,7 @@
 
 #include "core/application.hpp"
 #include "resource/image_texture.hpp"
+#include "resource/sprite_sheet_animation.hpp"
 
 bool Gui::TexturePicker(const char *id, RID &rid) {
 	bool changed = false;
@@ -57,8 +58,17 @@ void Gui::AnimationInput(const char *id, RID &rid) {
 			rid = res->GetRID();
 		}
 	} else {
+		bool endDisabled = false;
+		if (dynamic_cast<SpriteSheetAnimation *>(App().GetResourceRegistry().GetResource(rid)) == nullptr) {
+			ImGui::Text("Invalid Animation");
+			endDisabled = true;
+			ImGui::BeginDisabled();
+		}
 		if (ImGui::Button("Edit")) {
 			App().GetEditor().SetCurrentAnimation(rid);
+		}
+		if (endDisabled) {
+			ImGui::EndDisabled();
 		}
 
 		if (ImGui::Button("Delete")) {
