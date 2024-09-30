@@ -97,6 +97,25 @@ class Node {
 
 	NodeScriptRef _nodeScriptRef;
 	std::vector<std::string> _scripts;
+
+	/*
+		Template nodes:
+		On start,
+			Load scene from template path
+			Assign nodes children to self
+			Copy target root node to self
+			Destroy target root node
+
+		On serialization:
+			Serialize isTemplate and templatePath
+	*/
+	bool _isTemplate = false;
+	std::string _templatePath = "";
+
+#ifdef SW_EDITOR
+	// 	Node is not editable if its loaded from a scene template
+	bool _editorEditable = true;
+#endif
 };
 
 #endif // NODE_HPP

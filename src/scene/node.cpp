@@ -32,12 +32,17 @@ bool Node::Serialize(Document &doc) {
 	doc.Set("Groups", _groups);
 	doc.Set("Scripts", _scripts);
 
+	if (_isTemplate) {
+		doc.Set("IsTemplate", true);
+		doc.Set("TemplatePath", _templatePath);
+	}
+
 	return true;
 }
 
 bool Node::Deserialize(const Document &doc) {
 	Rename(doc.GetString("Name", Name()));
-	_id = doc.GetU64("ID", ID());
+	// _id = doc.GetU64("ID", ID());
 	_groups = doc.Get("Groups", _groups);
 	_scripts = doc.Get("Scripts", _scripts);
 
@@ -48,6 +53,8 @@ bool Node::Copy(Node *dst) {
 	dst->Rename(Name());
 	dst->_groups = _groups;
 	dst->_scripts = _scripts;
+	dst->_isTemplate = _isTemplate;
+	dst->_templatePath = _templatePath;
 	return true;
 }
 

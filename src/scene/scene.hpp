@@ -25,6 +25,7 @@ class Scene {
 
 	Node *Create(NodeTypeID type, const std::string &name = "Object", NodeID id = 0);
 	Node *Create(const char *typeName, const std::string &name = "Object", NodeID id = 0);
+	Node *CreateFromTemplate(const char *scenePath, const std::string &name = "Object", NodeID id = 0);
 
 	bool HasNode(NodeID id);
 	Node *GetNode(NodeID id);
@@ -68,6 +69,10 @@ class Scene {
 	std::filesystem::path _scenePath = "";
 
 	ResourceLocker _resourceLocker;
+
+	// if true, every node will get a unique id even when and id is specified in Create functions
+	// Used for node templating
+	bool _alwaysRandomIDs = false;
 };
 
 #endif // SCENE_HPP

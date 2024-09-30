@@ -44,7 +44,7 @@ Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
 		return nullptr;
 	node->_pScene = this;
 
-	NodeID nodeId = (id != 0 && !HasNode(id)) ? id : gen.Next();
+	NodeID nodeId = (id != 0 && !_alwaysRandomIDs && !HasNode(id)) ? id : gen.Next();
 	node->_id = nodeId;
 	node->Rename(name);
 
@@ -55,6 +55,30 @@ Node *Scene::Create(NodeTypeID type, const std::string &name, NodeID id) {
 
 Node *Scene::Create(const char *typeName, const std::string &name, NodeID id) {
 	return Create(_nodeDB->GetNodeTypeID(typeName), name, id);
+}
+
+Node *Scene::CreateFromTemplate(const char *scenePath, const std::string &name, NodeID id) {
+	static UUIDGenerator gen;
+	Scene scene;
+	scene._alwaysRandomIDs = true;
+	scene._nodeDB = this->_nodeDB;
+	scene.LoadFromFile(scenePath);
+	Node *node = scene.GetRoot();
+	node->_id = (id != 0 && !HasNode(id)) ? id : gen.Next();
+	node->_name = name;
+	node->_isTemplate = true;
+	node->_templatePath = scenePath;
+
+	for (Node *n : scene._nodeIter) {
+		this->_nodeIter.insert(n);
+		this->_nodes[n->ID()] = n;
+		if (n != node) // Node itself is editable
+			n->_editorEditable = false;
+	}
+
+	scene._nodeIter.clear();
+	scene._nodes.clear();
+	return node;
 }
 
 bool Scene::HasNode(NodeID id) {
@@ -140,7 +164,13 @@ bool Scene::SaveToFile(const char *path) {
 
 		YAML::Node children;
 		for (Node *child : node->GetChildren()) {
-			children.push_back(saveNode(child));
+#ifdef SW_EDITOR
+			if (child->_editorEditable) {
+#endif
+				children.push_back(saveNode(child));
+#ifdef SW_EDITOR
+			}
+#endif
 		}
 		if (children.size() > 0)
 			nodeDoc.SetDocument("Children", children);
@@ -205,7 +235,14 @@ bool Scene::LoadFromFile(const char *path) {
 		std::string name = node["Name"].as<std::string>("New Node");
 		NodeID nodeId = node["ID"].as<NodeID>(0);
 
-		Node *n = this->Create(type.c_str(), name, nodeId);
+		Node *n = nullptr;
+		if (node["IsTemplate"].as<bool>(false)) {
+			std::string path = node["TemplatePath"].as<std::string>("");
+			n = CreateFromTemplate(path.c_str(), name, nodeId);
+		} else {
+			n = Create(type.c_str(), name, nodeId);
+		}
+
 		Document doc(node);
 		n->Deserialize(doc);
 

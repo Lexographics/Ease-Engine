@@ -571,11 +571,22 @@ void Editor::Update() {
 		bool sceneNodeRclick = false;
 
 		drawNode = [this, &drawNode, &sceneNodeRclick, &scene](Node *node) -> void {
+			if (!node || !node->_editorEditable) {
+				return;
+			}
+
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowOverlap /*| ImGuiTreeNodeFlags_SpanFullWidth*/;
 			if (nullptr == node->GetParent())
 				flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-			if (node->GetChildCount() == 0)
+			bool hasChild = false;
+			for (Node *child : node->GetChildren()) {
+				if (child->_editorEditable) {
+					hasChild = true;
+					break;
+				}
+			}
+			if (!hasChild)
 				flags |= ImGuiTreeNodeFlags_Leaf;
 
 			ImGui::PushID(std::to_string(node->ID()).c_str());
@@ -701,6 +712,26 @@ void Editor::Update() {
 						}
 						_selectedNodeID = node->ID();
 					}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Instantiate Scene")) {
+				auto dir = App().FS().ReadDirectory("res://", true);
+
+				for (auto &entry : dir) {
+					if (!entry.is_directory && entry.path.extension() == ".sscn") {
+						if (ImGui::MenuItem(entry.path.string().c_str())) {
+							Node *node = scene->CreateFromTemplate(entry.path.string().c_str());
+							if (selectedNode) {
+								selectedNode->AddChild(node);
+							} else {
+								App().GetCurrentScene()->SetRoot(node);
+							}
+							_selectedNodeID = node->ID();
+						}
+					}
+				}
 
 				ImGui::EndMenu();
 			}
@@ -933,7 +964,28 @@ void Editor::Update() {
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			_selectedNodeID = App().GetHoveredID();
+			NodeID id = App().GetHoveredID();
+			Node *node = scene->GetNode(id);
+
+			if (node == nullptr) {
+				_selectedNodeID = 0;
+			} else {
+				if (node->_editorEditable) {
+					_selectedNodeID = id;
+				} else {
+					Node *firstValidParent = node->GetParent();
+					while (true) {
+						if (firstValidParent == nullptr) {
+							break;
+						}
+						if (firstValidParent->_editorEditable) {
+							_selectedNodeID = firstValidParent->ID();
+							break;
+						}
+						firstValidParent = firstValidParent->GetParent();
+					}
+				}
+			}
 		}
 	}
 
