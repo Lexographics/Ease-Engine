@@ -756,6 +756,9 @@ void Editor::Update() {
 			if (ImGui::IsItemClicked()) {
 				Debug::Log("Node ID: {} (this should be copied to clipboard)", node->ID());
 			}
+			if (node->_isTemplate) {
+				ImGui::TextDisabled("Template: %s", node->_templatePath.c_str());
+			}
 
 			std::string name = node->Name();
 			if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
