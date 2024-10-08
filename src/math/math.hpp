@@ -35,8 +35,14 @@ inline float Atan2(float y, float x) {
 }
 
 template <typename T>
-T Map(T v, T input_min, T input_max, T output_min, T output_max) {
+inline T Map(T v, T input_min, T input_max, T output_min, T output_max) {
 	return (v - input_min) * (output_max - output_min) / (input_max - input_min) + output_min;
+}
+
+// shortcut for Math::Map with input range 0..1
+template <typename T>
+inline T TweenMap(T v, T output_min, T output_max) {
+	return Map(v, static_cast<T>(0.0), static_cast<T>(1.0), output_min, output_max);
 }
 } // namespace Math
 
