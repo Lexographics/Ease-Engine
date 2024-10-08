@@ -217,6 +217,9 @@ void Application::Update() {
 		for (auto &timer : _timers) {
 			timer.Update(Delta());
 		}
+		for (auto &tween : _tweens) {
+			tween.Update(Delta());
+		}
 	}
 
 	_mainViewport.Clear(0.2f, 0.2f, 0.2f, 1.f, true);
@@ -337,6 +340,7 @@ void Application::Stop() {
 
 	_currentScene->Shutdown();
 	_timers.clear();
+	_tweens.clear();
 
 	_globalStore = _copyGlobalStore;
 }
@@ -356,6 +360,7 @@ void Application::SetCurrentScene(Ref<Scene> scene) {
 	if (_currentScene && IsRunning()) {
 		_currentScene->Shutdown();
 		_timers.clear();
+		_tweens.clear();
 	}
 	_currentScene = scene;
 	if (IsRunning()) {

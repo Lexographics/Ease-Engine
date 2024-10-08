@@ -16,6 +16,7 @@
 #include "filesystem/filesystem.hpp"
 
 #include "core/timer.hpp"
+#include "core/tween.hpp"
 #include "data/project_settings.hpp"
 #include "math/rect.hpp"
 #include "utils/store.hpp"
@@ -73,6 +74,9 @@ class Application {
 	inline std::list<Timer> &GetTimers() { return _timers; }
 	inline Timer *NewTimer(float timeout, bool autoStart = false) { return &_timers.emplace_back(timeout, autoStart); }
 
+	inline std::list<Tween> &GetTweens() { return _tweens; }
+	inline Tween *NewTween(float duration, Easing easing, const std::function<void(float)> &callback, const std::function<void()> &onFinish) { return &_tweens.emplace_back(duration, easing, callback, onFinish); }
+
 	NodeID GetHoveredID() const { return _hoveredID; }
 	void SetCursor(const std::string &texturePath);
 
@@ -124,6 +128,7 @@ class Application {
 	StringStore _copyGlobalStore;
 
 	std::list<Timer> _timers;
+	std::list<Tween> _tweens;
 
 	NodeID _hoveredID = 0;
 };
