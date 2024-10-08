@@ -191,7 +191,6 @@ int ScriptServer::PushModule(const char *path) {
 }
 
 ScriptServer::ScriptServer() {
-	data = std::make_unique<ScriptServerData>();
 }
 
 ScriptServer::~ScriptServer() {
@@ -201,6 +200,7 @@ void ScriptServer::Init() {
 	using namespace luabridge;
 
 	state = luaL_newstate();
+	data = std::make_unique<ScriptServerData>();
 
 	luaopen_base(state);
 
@@ -223,6 +223,9 @@ void ScriptServer::Init() {
 
 			return script; })
 
+		.beginClass<Tween>("Tween")
+		.endClass()
+
 		.beginClass<Timer>("Timer")
 		.addFunction("Start", &Timer::Start)
 		.addFunction("Pause", &Timer::Pause)
@@ -239,6 +242,16 @@ void ScriptServer::Init() {
 																								}); })
 		.endClass()
 		.addFunction("NewTimer", +[](float timeout) { return App().NewTimer(timeout); }, +[](float timeout, bool autoStart) { return App().NewTimer(timeout, autoStart); })
+		.addFunction("NewTween", +[](float duration, int easing, luabridge::LuaRef callback, luabridge::LuaRef onFinish) {
+				Tween* tween = App().NewTween(duration, (Easing)easing, nullptr, nullptr);
+				if(callback.isCallable()) {
+					tween->SetCallback([callback](float value){callback.call(value);});
+				}
+				if(onFinish.isCallable()) {
+					tween->SetOnFinish([onFinish](){ onFinish.call(); });
+				}
+				return tween;
+				; })
 		.addFunction("LoadScene", +[](const std::string &path) { App().LoadScene(path); })
 
 		.beginNamespace("Time")
@@ -260,11 +273,46 @@ void ScriptServer::Init() {
 		.addVariable("MouseRight", Key::MouseRight)
 		.endNamespace()
 
+		.beginNamespace("Easing")
+		.addVariable("Linear", Easing::Linear)
+		.addVariable("SineEaseIn", Easing::SineEaseIn)
+		.addVariable("SineEaseOut", Easing::SineEaseOut)
+		.addVariable("SineEaseInOut", Easing::SineEaseInOut)
+		.addVariable("CubicEaseIn", Easing::CubicEaseIn)
+		.addVariable("CubicEaseOut", Easing::CubicEaseOut)
+		.addVariable("CubicEaseInOut", Easing::CubicEaseInOut)
+		.addVariable("QuintIn", Easing::QuintIn)
+		.addVariable("QuintOut", Easing::QuintOut)
+		.addVariable("QuintInOut", Easing::QuintInOut)
+		.addVariable("CircIn", Easing::CircIn)
+		.addVariable("CircOut", Easing::CircOut)
+		.addVariable("CircInOut", Easing::CircInOut)
+		.addVariable("ElasticIn", Easing::ElasticIn)
+		.addVariable("ElasticOut", Easing::ElasticOut)
+		.addVariable("ElasticInOut", Easing::ElasticInOut)
+		.addVariable("QuadIn", Easing::QuadIn)
+		.addVariable("QuadOut", Easing::QuadOut)
+		.addVariable("QuadInOut", Easing::QuadInOut)
+		.addVariable("QuartIn", Easing::QuartIn)
+		.addVariable("QuartOut", Easing::QuartOut)
+		.addVariable("QuartInOut", Easing::QuartInOut)
+		.addVariable("ExpoIn", Easing::ExpoIn)
+		.addVariable("ExpoOut", Easing::ExpoOut)
+		.addVariable("ExpoInOut", Easing::ExpoInOut)
+		.addVariable("BackIn", Easing::BackIn)
+		.addVariable("BackOut", Easing::BackOut)
+		.addVariable("BackInOut", Easing::BackInOut)
+		.addVariable("BounceIn", Easing::BounceIn)
+		.addVariable("BounceOut", Easing::BounceOut)
+		.addVariable("BounceInOut", Easing::BounceInOut)
+		.endNamespace()
+
 		.beginNamespace("Math")
 		.addFunction("Clamp", Math::Clamp<float>)
 		.addFunction("Lerp", Math::Lerp<float>, Math::Lerp<Vector2>)
 		.addFunction("Atan2", Math::Atan2)
 		.addFunction("Map", Math::Map<float>)
+		.addFunction("TweenMap", Math::TweenMap<float>)
 		.endNamespace()
 
 		.beginNamespace("Utils")
