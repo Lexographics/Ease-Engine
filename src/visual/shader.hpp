@@ -12,7 +12,7 @@ class Shader {
 	Shader() = default;
 	~Shader();
 
-	void Load(const char *vertexPath, const char* fragmentPath);
+	void Load(const char *vertexPath, const char *fragmentPath);
 
 	void Delete();
 
@@ -20,6 +20,8 @@ class Shader {
 	void Unbind();
 
 	void Uniformiv(const char *name, const std::vector<int> &value);
+	void UniformFloat(const char *name, float value);
+	void UniformVec2(const char *name, const glm::vec2 &value);
 	void UniformMat4(const char *name, const glm::mat4 &value);
 	void UniformTexture(const char *name, uint32_t id, int slot = 0);
 

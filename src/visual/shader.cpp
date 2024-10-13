@@ -114,6 +114,26 @@ void Shader::Uniformiv(const char *name, const std::vector<int> &value) {
 	glUniform1iv(loc, value.size(), value.data());
 }
 
+void Shader::UniformFloat(const char *name, float value) {
+	Bind();
+	int loc = glGetUniformLocation(_id, name);
+	if (loc < 0) {
+		return;
+	}
+
+	glUniform1f(loc, value);
+}
+
+void Shader::UniformVec2(const char *name, const glm::vec2 &value) {
+	Bind();
+	int loc = glGetUniformLocation(_id, name);
+	if (loc < 0) {
+		return;
+	}
+
+	glUniform2f(loc, value.x, value.y);
+}
+
 void Shader::UniformMat4(const char *name, const glm::mat4 &value) {
 	Bind();
 	int loc = glGetUniformLocation(_id, name);
