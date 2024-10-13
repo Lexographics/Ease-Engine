@@ -55,6 +55,9 @@ bool Node::Copy(Node *dst) {
 	dst->_scripts = _scripts;
 	dst->_isTemplate = _isTemplate;
 	dst->_templatePath = _templatePath;
+#ifdef SW_EDITOR
+	dst->_editorEditable = _editorEditable;
+#endif
 	return true;
 }
 
