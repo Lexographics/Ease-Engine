@@ -58,6 +58,22 @@ static DragDropData _sDragDropData;
 
 static bool _sShowStyleWindow = false;
 
+struct EditorNodeData {
+	bool showLocalChildren;
+};
+
+struct EditorRuntimeData {
+	std::unordered_map<NodeID, EditorNodeData> nodeDatas;
+};
+
+Editor::Editor() {
+	_runtimeData = new EditorRuntimeData();
+}
+
+Editor::~Editor() {
+	delete _runtimeData;
+}
+
 void Editor::Init() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -571,7 +587,21 @@ void Editor::Update() {
 		bool sceneNodeRclick = false;
 
 		drawNode = [this, &drawNode, &sceneNodeRclick, &scene](Node *node) -> void {
-			if (!node || !node->_editorEditable) {
+			bool showDisabled = false;
+			Node *n = node;
+			while (!node->_editorEditable && n != nullptr) {
+				n = n->GetParent();
+
+				if (n == nullptr)
+					break;
+
+				if (n->_isTemplate) {
+					showDisabled = this->_runtimeData->nodeDatas[n->ID()].showLocalChildren;
+					break;
+				}
+			}
+
+			if (!node || (!node->_editorEditable && !showDisabled)) {
 				return;
 			}
 
@@ -580,10 +610,14 @@ void Editor::Update() {
 				flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
 			bool hasChild = false;
-			for (Node *child : node->GetChildren()) {
-				if (child->_editorEditable) {
-					hasChild = true;
-					break;
+			if (this->_runtimeData->nodeDatas[node->ID()].showLocalChildren) {
+				hasChild = node->GetChildCount() > 0;
+			} else {
+				for (Node *child : node->GetChildren()) {
+					if (child->_editorEditable) {
+						hasChild = true;
+						break;
+					}
 				}
 			}
 			if (!hasChild)
@@ -605,41 +639,47 @@ void Editor::Update() {
 			ImGui::SetWindowFontScale(1.2f);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetFontSize() * 0.1f);
 
+			if (showDisabled) {
+				ImGui::BeginDisabled();
+			}
 			bool open = ImGui::TreeNodeEx(("##" + node->Name()).c_str(), flags);
 
 			ImGui::SetWindowFontScale(1.f);
 
-			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-				this->_selectedNodeID = node->ID();
-			}
-			if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-				sceneNodeRclick = true;
-				this->_selectedNodeID = node->ID();
-			}
+			if (!showDisabled) {
 
-			if (ImGui::BeginDragDropSource()) {
-				_sDragDropData.dragNode.nodeID = node->ID();
-
-				ImGui::SetDragDropPayload("NodeSelect", &_sDragDropData, sizeof(DragDropData));
-				ImGui::Text("Reparent");
-				ImGui::EndDragDropSource();
-			}
-
-			if (ImGui::BeginDragDropTarget()) {
-				if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("NodeSelect")) {
-					DragDropData *data = reinterpret_cast<DragDropData *>(payload->Data);
-
-					Node *dragged = scene->GetNode(data->dragNode.nodeID);
-					if (dragged) {
-						if (dragged->GetParent()) {
-							dragged->GetParent()->RemoveChild(dragged);
-						}
-
-						node->AddChild(dragged);
-					}
+				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+					this->_selectedNodeID = node->ID();
+				}
+				if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+					sceneNodeRclick = true;
+					this->_selectedNodeID = node->ID();
 				}
 
-				ImGui::EndDragDropTarget();
+				if (ImGui::BeginDragDropSource()) {
+					_sDragDropData.dragNode.nodeID = node->ID();
+
+					ImGui::SetDragDropPayload("NodeSelect", &_sDragDropData, sizeof(DragDropData));
+					ImGui::Text("Reparent");
+					ImGui::EndDragDropSource();
+				}
+
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("NodeSelect")) {
+						DragDropData *data = reinterpret_cast<DragDropData *>(payload->Data);
+
+						Node *dragged = scene->GetNode(data->dragNode.nodeID);
+						if (dragged) {
+							if (dragged->GetParent()) {
+								dragged->GetParent()->RemoveChild(dragged);
+							}
+
+							node->AddChild(dragged);
+						}
+					}
+
+					ImGui::EndDragDropTarget();
+				}
 			}
 
 			ImGui::SetNextItemAllowOverlap();
@@ -653,13 +693,16 @@ void Editor::Update() {
 				ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x - 18);
 
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::Button(node2d->_visible ? ICON_VISIBLE : ICON_HIDDEN)) {
+				if (ImGui::Button(node2d->_visible ? ICON_VISIBLE : ICON_HIDDEN) && !showDisabled) {
 					node2d->_visible = !node2d->_visible;
 				}
 				ImGui::PopStyleColor();
 			}
 
 			ImGui::PopStyleVar(2);
+			if (showDisabled) {
+				ImGui::EndDisabled();
+			}
 
 			if (open) {
 				for (Node *child : node->GetChildren()) {
@@ -698,6 +741,10 @@ void Editor::Update() {
 					if (ImGui::Selectable("Make Current")) {
 						camera->MakeCurrent();
 					}
+				}
+
+				if (selectedNode->_isTemplate) {
+					ImGui::Checkbox("Show Local Children", &_runtimeData->nodeDatas[_selectedNodeID].showLocalChildren);
 				}
 			}
 

@@ -23,8 +23,13 @@ struct EditorSettings {
 	bool coloredLogMessages = true;
 };
 
+struct EditorRuntimeData;
+
 class Editor {
   public:
+	Editor();
+	~Editor();
+
 	void Init();
 
 	void Begin();
@@ -71,6 +76,8 @@ class Editor {
 
 	FolderFileServer *_fs;
 	HotReloader _hotReloader;
+
+	EditorRuntimeData *_runtimeData;
 };
 
 #endif // SW_EDITOR
