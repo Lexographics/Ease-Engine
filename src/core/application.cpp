@@ -305,14 +305,14 @@ void Application::Update() {
 		float spacing = 16 * std::pow(3, std::ceil(logZoom));
 		spacing = std::max(spacing, 16.f);
 
-		for (float x = ((int)(center.x - size.x * 0.5f) / (int)spacing) * spacing; x <= (center.x + size.x * 0.5f) + spacing; x += spacing) {
+		for (float x = (((int)(center.x - size.x * 0.5f) / (int)spacing) * spacing) - spacing; x <= (center.x + size.x * 0.5f) + spacing; x += spacing) {
 			GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(x, center.y - size.y), glm::vec2(x, center.y + size.y), 3.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.2f));
 
 			GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(x + spacing * 0.25f, center.y - size.y), glm::vec2(x + spacing * 0.25f, center.y + size.y), 2.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.1f));
 			GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(x + spacing * 0.50f, center.y - size.y), glm::vec2(x + spacing * 0.50f, center.y + size.y), 2.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.1f));
 			GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(x + spacing * 0.75f, center.y - size.y), glm::vec2(x + spacing * 0.75f, center.y + size.y), 2.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.1f));
 
-			for (float y = ((int)(center.y - size.y * 0.5f) / (int)spacing) * spacing; y <= (center.y + size.y * 0.5f) + spacing; y += spacing) {
+			for (float y = (((int)(center.y - size.y * 0.5f) / (int)spacing) * spacing) - spacing; y <= (center.y + size.y * 0.5f) + spacing; y += spacing) {
 				GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(center.x - size.x, y), glm::vec2(center.x + size.x, y), 3.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.2f));
 
 				GetRenderer().GetRenderer2D("2D").DrawLine(glm::vec2(center.x - size.x, y + spacing * 0.25f), glm::vec2(center.x + size.x, y + spacing * 0.25f), 2.f * _editor._cameraZoom, Color::RGBAFloat(1.f, 1.f, 1.f, 0.1f));
