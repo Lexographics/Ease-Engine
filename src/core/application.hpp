@@ -13,6 +13,7 @@
 #include "visual/viewport.hpp"
 #include "visual/window.hpp"
 
+#include "argparser/argparser.hpp"
 #include "filesystem/filesystem.hpp"
 
 #include "core/timer.hpp"
@@ -98,6 +99,7 @@ class Application {
 	bool _isRunning = false;
 
 	FileSystem _fs;
+	ArgParser _argParser;
 
 	ProjectSettings _projectSettings;
 

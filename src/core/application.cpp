@@ -40,6 +40,7 @@ Application &App() {
 
 Application::Application(int argc, char const *argv[]) {
 	s_app = this;
+	_argParser.Parse(argc, argv);
 }
 
 Application::~Application() {
